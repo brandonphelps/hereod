@@ -3,7 +3,8 @@
 
 #include <windows.h>
 #include <stdlib.h>
-#include <string.h>
+#include <vector>
+#include <string>
 #include <tchar.h>
 
 // Global variables
@@ -19,11 +20,23 @@ class Holder
 {
 public:
 
+	std::vector<TCHAR*> messages;
 	TCHAR tmp_One[3000];
-	TCHAR tmp_Two[3000];
 
 	int message_count;
-	
+	int message_index;
+
+	void add_message(const std::string& message)
+	{
+		for(int i = 0; i < message.size(); i++)
+		{
+			tmp_One[i] = message[i];
+		}
+		tmp_One[message.size()] = '\0';
+		messages.push_back(tmp_One);
+		message_count++;
+		message_index++;
+	}
 };
 
 
@@ -68,11 +81,7 @@ int CALLBACK WinMain(
    }
 
    message_log.message_count = 0;
-   message_log.tmp_One[0] = 'b';
-   message_log.tmp_One[1] = 'e';
-   message_log.tmp_One[2] = 'e';
-   message_log.tmp_One[3] = '\0';
-   message_log.message_count++;
+   message_log.add_message("bee");
 
    // Store instance handle in our global variable
    hInst = hInstance;
@@ -161,8 +170,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	      TextOut(hdc,
 	              50, 40,
-	              message_log.tmp_One,
-	              _tcslen(message_log.tmp_One));
+	              message_log.messages[i],
+	              _tcslen(message_log.messages[i]));
       }
 
       EndPaint(hWnd, &ps);
