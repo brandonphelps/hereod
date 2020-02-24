@@ -21,13 +21,14 @@ class Holder
 public:
 
 	std::vector<TCHAR*> messages;
-	TCHAR tmp_One[3000];
+
 
 	int message_count;
 	int message_index;
 
 	void add_message(const std::string& message)
 	{
+		TCHAR* tmp_One = new TCHAR[3000];
 		for(int i = 0; i < message.size(); i++)
 		{
 			tmp_One[i] = message[i];
@@ -36,6 +37,11 @@ public:
 		messages.push_back(tmp_One);
 		message_count++;
 		message_index++;
+	}
+
+	int get_message_count() const
+	{
+		return messages.size();
 	}
 };
 
@@ -82,7 +88,7 @@ int CALLBACK WinMain(
 
    message_log.message_count = 0;
    message_log.add_message("bee");
-
+   message_log.add_message("world");
    // Store instance handle in our global variable
    hInst = hInstance;
 
@@ -101,7 +107,7 @@ int CALLBACK WinMain(
       szTitle,
       WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, CW_USEDEFAULT,
-      500, 100,
+      500, 400,
       NULL,
       NULL,
       hInstance,
@@ -165,11 +171,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
          greeting, _tcslen(greeting));
       // End application-specific layout section.
 
-      for(int i = 0; i < message_log.message_count; i++)
+      for(int i = 0; i < message_log.get_message_count(); i++)
       {
 
 	      TextOut(hdc,
-	              50, 40,
+	              // todo(brandon): how to get size of characters? in pixels?
+	              50, 40+(20 * i),
 	              message_log.messages[i],
 	              _tcslen(message_log.messages[i]));
       }
