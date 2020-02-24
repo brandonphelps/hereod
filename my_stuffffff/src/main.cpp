@@ -1,70 +1,3 @@
-// #include <iostream>
-// #include <string>
-// #include <windows.h>
-
-
-// bool WIN_IsWindowsVistaOrGreater(void)
-// {
-// #ifdef __WINRT__
-// 	return true;
-// #else
-// 	return false;
-// #endif
-// }
-
-// class SDL_Window
-// {
-	
-// };
-
-// #define STYLE_BASIC (WS_CLIPSIBLINGS | WS_CLIPCHILDREN)
-
-// int MyCreateWindow(HINSTANCE hinstance, int nCmdShow)
-// {
-// 	HWND hwnd, parent = NULL;
-// 	DWORD style = STYLE_BASIC;
-// 	int x, y;
-// 	int w, h;
-// 	HINSTANCE SDL_Instance;
-
-// 	SDL_Instance = GetModuleHandle(NULL);
-
-// 	hwnd = CreateWindow("My Cool App", "Hello World", STYLE_BASIC, 0, 0, 500, 500, NULL, NULL, hinstance, NULL);
-
-// 	if(!hwnd)
-// 	{
-// 		return 0;
-// 	}
-
-// 	ShowWindow(hwnd, nCmdShow);
-// 	UpdateWindow(hwnd);
-// 	return 1;
-// }
-
-
-// //int main(int argc, char* argv[])
-// int WINAPI WinMain(HINSTANCE hinst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow)
-// {
-// 	std::cout << "hello world" << std::endl;
-
-// 	MSG msg;
-
-	
-// 	SYSTEM_POWER_STATUS status;
-// 	if(!GetSystemPowerStatus(&status))
-// 	{
-// 		std::cout << "failed to get power state" << std::endl;
-// 	}
-// 	else
-// 	{
-// 		std::cout << "Got a power state: " << std::to_string(status.SystemStatusFlag) << std::endl;
-// 		std::cout << "Batt flag: " << std::to_string(status.BatteryFlag) << std::endl;
-// 	}
-
-// 	MyCreateWindow(hinst, nCmdShow);
-	
-// 	return 0;
-// }
 // HelloWindowsDesktop.cpp
 // compile with: /D_UNICODE /DUNICODE /DWIN32 /D_WINDOWS /c
 
@@ -76,12 +9,28 @@
 // Global variables
 
 // The main window class name.
-static TCHAR szWindowClass[] = _T("DesktopApp");
+static TCHAR szWindowClass[] = _T("My cool dude");
 
 // The string that appears in the application's title bar.
-static TCHAR szTitle[] = _T("Windows Desktop Guided Tour Application");
+static TCHAR szTitle[] = _T("My cool title");
+
+
+class Holder
+{
+public:
+
+	TCHAR tmp_One[3000];
+	TCHAR tmp_Two[3000];
+
+	int message_count;
+	
+};
+
 
 HINSTANCE hInst;
+
+Holder message_log;
+
 
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -117,6 +66,13 @@ int CALLBACK WinMain(
 
       return 1;
    }
+
+   message_log.message_count = 0;
+   message_log.tmp_One[0] = 'b';
+   message_log.tmp_One[1] = 'e';
+   message_log.tmp_One[2] = 'e';
+   message_log.tmp_One[3] = '\0';
+   message_log.message_count++;
 
    // Store instance handle in our global variable
    hInst = hInstance;
@@ -170,6 +126,10 @@ int CALLBACK WinMain(
 
    return (int) msg.wParam;
 }
+static TCHAR greeting[] = _T("Hello, Windows desktop!");
+
+
+
 
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -181,7 +141,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
    PAINTSTRUCT ps;
    HDC hdc;
-   TCHAR greeting[] = _T("Hello, Windows desktop!");
+
 
    switch (message)
    {
@@ -195,6 +155,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
          5, 5,
          greeting, _tcslen(greeting));
       // End application-specific layout section.
+
+      for(int i = 0; i < message_log.message_count; i++)
+      {
+
+	      TextOut(hdc,
+	              50, 40,
+	              message_log.tmp_One,
+	              _tcslen(message_log.tmp_One));
+      }
 
       EndPaint(hWnd, &ps);
       break;
