@@ -4,11 +4,18 @@
 #include <io.h>
 #include <iostream>
 #include <fstream>
+#include <string>
+
 using namespace std;
 
 
 HANDLE ConsoleStdout = NULL;
+HANDLE ConsoleStdin = NULL;
 
+void WriteOut(std::string& tmp)
+{
+	WriteConsole(ConsoleStdout, reinterpret_cast<const VOID*>(tmp.c_str()), tmp.size(), NULL, NULL);
+}
 
 
 BOOL InitializeDebugConsole()
@@ -27,6 +34,7 @@ BOOL InitializeDebugConsole()
   if(ConsoleStdout == INVALID_HANDLE_VALUE || ConsoleStdout == NULL)
   {
 	  // fprintf(tmp, "Failed to get STd handle\n");
+	  return false;
   }
 
   // int SystemOutput =  _open_osfhandle(intptr_t(ConsoleOutput), _O_TEXT);
@@ -38,6 +46,24 @@ BOOL InitializeDebugConsole()
   DWORD writtenChars;
 
   WriteConsole(ConsoleStdout, reinterpret_cast<const VOID*>("hello world"), 5, &writtenChars, NULL);
+
+  ConsoleStdin = GetStdHandle(STD_INPUT_HANDLE);
+  if(ConsoleStdin == INVALID_HANDLE_VALUE || ConsoleStdin == NULL)
+  {
+	  return false;
+  }
+
+
+  char my_cool_buf[100];
+  DWORD readCount;
+
+  int tmp = ReadConsole(ConsoleStdin, reinterpret_cast<VOID*>(my_cool_buf), 10, &readCount, NULL);
+  if(tmp)
+  {
+	  // WriteConsole(ConsoleStdout, reinterpret_cast<const VOID*>("Failed to read std in"), 10, &writtenChars, NULL);
+	  WriteOut("Failed to read std in with status " + std::to_string(tmp));
+	  WriteOut("Get last error: " + std::to_string(GetLastError()));
+  }
 
 
   // setvbuf(stdout, NULL, _IONBF, 0); //Redirect unbuffered STDERR to the console
@@ -57,6 +83,8 @@ BOOL InitializeDebugConsole()
   // //make cout, wcout, cin, wcin,  wcerr, cerr, wclog and clog point to console as well
   // ios::sync_with_stdio(true);
   // fclose(tmp);
+
+  return true;
 }
 
 void ShutdownDebugConsole(void)
