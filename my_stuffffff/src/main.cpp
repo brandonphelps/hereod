@@ -4,6 +4,10 @@
 #include <windows.h>
 #include <stdlib.h>
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <conio.h>
 #include <string>
 #include <tchar.h>
 
@@ -12,18 +16,30 @@
 // The main window class name.
 static TCHAR szWindowClass[] = _T("My cool dude");
 
+
+BOOL InitializeDebugConsole();
+
+
 // The string that appears in the application's title bar.
 static TCHAR szTitle[] = _T("My cool title");
 
+static int counter= 0; 
+
+static bool Running = true;
 
 class Holder
 {
 public:
 
+	~Holder()
+	{
+		for(int i = 0; i < messages.size(); i++)
+		{
+			delete messages[i];
+		}
+	}
+
 	std::vector<TCHAR*> messages;
-
-
-	int message_count;
 	int message_index;
 
 	void add_message(const std::string& message)
@@ -35,7 +51,6 @@ public:
 		}
 		tmp_One[message.size()] = '\0';
 		messages.push_back(tmp_One);
-		message_count++;
 		message_index++;
 	}
 
@@ -86,9 +101,15 @@ int CALLBACK WinMain(
       return 1;
    }
 
-   message_log.message_count = 0;
+
+   //
+
+
    message_log.add_message("bee");
    message_log.add_message("world");
+   message_log.add_message("toges");
+   message_log.add_message("mec");
+   message_log.add_message("goes");
    // Store instance handle in our global variable
    hInst = hInstance;
 
@@ -131,12 +152,40 @@ int CALLBACK WinMain(
       nCmdShow);
    UpdateWindow(hWnd);
 
+
+
    // Main message loop:
    MSG msg;
-   while (GetMessage(&msg, NULL, 0, 0))
+
+   // RedirectIOToConsole();
+   InitializeDebugConsole();
+   
+   
+   fprintf(stdout, "Hello World\n");
+   fprintf(stderr, "Test output to stderr\n");
+   fprintf(stdout, "Enter an integer!\n");
+   
+
+   
+
+   while(Running)
    {
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
+	   fprintf(stdout, "Enter an integer!\n");	   
+	   counter += 1;
+	   if(counter % 10000 == 0)
+	   {
+		   //message_log.add_message("Whoooo ");
+	   }
+
+
+	   while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+	   {
+		   
+		   TranslateMessage(&msg);
+		   DispatchMessage(&msg);
+
+	   }
+
    }
 
    return (int) msg.wParam;
@@ -156,6 +205,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
    PAINTSTRUCT ps;
    HDC hdc;
+
 
 
    switch (message)
@@ -185,6 +235,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       break;
    case WM_DESTROY:
       PostQuitMessage(0);
+      Running = false;
       break;
    default:
       return DefWindowProc(hWnd, message, wParam, lParam);
