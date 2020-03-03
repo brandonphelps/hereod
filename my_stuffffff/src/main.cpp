@@ -182,6 +182,7 @@ int CALLBACK WinMain(
 
    return (int) msg.wParam;
 }
+static TCHAR greeting[] = _T("Hello, Windows desktop!");
 
 
 
