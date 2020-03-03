@@ -8,15 +8,17 @@
 
 using namespace std;
 
-
 HANDLE ConsoleStdout = NULL;
 HANDLE ConsoleStdin = NULL;
 
-void WriteOut(std::string& tmp)
+void WriteOut(const std::string& tmp)
 {
-	WriteConsole(ConsoleStdout, reinterpret_cast<const VOID*>(tmp.c_str()), tmp.size(), NULL, NULL);
+	if(ConsoleStdout != NULL)
+	{
+		WriteConsole(ConsoleStdout, reinterpret_cast<const VOID*>(tmp.c_str()), tmp.size(), NULL, NULL);
+	}
+	
 }
-
 
 BOOL InitializeDebugConsole()
 {
@@ -45,8 +47,11 @@ BOOL InitializeDebugConsole()
   char tmp_buff[] = "Hello World\n";
   DWORD writtenChars;
 
-  WriteConsole(ConsoleStdout, reinterpret_cast<const VOID*>("hello world"), 5, &writtenChars, NULL);
+  // WriteConsole(ConsoleStdout, reinterpret_cast<const VOID*>("hello world"), 5, &writtenChars, NULL);
+  WriteConsole(ConsoleStdout, reinterpret_cast<const VOID*>("Hello World yo"), 7, NULL, NULL);
 
+  WriteOut("\n\rWakka wakka\n\r");
+  
   ConsoleStdin = GetStdHandle(STD_INPUT_HANDLE);
   if(ConsoleStdin == INVALID_HANDLE_VALUE || ConsoleStdin == NULL)
   {
@@ -66,7 +71,7 @@ BOOL InitializeDebugConsole()
   }
 
 
-  // setvbuf(stdout, NULL, _IONBF, 0); //Redirect unbuffered STDERR to the console
+  // setvbuf(stdout, NULL, _I0); //Redirect unbuffered STDERR to the console
   // HANDLE ConsoleError = GetStdHandle(STD_ERROR_HANDLE);
   // int SystemError = _open_osfhandle(intptr_t(ConsoleError), _O_TEXT);
   // FILE *CErrorHandle  = _fdopen(SystemError, "w" );
@@ -87,19 +92,19 @@ BOOL InitializeDebugConsole()
   return true;
 }
 
-void ShutdownDebugConsole(void)
-{
-	//Write "Press any key to exit"
-	HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-	DWORD CharsWritten;
+// void ShutdownDebugConsole(void)
+// {
+// 	//Write "Press any key to exit"
+// 	HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+// 	DWORD CharsWritten;
 	
-	WriteConsole(ConsoleOutput, "\nPress any key to exit", 22, &CharsWritten, 0);
+// 	WriteConsole(ConsoleOutput, "\nPress any key to exit", 22, &CharsWritten, 0);
 	
-	//Disable line-based input mode so we can get a	single character
-	HANDLE ConsoleInput = GetStdHandle(STD_INPUT_HANDLE);
-	SetConsoleMode(ConsoleInput, 0);
-	//Read a single character
-	TCHAR InputBuffer;
-	DWORD CharsRead;
-	ReadConsole(ConsoleInput, &InputBuffer, 1, &CharsRead, 0);
-}
+// 	//Disable line-based input mode so we can get a	single character
+// 	HANDLE ConsoleInput = GetStdHandle(STD_INPUT_HANDLE);
+// 	SetConsoleMode(ConsoleInput, 0);
+// 	//Read a single character
+// 	TCHAR InputBuffer;
+// 	DWORD CharsRead;
+// 	ReadConsole(ConsoleInput, &InputBuffer, 1, &CharsRead, 0);
+// }

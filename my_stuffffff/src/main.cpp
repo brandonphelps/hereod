@@ -11,19 +11,18 @@
 #include <string>
 #include <tchar.h>
 
+
+#include "console_another.h"
+
 // Global variables
 
 // The main window class name.
 static TCHAR szWindowClass[] = _T("My cool dude");
 
-
-BOOL InitializeDebugConsole();
-
-
 // The string that appears in the application's title bar.
 static TCHAR szTitle[] = _T("My cool title");
 
-static int counter= 0; 
+static int counter = 0; 
 
 static bool Running = true;
 
@@ -64,7 +63,6 @@ public:
 HINSTANCE hInst;
 
 Holder message_log;
-
 
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -148,25 +146,19 @@ int CALLBACK WinMain(
    // The parameters to ShowWindow explained:
    // hWnd: the value returned from CreateWindow
    // nCmdShow: the fourth parameter from WinMain
-   ShowWindow(hWnd,
-      nCmdShow);
+   ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
 
+   InitializeDebugConsole();
+
+
+
+   WriteOut("Starting Running while loop\n\r");
 
    // Main message loop:
    MSG msg;
 
-   // RedirectIOToConsole();
-   InitializeDebugConsole();
-   
-   
-   fprintf(stdout, "Hello World\n");
-   fprintf(stderr, "Test output to stderr\n");
-   fprintf(stdout, "Enter an integer!\n");
-   
-
-   
 
    while(Running)
    {
@@ -190,7 +182,6 @@ int CALLBACK WinMain(
 
    return (int) msg.wParam;
 }
-static TCHAR greeting[] = _T("Hello, Windows desktop!");
 
 
 
@@ -245,116 +236,3 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
    return 0;
 }
 
-// // Global variable 
-// #include <windows.h>
-
-// HINSTANCE hinst; 
- 
-// // Function prototypes. 
- 
-// int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int); 
-// int InitApplication(HINSTANCE); 
-// int InitInstance(HINSTANCE, int); 
-
-// LRESULT CALLBACK Win32MainWindowCallback(HWND Window, UINT message, WPARAM WParam, LPARAM lParam)
-// {
-// 	LRESULT result = 0;
-
-// 	switch(message)
-// 	{
-// 		case WM_CLOSE:
-// 		{
-// 		}
-// 		default:
-// 		{
-// 			result = DefWindowProcA(Window, message, WParam, lParam);
-// 		}
-// 	}
-
-// 	return result;
-// }
- 
-// // Application entry point. 
- 
-// int CALLBACK WinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, 
-//     LPSTR lpCmdLine, int nCmdShow) 
-// { 
-
-// 	OutputDebugString("Hello World\n\r");
-// 	return 23;
-
-// 	WNDCLASSA WindowClass;
-
-// 	WindowClass.style = CS_HREDRAW|CS_VREDRAW;
-// 	WindowClass.lpfnWndProc = Win32MainWindowCallback;
-// 	WindowClass.hInstance = hinstance;
-// 	WindowClass.lpszClassName = "My cool app";
-
-// 	if(RegisterClassA(&WindowClass))
-// 	{
-	
-// 		MSG msg; 
-	
- 
-// 		HWND my_window = CreateWindowExA( 
-// 		                                 0,
-// 		                                 WindowClass.lpszClassName,
-// 		                                 "Sample",            // title-bar string 
-// 		                                 WS_OVERLAPPEDWINDOW | WS_VISIBLE, // top-level window 
-// 		                                 CW_USEDEFAULT,       // default horizontal position 
-// 		                                 CW_USEDEFAULT,       // default vertical position 
-// 		                                 CW_USEDEFAULT,       // default width 
-// 		                                 CW_USEDEFAULT,       // default height 
-// 		                                 (HWND) NULL,         // no owner window 
-// 		                                 (HMENU) NULL,        // use class menu 
-// 		                                 hinstance,           // handle to application instance 
-// 		                                 (LPVOID) NULL);      // no window-creation data 
- 
-// 		if(my_window)
-// 		{
-			
-// 			while(PeekMessage(&msg, 0,0,0,PM_REMOVE))
-// 			{
-// 				switch(msg.message)
-// 				{
-// 					case WM_QUIT:
-// 					{
-// 						break;
-// 					}
-// 					default:
-// 					{
-// 						TranslateMessage(&msg); 
-// 						DispatchMessage(&msg); 
-// 					}
-// 				}
-// 			}
-// 		}
-// 		return 1;
-// 	}
-// 	else
-// 	{
-// 		return 3;
-// 	}
-// 	return 2;
-// } 
- 
-// BOOL InitInstance(HINSTANCE hinstance, int nCmdShow) 
-// { 
-//     HWND hwnd; 
- 
-//     // Save the application-instance handle. 
- 
-//     hinst = hinstance; 
- 
-//     // Create the main window. 
-//     if (!hwnd) 
-//         return FALSE; 
- 
-//     // Show the window and send a WM_PAINT message to the window 
-//     // procedure. 
- 
-//     ShowWindow(hwnd, nCmdShow); 
-//     UpdateWindow(hwnd); 
-//     return TRUE; 
- 
-// } 
