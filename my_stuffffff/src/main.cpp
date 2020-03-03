@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include <stdlib.h>
+#include <wingdi.h>
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -11,6 +12,7 @@
 #include <string>
 #include <tchar.h>
 
+#include <stdint.h>
 
 #include "console_another.h"
 
@@ -59,10 +61,18 @@ public:
 	}
 };
 
+uint32_t display[100 * 100];
+
+
+
 
 HINSTANCE hInst;
 
 Holder message_log;
+
+BITMAPINFO map_info;
+
+
 
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -74,6 +84,20 @@ int CALLBACK WinMain(
                      int       nCmdShow
 )
 {
+
+	for(int i = 0; i < 100 * 100; i++)
+	{
+		display[i] = 0xFFFF0000;
+	}
+
+	map_info.bmiHeader.biSize = sizeof(map_info.bmiHeader);
+	map_info.bmiHeader.biWidth = 100;
+	map_info.bmiHeader.biHeight = -1 * 100;
+	map_info.bmiHeader.biPlanes = 1;
+	map_info.bmiHeader.biBitCount = 32;
+	map_info.bmiHeader.biCompression = BI_RGB;
+
+
    WNDCLASSEX wcex;
 
    wcex.cbSize = sizeof(WNDCLASSEX);
@@ -149,17 +173,12 @@ int CALLBACK WinMain(
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
-
    InitializeDebugConsole();
-
-
 
    WriteOut("Starting Running while loop\n\r");
 
    // Main message loop:
    MSG msg;
-
-
    while(Running)
    {
 	   fprintf(stdout, "Enter an integer!\n");	   
@@ -169,20 +188,22 @@ int CALLBACK WinMain(
 		   //message_log.add_message("Whoooo ");
 	   }
 
-
 	   while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 	   {
 		   
 		   TranslateMessage(&msg);
 		   DispatchMessage(&msg);
-
 	   }
 
    }
 
    return (int) msg.wParam;
 }
+
 static TCHAR greeting[] = _T("Hello, Windows desktop!");
+
+
+
 
 
 
@@ -208,10 +229,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       // Here your application is laid out.
       // For this introduction, we just print out "Hello, Windows desktop!"
       // in the top left corner.
-      TextOut(hdc,
-         5, 5,
-         greeting, _tcslen(greeting));
+      // TextOut(hdc,
+      //    5, 5,
+      //    greeting, _tcslen(greeting));
       // End application-specific layout section.
+
+      PatBlt(hdc, 0, 0, 100, 100, BLACKNESS);
+      StretchDIBits(hdc, 0, 0, 20, 20, 0, 0, 20, 20, display, &map_info, DIB_RGB_COLORS, SRCCOPY);
+
 
       for(int i = 0; i < message_log.get_message_count(); i++)
       {
@@ -222,6 +247,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	              message_log.messages[i],
 	              _tcslen(message_log.messages[i]));
       }
+
+      
+
 
       EndPaint(hWnd, &ps);
       break;
