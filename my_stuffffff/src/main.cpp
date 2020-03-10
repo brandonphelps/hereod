@@ -123,15 +123,6 @@ int CALLBACK WinMain(
       return 1;
    }
 
-
-   //
-
-
-   message_log.add_message("bee");
-   message_log.add_message("world");
-   message_log.add_message("toges");
-   message_log.add_message("mec");
-   message_log.add_message("goes");
    // Store instance handle in our global variable
    hInst = hInstance;
 
@@ -181,13 +172,6 @@ int CALLBACK WinMain(
    MSG msg;
    while(Running)
    {
-	   fprintf(stdout, "Enter an integer!\n");	   
-	   counter += 1;
-	   if(counter % 10000 == 0)
-	   {
-		   //message_log.add_message("Whoooo ");
-	   }
-
 	   while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 	   {
 		   
@@ -202,12 +186,6 @@ int CALLBACK WinMain(
 
 static TCHAR greeting[] = _T("Hello, Windows desktop!");
 
-
-
-
-
-
-
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
 //  PURPOSE:  Processes messages for the main window.
@@ -218,48 +196,49 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
    PAINTSTRUCT ps;
    HDC hdc;
-
-
-
    switch (message)
    {
-   case WM_PAINT:
-      hdc = BeginPaint(hWnd, &ps);
+	   case WM_PAINT:
+	   {
+		   hdc = BeginPaint(hWnd, &ps);
+		   
+		   // Here your application is laid out.
+		   // For this introduction, we just print out "Hello, Windows desktop!"
+		   // in the top left corner.
+		   // TextOut(hdc,
+		   //    5, 5,
+		   //    greeting, _tcslen(greeting));
+		   // End application-specific layout section.
 
-      // Here your application is laid out.
-      // For this introduction, we just print out "Hello, Windows desktop!"
-      // in the top left corner.
-      // TextOut(hdc,
-      //    5, 5,
-      //    greeting, _tcslen(greeting));
-      // End application-specific layout section.
-
-      PatBlt(hdc, 0, 0, 100, 100, BLACKNESS);
-      StretchDIBits(hdc, 0, 0, 20, 20, 0, 0, 20, 20, display, &map_info, DIB_RGB_COLORS, SRCCOPY);
+		   PatBlt(hdc, 0, 0, 100, 100, BLACKNESS);
+		   StretchDIBits(hdc, 0, 0, 20, 20, 0, 0, 20, 20, display, &map_info, DIB_RGB_COLORS, SRCCOPY);
 
 
-      for(int i = 0; i < message_log.get_message_count(); i++)
-      {
+		   for(int i = 0; i < message_log.get_message_count(); i++)
+			   {
 
-	      TextOut(hdc,
-	              // todo(brandon): how to get size of characters? in pixels?
-	              50, 40+(20 * i),
-	              message_log.messages[i],
-	              _tcslen(message_log.messages[i]));
-      }
+				   TextOut(hdc,
+				           // todo(brandon): how to get size of characters? in pixels?
+				           50, 40+(20 * i),
+				           message_log.messages[i],
+				           _tcslen(message_log.messages[i]));
+			   }
 
       
 
 
-      EndPaint(hWnd, &ps);
-      break;
-   case WM_DESTROY:
-      PostQuitMessage(0);
-      Running = false;
-      break;
-   default:
-      return DefWindowProc(hWnd, message, wParam, lParam);
-      break;
+		   EndPaint(hWnd, &ps);
+	   } break;
+	   case WM_DESTROY:
+		 {
+			 PostQuitMessage(0);
+			 Running = false;
+		 } break;
+	   default:
+		 {
+			   return DefWindowProc(hWnd, message, wParam, lParam);
+		 }
+		 break;
    }
 
    return 0;
