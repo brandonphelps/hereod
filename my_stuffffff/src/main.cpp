@@ -15,6 +15,7 @@
 #include <stdint.h>
 
 #include "console_another.h"
+#include "video.h"
 
 // Global variables
 
@@ -62,8 +63,6 @@ public:
 };
 
 uint32_t display[100 * 100];
-
-
 
 
 HINSTANCE hInst;
