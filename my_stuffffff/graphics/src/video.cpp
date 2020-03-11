@@ -1,7 +1,8 @@
 
 #include "video.h"
+#include "console_another.h"
 
-void resize_size_buffer(PixelBuffer& buf, uint32_t new_width, uint32_t new_height)
+void resize_buffer(PixelBuffer& buf, uint32_t new_width, uint32_t new_height)
 {
 	if(buf.buffer != NULL)
 	{
@@ -9,9 +10,15 @@ void resize_size_buffer(PixelBuffer& buf, uint32_t new_width, uint32_t new_heigh
 		buf.buffer = NULL;
 	}
 
+	WriteOut("Resizing buffer\n\r");
+
 	buf.buffer = new uint32_t[new_height * new_width];	
 	buf.width = new_width;
 	buf.height = new_height;
+	for(int i = 0; i < new_height * new_width+1; i++)
+	{
+		buf.buffer[i] = 0xFFFF0000;
+	}
 }
 
 

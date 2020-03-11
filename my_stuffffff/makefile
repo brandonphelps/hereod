@@ -10,7 +10,8 @@ LIB_DIRS = lib
 # todo(brandon): determine no logo option
 C_FLAGS = -nologo -DWIN32 -EHsc $(foreach tmp_dir,$(INCLUDE_DIRS),-I$(tmp_dir))
 
-LIB_LIST = user32.lib GDI32.lib Kernel32.lib MyGraphics.lib
+LIB_LIST = user32.lib GDI32.lib Kernel32.lib $(MY_LIB_LIST)
+
 
 CPP_SOURCES = src/main.cpp src/console_redirect.cpp src/console_another.cpp 
 
@@ -38,5 +39,5 @@ bin/%.o: src/%.cpp
 	$(CC) $(C_FLAGS) /std:c++17 -c -Fo$@ $<
 
 
-bin/hello.exe: $(OBJ_FILES)
+bin/hello.exe: $(OBJ_FILES) lib/MyGraphics.lib
 	$(LD) /OUT:$@ $(foreach lib_d,$(LIB_DIRS),/LIBPATH:$(lib_d)) $(LIB_LIST) $^ 
