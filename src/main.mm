@@ -142,6 +142,18 @@
 // 	return SDL_CPUCount;
 // }
 
+static bool Running = true;
+
+@interface MainWindowDelegate: NSObject<NSWindowDelegate>
+
+@end
+
+@implementation MainWindowDelegate
+-(void)windowWillClose:(id)sender {
+  Running = false;
+}
+@end
+
 int main(int argc, const char* argv[])
 {
   printf("HAndmade hero what ever");
@@ -156,6 +168,8 @@ int main(int argc, const char* argv[])
 				   768);
 				   
 
+  MainWindowDelegate* MainDele = [[MainWindowDelegate alloc] init];
+
   NSWindow* window = [[NSWindow alloc] initWithContentRect: initialFrame
 						styleMask: NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable
 						  backing: NSBackingStoreBuffered
@@ -163,9 +177,9 @@ int main(int argc, const char* argv[])
   [window setBackgroundColor: NSColor.redColor];
   [window setTitle: @"Hello World"];
   [window makeKeyAndOrderFront: nil];
+  [window setDelegate: MainDele];
 
-
-  while(true) {
+  while(Running) {
     NSEvent* event;
 
     do {
