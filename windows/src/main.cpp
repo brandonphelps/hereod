@@ -145,6 +145,20 @@ int CALLBACK WinMain(
 	// Store instance handle in our global variable
 	hInst = hInstance;
 
+
+	HINSTANCE tower_dLib;
+	tower_dLib = LoadLibrary(TEXT("bin/tower_d.dll"));
+
+	if(tower_dLib != NULL)
+	{
+		WriteOut("Succesfully loaded tower lib\n\r");
+	}
+	else
+	{
+		WriteOut("Failed to loaded tower lib\n\r");
+	}
+
+
 	// The parameters to CreateWindow explained:
 	// szWindowClass: the name of the application
 	// szTitle: the text that appears in the title bar
@@ -200,6 +214,12 @@ int CALLBACK WinMain(
 	UpdateWindow(hWnd);
 
 	WriteOut("Starting Running while loop\n\r");
+
+	// load custom game module 
+
+	
+
+	// GameInit();
 
 	// Main message loop:
 	MSG msg;

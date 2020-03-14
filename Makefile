@@ -39,6 +39,12 @@ clean:
 print_predefines:
 	$(CC) -dM -E -x c++ - < /dev/null
 
+
+
+
+
+
+
 ifeq ($(OS),Windows_NT)
 
 include windows/specific.mk
