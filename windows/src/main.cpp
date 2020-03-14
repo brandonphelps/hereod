@@ -187,7 +187,7 @@ int CALLBACK WinMain(
 	CurrentBuffer.map_info.bmiHeader.biBitCount = 32;
 	CurrentBuffer.map_info.bmiHeader.biCompression = BI_RGB;
 
-	ResizeGraphicsBuffer(CurrentBuffer, 200, 200);
+	ResizeGraphicsBuffer(CurrentBuffer, 400, 500);
 
 	drawBuf(currentScreen.buffer, currentScreen.width,
 	        currentScreen.height, currentScreen.pitch);
