@@ -175,16 +175,16 @@ uint8_t *buffer;
 
 void drawBuf(uint8_t*, uint32_t, uint32_t, uint32_t);
 
-void RefreshBuf(NSWindow* window, uint32_t* width, uint32_t* height)
+void RefreshBuf(NSWindow* window, ScreenData& screendata)
 {
   if(buffer)
   {
     free(buffer);
   }
-  *width = window.contentView.bounds.size.width;
-  *height = window.contentView.bounds.size.height;
-  int pitch = *width * bytesPerPixel;
-  buffer = (uint8_t*)malloc(pitch * (*height));
+  screendata.width = window.contentView.bounds.size.width;
+  screendata.height = window.contentView.bounds.size.height;
+  screendata.pitch = screendata.width * screendata.bytesPerPixel;
+  buffer = (uint8_t*)malloc(screendata.pitch * screendata.height);
 }
 
 void ReDrawBuf(NSWindow* window, uint8_t* buffer, uint32_t bitmapWidth, uint32_t bitmapHeight, uint32_t pitch)
@@ -235,8 +235,8 @@ int main(int argc, const char* argv[])
   window.contentView.wantsLayer = YES;
 
   ScreenData currentScreen;
-  RefreshBuf(window, &currentScreen.width, &currentScreen.height);
-  currentScreen.pitch = currentScreen.width * 4;
+  currentScreen.bytesPerPixel = 4;
+  RefreshBuf(window, currentScreen);
 
   while(Running) {
     // updates the temporary buffer with data.
