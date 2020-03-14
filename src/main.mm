@@ -159,6 +159,8 @@ uint32_t globalRenderHeight = 768U;
 
 uint8_t *buffer;
 
+void drawBuf(uint8_t*, uint32_t, uint32_t, uint32_t);
+
 int main(int argc, const char* argv[])
 {
   MainWindowDelegate* MainDele = [[MainWindowDelegate alloc] init];
@@ -192,30 +194,7 @@ int main(int argc, const char* argv[])
 
   while(Running) {
 
-    int width = bitmapWidth;
-    int height = bitmapHeight;
-
-    uint8_t* row = (uint8_t*)buffer;
-
-    for(int y = 0; y < height; ++y)
-    {
-      uint8_t* pixel = (uint8_t*) row;
-      for(int x = 0; x < width; ++x)
-      {
-	*pixel = 0;
-	++pixel;
-	*pixel = (uint8_t)y;
-	++pixel;
-
-	*pixel = (uint8_t)x;
-	++pixel;
-
-	*pixel = 255;
-	++pixel;
-      }
-
-      row += pitch;
-    }
+    drawBuf((uint8_t*)buffer, bitmapWidth, bitmapHeight, bitmapWidth * bytesPerPixel);
 
     @autoreleasepool { 
       NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc]
