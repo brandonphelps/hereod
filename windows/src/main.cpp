@@ -108,6 +108,10 @@ void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, ui
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
+
+typedef void (*FPin)();
+typedef int (*FInt)();
+
 int CALLBACK WinMain(
                      HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -152,6 +156,23 @@ int CALLBACK WinMain(
 	if(tower_dLib != NULL)
 	{
 		WriteOut("Succesfully loaded tower lib\n\r");
+		FARPROC p = GetProcAddress(tower_dLib, "GameInit");
+		FInt gGame = (FInt)p;
+		if(p != NULL)
+		{
+			WriteOut("Succesfully obtained GameInit\n\r");
+			if(gGame != NULL)
+			{
+				WriteOut("Calling gGame\n\r");
+				int k = gGame();
+				WriteOut("Return: " + std::to_string(k));
+			}
+
+		}
+		else
+		{
+			WriteOut("Failed to get gameInit\n\r");
+		}
 	}
 	else
 	{
