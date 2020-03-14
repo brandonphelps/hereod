@@ -6,4 +6,7 @@ C_FLAGS = -cc1 -triple x86_64-apple-macosx10.14.0 -Wdeprecated-objc-isa-usage -W
 
 C_OUTPUT_SPECIFIER = -o
 
+LIBS = -lc++ -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/lib/darwin/libclang_rt.osx.a
 
+
+INCLUDE_DIRS += -Imac_osx/include

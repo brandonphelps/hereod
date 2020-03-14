@@ -10,3 +10,5 @@ C_FLAGS = -nologo -DWIN32 -EHsc /std:c++17
 LIBS = user32.lib GDI32.lib Kernel32.lib 
 
 C_OUTPUT_SPECIFIER = -Fo
+
+INCLUDE_DIRS += -Iwindows/include
