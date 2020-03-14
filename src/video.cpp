@@ -1,5 +1,3 @@
-
-
 #include <stdint.h>
 
 void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t pitch)
