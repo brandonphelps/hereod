@@ -9,21 +9,20 @@ typedef struct ScreenData
   uint32_t height;
   uint32_t pitch;
   uint8_t bytesPerPixel;
+  uint8_t *buffer;
 } ScreenData;
-uint8_t *buffer;
 
 void RefreshBuf(NSWindow* window, ScreenData& screendata)
 {
-  if(buffer)
+  if(screendata.buffer)
   {
-    free(buffer);
+    free(screendata.buffer);
   }
   screendata.width = window.contentView.bounds.size.width;
   screendata.height = window.contentView.bounds.size.height;
   screendata.pitch = screendata.width * screendata.bytesPerPixel;
-  buffer = (uint8_t*)malloc(screendata.pitch * screendata.height);
+  screendata.buffer = (uint8_t*)malloc(screendata.pitch * screendata.height);
 }
-
 
 void drawBuf(uint8_t*, uint32_t, uint32_t, uint32_t);
 
@@ -95,16 +94,17 @@ int main(int argc, const char* argv[])
   window.contentView.wantsLayer = YES;
 
   ScreenData currentScreen;
+  currentScreen.buffer = 0;
   MainDele.screenRef = &currentScreen;
   currentScreen.bytesPerPixel = 4;
   RefreshBuf(window, currentScreen);
 
   while(Running) {
     // updates the temporary buffer with data.
-    drawBuf((uint8_t*)buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
+    drawBuf(currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
 
     // takes the buffer data and puts it onto the screen.
-    ReDrawBuf(window, buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
+    ReDrawBuf(window, currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
 
     NSEvent* event;
     do {
