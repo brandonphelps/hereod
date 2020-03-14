@@ -161,6 +161,29 @@ uint8_t *buffer;
 
 void drawBuf(uint8_t*, uint32_t, uint32_t, uint32_t);
 
+void ReDrawBuf(NSWindow* window, uint8_t* buffer, uint32_t bitmapWidth, uint32_t bitmapHeight, uint32_t pitch)
+{
+  int bytesPerPixel = 4;
+  @autoreleasepool { 
+    NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc]
+				initWithBitmapDataPlanes: &buffer
+					      pixelsWide: bitmapWidth
+					      pixelsHigh: bitmapHeight
+					   bitsPerSample: 8
+					 samplesPerPixel: 4
+						hasAlpha: YES
+						isPlanar: NO
+					  colorSpaceName: NSDeviceRGBColorSpace
+					     bytesPerRow: pitch
+					    bitsPerPixel: bytesPerPixel * 8] autorelease];
+  
+    NSSize imageSize = NSMakeSize(bitmapWidth, bitmapHeight);
+    NSImage* image = [[[NSImage alloc] initWithSize: imageSize] autorelease];
+    [image addRepresentation: rep];
+    window.contentView.layer.contents = image;
+  }
+}
+
 int main(int argc, const char* argv[])
 {
   MainWindowDelegate* MainDele = [[MainWindowDelegate alloc] init];
@@ -195,25 +218,7 @@ int main(int argc, const char* argv[])
   while(Running) {
 
     drawBuf((uint8_t*)buffer, bitmapWidth, bitmapHeight, bitmapWidth * bytesPerPixel);
-
-    @autoreleasepool { 
-      NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc]
-				initWithBitmapDataPlanes: &buffer
-					      pixelsWide: bitmapWidth
-					      pixelsHigh: bitmapHeight
-					   bitsPerSample: 8
-					 samplesPerPixel: 4
-						hasAlpha: YES
-						isPlanar: NO
-					  colorSpaceName: NSDeviceRGBColorSpace
-					     bytesPerRow: pitch
-					    bitsPerPixel: bytesPerPixel * 8] autorelease];
-  
-      NSSize imageSize = NSMakeSize(bitmapWidth, bitmapHeight);
-      NSImage* image = [[[NSImage alloc] initWithSize: imageSize] autorelease];
-      [image addRepresentation: rep];
-      window.contentView.layer.contents = image;
-    }
+    ReDrawBuf(window, buffer, bitmapWidth, bitmapHeight, bitmapWidth * bytesPerPixel);
 
     NSEvent* event;
 
