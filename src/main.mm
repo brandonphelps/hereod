@@ -152,18 +152,43 @@ static bool Running = true;
 -(void)windowWillClose:(id)sender {
   Running = false;
 }
+
+-(void)windowDidResize:(NSNotification*) notification {
+  NSWindow* window = (NSWindow*)notification.object;
+
+}
 @end
+
+typedef struct ScreenData
+{
+  uint32_t width;
+  uint32_t height;
+  uint32_t pitch;
+  uint8_t bytesPerPixel;
+} ScreenData;
 
 uint32_t globalRenderWidth = 1078U;
 uint32_t globalRenderHeight = 768U;
 
+int bytesPerPixel = 4;
 uint8_t *buffer;
 
 void drawBuf(uint8_t*, uint32_t, uint32_t, uint32_t);
 
+void RefreshBuf(NSWindow* window, uint32_t* width, uint32_t* height)
+{
+  if(buffer)
+  {
+    free(buffer);
+  }
+  *width = window.contentView.bounds.size.width;
+  *height = window.contentView.bounds.size.height;
+  int pitch = *width * bytesPerPixel;
+  buffer = (uint8_t*)malloc(pitch * (*height));
+}
+
 void ReDrawBuf(NSWindow* window, uint8_t* buffer, uint32_t bitmapWidth, uint32_t bitmapHeight, uint32_t pitch)
 {
-  int bytesPerPixel = 4;
   @autoreleasepool { 
     NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc]
 				initWithBitmapDataPlanes: &buffer
@@ -209,19 +234,18 @@ int main(int argc, const char* argv[])
   [window setDelegate: MainDele];
   window.contentView.wantsLayer = YES;
 
-  int bitmapWidth = window.contentView.bounds.size.width;
-  int bitmapHeight = window.contentView.bounds.size.height;
-  int bytesPerPixel = 4;
-  int pitch = bitmapWidth * bytesPerPixel;
-  buffer = (uint8_t*)malloc(pitch * bitmapHeight);
+  ScreenData currentScreen;
+  RefreshBuf(window, &currentScreen.width, &currentScreen.height);
+  currentScreen.pitch = currentScreen.width * 4;
 
   while(Running) {
+    // updates the temporary buffer with data.
+    drawBuf((uint8_t*)buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
 
-    drawBuf((uint8_t*)buffer, bitmapWidth, bitmapHeight, bitmapWidth * bytesPerPixel);
-    ReDrawBuf(window, buffer, bitmapWidth, bitmapHeight, bitmapWidth * bytesPerPixel);
+    // takes the buffer data and puts it onto the screen.
+    ReDrawBuf(window, buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
 
     NSEvent* event;
-
     do {
       event = [NSApp nextEventMatchingMask: NSEventMaskAny
 				 untilDate: nil
