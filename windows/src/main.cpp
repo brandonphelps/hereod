@@ -110,7 +110,10 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 
 typedef void (*FPin)();
-typedef int (*FInt)();
+typedef int (*FGameInit)();
+typedef int (*FGameShutdown)();
+typedef int (*FGameUpdate)(int, ScreenData*);
+
 
 int CALLBACK WinMain(
                      HINSTANCE hInstance,
@@ -156,22 +159,19 @@ int CALLBACK WinMain(
 	if(tower_dLib != NULL)
 	{
 		WriteOut("Succesfully loaded tower lib\n\r");
-		FARPROC p = GetProcAddress(tower_dLib, "GameInit");
-		FInt gGame = (FInt)p;
-		if(p != NULL)
+		FGameInit GameInit = (FGameInit)GetProcAddress(tower_dLib, "GameInit");
+		FGameUpdate GameUpdate = (FGameUpdate)GetProcAddress(tower_dLib, "GameUpdate");
+		FGameShutdown GameShutdown = (FGameShutdown)GetProcAddress(tower_dLib, "GameShutdown");
+		WriteOut("Succesfully obtained GameInit\n\r");
+		if(GameInit == NULL || GameUpdate == NULL || GameShutdown == NULL)
 		{
-			WriteOut("Succesfully obtained GameInit\n\r");
-			if(gGame != NULL)
-			{
-				WriteOut("Calling gGame\n\r");
-				int k = gGame();
-				WriteOut("Return: " + std::to_string(k));
-			}
-
+			WriteLine("Failed to initailzie game");
 		}
 		else
 		{
-			WriteOut("Failed to get gameInit\n\r");
+			WriteOut("Calling gGame\n\r");
+			int k = GameInit();
+			WriteLine("Return: " + std::to_string(k));
 		}
 	}
 	else

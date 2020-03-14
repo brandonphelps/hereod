@@ -20,6 +20,11 @@ void WriteOut(const std::string& tmp)
 	
 }
 
+void WriteLine(const std::string& tmp)
+{
+	WriteOut(tmp + "\n\r");
+}
+
 BOOL InitializeDebugConsole()
 {
 	//Create a console for this application
