@@ -154,32 +154,62 @@ static bool Running = true;
 }
 @end
 
+uint32_t globalRenderWidth = 1078U;
+uint32_t globalRenderHeight = 768U;
+
+uint8_t *buffer;
+
 int main(int argc, const char* argv[])
 {
-  printf("HAndmade hero what ever");
-
-	// std::cout << "Hello World" << std::endl;
-	// std::cout << "Have cpuinfo: " << std::to_string(CPU_haveCPUID()) << " : " << std::to_string(GetCPUCount()) << std::endl;
-
-  NSRect screenRect = [[NSScreen mainScreen] frame];
-  NSRect initialFrame = NSMakeRect((screenRect.size.width - 1024) * 0.5,
-				   (screenRect.size.height - 768) * 0.5,
-				   1024,
-				   768);
-				   
-
   MainWindowDelegate* MainDele = [[MainWindowDelegate alloc] init];
 
-  NSWindow* window = [[NSWindow alloc] initWithContentRect: initialFrame
-						styleMask: NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable
-						  backing: NSBackingStoreBuffered
-						    defer:NO];
+  NSRect screenRect = [[NSScreen mainScreen] frame];
+
+  NSRect initialFrame = NSMakeRect((screenRect.size.width - globalRenderWidth) * 0.5,
+				   (screenRect.size.height - globalRenderHeight) * 0.5,
+				   globalRenderWidth,
+				   globalRenderHeight);
+
+  NSWindow* window = [[NSWindow alloc] initWithContentRect : initialFrame
+						 styleMask : NSWindowStyleMaskTitled |
+				       NSWindowStyleMaskClosable |
+				       NSWindowStyleMaskMiniaturizable |
+				       NSWindowStyleMaskResizable
+						   backing : NSBackingStoreBuffered
+						     defer : NO];
+
   [window setBackgroundColor: NSColor.redColor];
   [window setTitle: @"Hello World"];
   [window makeKeyAndOrderFront: nil];
   [window setDelegate: MainDele];
+  window.contentView.wantsLayer = YES;
+
+  int bitmapWidth = window.contentView.bounds.size.width;
+  int bitmapHeight = window.contentView.bounds.size.height;
+  int bytesPerPixel = 4;
+  int pitch = bitmapWidth * bytesPerPixel;
+  buffer = (uint8_t*)malloc(pitch * bitmapHeight);
 
   while(Running) {
+    @autoreleasepool { 
+      NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc]
+				initWithBitmapDataPlanes: &buffer
+					      pixelsWide: bitmapWidth
+					      pixelsHigh: bitmapHeight
+					   bitsPerSample: 8
+					 samplesPerPixel: 4
+						hasAlpha: YES
+						isPlanar: NO
+					  colorSpaceName: NSDeviceRGBColorSpace
+					     bytesPerRow: pitch
+					    bitsPerPixel: bytesPerPixel * 8] autorelease];
+  
+      NSSize imageSize = NSMakeSize(bitmapWidth, bitmapHeight);
+      NSImage* image = [[[NSImage alloc] initWithSize: imageSize] autorelease];
+      [image addRepresentation: rep];
+      window.contentView.layer.contents = image;
+    }
+
     NSEvent* event;
 
     do {
@@ -193,5 +223,9 @@ int main(int argc, const char* argv[])
       }
     }while(event != nil);
   }
-  WindowData tmp;
+
+
+
+  printf("finished running\n");
+
 }
