@@ -1,2 +1,0 @@
-HelloW World
-Succesffully alloced console
