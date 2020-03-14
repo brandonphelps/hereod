@@ -10,3 +10,5 @@ LIBS = -lc++ -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/Xcod
 
 
 INCLUDE_DIRS += -Imac_osx/include
+
+TARGETS = cool

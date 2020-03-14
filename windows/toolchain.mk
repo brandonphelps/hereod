@@ -10,5 +10,8 @@ C_FLAGS = -nologo -DWIN32 -EHsc /std:c++17
 LIBS = user32.lib GDI32.lib Kernel32.lib 
 
 C_OUTPUT_SPECIFIER = -Fo
+C_BIN_SPECIFIER = -c
 
 INCLUDE_DIRS += -Iwindows/include
+
+TARGETS = cool.exe

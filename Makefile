@@ -27,14 +27,14 @@ LIB_DIRS = -L/usr/local/lib
 
 C_FLAGS += $(INCLUDE_DIRS)
 
-all: cool
+all: $(TARGETS)
 
 bin/video.o: src/video.cpp
 	mkdir -p $(dir $@)
-	$(CC) $(C_FLAGS) -c $< $(C_OUTPUT_SPECIFIER)$@
+	$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
 
 clean:
-	rm -rf bin cool
+	rm -rf bin $(TARGETS)
 
 print_predefines:
 	$(CC) -dM -E -x c++ - < /dev/null
