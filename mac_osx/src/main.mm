@@ -36,7 +36,6 @@ void RefreshBuf(NSWindow* window, ScreenData& screendata)
 uint32_t globalRenderWidth = 1078U;
 uint32_t globalRenderHeight = 768U;
 
-
 void ReDrawBuf(NSWindow* window, uint8_t* buffer, uint32_t bitmapWidth, uint32_t bitmapHeight, uint32_t pitch)
 {
   @autoreleasepool { 

@@ -28,45 +28,7 @@ static int counter = 0;
 
 static bool Running = true;
 
-class Holder
-{
-public:
-
-	~Holder()
-	{
-		for(int i = 0; i < messages.size(); i++)
-		{
-			delete messages[i];
-		}
-	}
-
-	std::vector<TCHAR*> messages;
-	int message_index;
-
-	void add_message(const std::string& message)
-	{
-		TCHAR* tmp_One = new TCHAR[3000];
-		for(int i = 0; i < message.size(); i++)
-		{
-			tmp_One[i] = message[i];
-		}
-		tmp_One[message.size()] = '\0';
-		messages.push_back(tmp_One);
-		message_index++;
-	}
-
-	int get_message_count() const
-	{
-		return messages.size();
-	}
-};
-
-
-
-
 HINSTANCE hInst;
-
-Holder message_log;
 
 class PixelBuffer
 {
@@ -106,40 +68,25 @@ public:
 };
 
 
-
-void resize_buffer(PixelBuffer& buf, uint32_t new_width, uint32_t new_height)
+void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_height)
 {
-	if(buf.buffer != NULL)
+	if(screendata.buffer != NULL)
 	{
-		delete buf.buffer;
-		buf.buffer = NULL;
+		delete screendata.buffer;
+		screendata.buffer = NULL;
 	}
 
 	WriteOut("Resizing buffer\n\r");
 
-	buf.buffer = new uint32_t[new_height * new_width];	
-	buf.width = new_width;
-	buf.height = new_height;
-	for(int i = 0; i < new_height * new_width+1; i++)
-	{
-		buf.buffer[i] = 0xFFFF0000;
-	}
+	screendata.width = new_width;
+	screendata.height = new_height;
+	screendata.pitch = screendata.width * screendata.bytesPerPixel;
+	screendata.buffer = new uint8_t[screendata.pitch * screendata.height];	
 }
-
-
-void BlitBuffer(void* source, uint32_t src_x, uint32_t src_y,
-                void* dest, uint32_t dest_x, uint32_t dest_y)
-{
-	
-}
-
-
-PixelBuffer my_display;
-uint32_t display[100 * 100];
 
 struct win32_pixel_buffer
 {
-	PixelBuffer* video_buf;
+	ScreenData* video_buf;
 	BITMAPINFO map_info;
 };
 
@@ -147,11 +94,12 @@ win32_pixel_buffer CurrentBuffer;
 
 void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, uint32_t new_height)
 {
+	WriteOut("Reszing graphics buffer\n\r");
 	resize_buffer(*(pixel_buff.video_buf), new_width, new_height);
 	pixel_buff.map_info.bmiHeader.biWidth = new_width;
 	pixel_buff.map_info.bmiHeader.biHeight = -1 * new_height;
+	WriteOut("Finished with graphics buffer\n\r");
 }
-
 
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -165,25 +113,20 @@ int CALLBACK WinMain(
 {
 	InitializeDebugConsole();
 
-	for(int i = 0; i < 100 * 100; i++)
-	{
-		display[i] = 0xFFFF0000;
-	}
+	ScreenData currentScreen;
+	currentScreen.bytesPerPixel = 4;
+	currentScreen.buffer = NULL;
 
-	CurrentBuffer.video_buf = &my_display;
-
+	CurrentBuffer.video_buf = &currentScreen;
 	CurrentBuffer.map_info.bmiHeader.biSize = sizeof(CurrentBuffer.map_info.bmiHeader);
 	CurrentBuffer.map_info.bmiHeader.biPlanes = 1;
 	CurrentBuffer.map_info.bmiHeader.biBitCount = 32;
 	CurrentBuffer.map_info.bmiHeader.biCompression = BI_RGB;
 
 	ResizeGraphicsBuffer(CurrentBuffer, 200, 200);
-	// my_display.DrawRect(0, 0, 30, 30, 0xFFFF0000);
 
-	// my_display.buffer = display;
 
 	WNDCLASSEX wcex;
-
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style          = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc    = WndProc;
@@ -296,19 +239,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			// PatBlt(hdc, 0, 0, 100, 100, BLACKNESS);
 			// xDest, yDest, DestWidth, DestHeight, xSrc, ySrc, SrcWidth, SrcHeight
-			StretchDIBits(hdc, 10, 10, 40, 40, 0, 0, 60, 60, my_display.buffer, &CurrentBuffer.map_info, DIB_RGB_COLORS, SRCCOPY);
+			StretchDIBits(hdc, 10, 10, 40, 40, 0, 0, 60, 60, CurrentBuffer.video_buf->buffer, &CurrentBuffer.map_info, DIB_RGB_COLORS, SRCCOPY);
 			//StretchDIBits(hdc, 10, 10, 40, 40, 0, 0, 60, 60, display, &map_info, DIB_RGB_COLORS, SRCCOPY);
 
 
-			for(int i = 0; i < message_log.get_message_count(); i++)
-			{
+			// for(int i = 0; i < message_log.get_message_count(); i++)
+			// {
 
-				TextOut(hdc,
-				        // todo(brandon): how to get size of characters? in pixels?
-				        50, 40+(20 * i),
-				        message_log.messages[i],
-				        _tcslen(message_log.messages[i]));
-			}
+			// 	TextOut(hdc,
+			// 	        // todo(brandon): how to get size of characters? in pixels?
+			// 	        50, 40+(20 * i),
+			// 	        message_log.messages[i],
+			// 	        _tcslen(message_log.messages[i]));
+			// }
 
       
 
