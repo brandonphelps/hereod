@@ -1,5 +1,6 @@
 #include <stdio.h>
-
+#include <AppKit/AppKit.h>
+#include <stdint.h>
 #include "video.h"
 
 static bool Running = true;
