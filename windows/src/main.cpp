@@ -11,6 +11,7 @@
 #include <conio.h>
 #include <string>
 #include <tchar.h>
+#include <sstream>
 
 #include <stdint.h>
 
@@ -72,6 +73,7 @@ void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_heig
 {
 	if(screendata.buffer != NULL)
 	{
+		WriteOut("Clearning out previously allocated buffer\n\r");
 		delete screendata.buffer;
 		screendata.buffer = NULL;
 	}
@@ -81,7 +83,9 @@ void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_heig
 	screendata.width = new_width;
 	screendata.height = new_height;
 	screendata.pitch = screendata.width * screendata.bytesPerPixel;
-	screendata.buffer = new uint8_t[screendata.pitch * screendata.height];	
+
+	WriteOut("Allocating " + std::to_string(screendata.pitch) + " * " + std::to_string(screendata.height) + "\n\r");
+	screendata.buffer = new uint8_t[screendata.pitch * screendata.height];
 }
 
 struct win32_pixel_buffer
@@ -98,7 +102,7 @@ void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, ui
 	resize_buffer(*(pixel_buff.video_buf), new_width, new_height);
 	pixel_buff.map_info.bmiHeader.biWidth = new_width;
 	pixel_buff.map_info.bmiHeader.biHeight = -1 * new_height;
-	WriteOut("Finished with graphics buffer\n\r");
+	WriteOut("Finished with graphics buffer " + std::to_string(pixel_buff.map_info.bmiHeader.biWidth) + "\n\r");
 }
 
 // Forward declarations of functions included in this code module:
@@ -112,18 +116,6 @@ int CALLBACK WinMain(
 )
 {
 	InitializeDebugConsole();
-
-	ScreenData currentScreen;
-	currentScreen.bytesPerPixel = 4;
-	currentScreen.buffer = NULL;
-
-	CurrentBuffer.video_buf = &currentScreen;
-	CurrentBuffer.map_info.bmiHeader.biSize = sizeof(CurrentBuffer.map_info.bmiHeader);
-	CurrentBuffer.map_info.bmiHeader.biPlanes = 1;
-	CurrentBuffer.map_info.bmiHeader.biBitCount = 32;
-	CurrentBuffer.map_info.bmiHeader.biCompression = BI_RGB;
-
-	ResizeGraphicsBuffer(CurrentBuffer, 200, 200);
 
 
 	WNDCLASSEX wcex;
@@ -185,13 +177,27 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
+	ScreenData currentScreen;
+	currentScreen.bytesPerPixel = 4;
+	currentScreen.buffer = NULL;
+
+	CurrentBuffer.video_buf = &currentScreen;
+	CurrentBuffer.map_info.bmiHeader.biSize = sizeof(CurrentBuffer.map_info.bmiHeader);
+	CurrentBuffer.map_info.bmiHeader.biPlanes = 1;
+	CurrentBuffer.map_info.bmiHeader.biBitCount = 32;
+	CurrentBuffer.map_info.bmiHeader.biCompression = BI_RGB;
+
+	ResizeGraphicsBuffer(CurrentBuffer, 200, 200);
+
+	drawBuf(currentScreen.buffer, currentScreen.width,
+	        currentScreen.height, currentScreen.pitch);
+
+
 	// The parameters to ShowWindow explained:
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
-
-
 
 	WriteOut("Starting Running while loop\n\r");
 
@@ -199,6 +205,10 @@ int CALLBACK WinMain(
 	MSG msg;
 	while(Running)
 	{
+		drawBuf(currentScreen.buffer, currentScreen.width,
+		        currentScreen.height, currentScreen.pitch);
+		
+
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
 		   
@@ -211,7 +221,14 @@ int CALLBACK WinMain(
 	return (int) msg.wParam;
 }
 
-static TCHAR greeting[] = _T("Hello, Windows desktop!");
+template <typename T>
+std::string toHex(T value)
+{
+	std::stringstream stream;
+	stream << "0x" << std::hex << value;
+	std::string msg = stream.str();
+	return msg;
+}
 
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -223,6 +240,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
+	static int printme = 1;
 	switch (message)
 	{
 	case WM_PAINT:
@@ -237,11 +255,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//    greeting, _tcslen(greeting));
 			// End application-specific layout section.
 
-			// PatBlt(hdc, 0, 0, 100, 100, BLACKNESS);
+			PatBlt(hdc, 0, 0, 40, 40, BLACKNESS);
 			// xDest, yDest, DestWidth, DestHeight, xSrc, ySrc, SrcWidth, SrcHeight
-			StretchDIBits(hdc, 10, 10, 40, 40, 0, 0, 60, 60, CurrentBuffer.video_buf->buffer, &CurrentBuffer.map_info, DIB_RGB_COLORS, SRCCOPY);
-			//StretchDIBits(hdc, 10, 10, 40, 40, 0, 0, 60, 60, display, &map_info, DIB_RGB_COLORS, SRCCOPY);
 
+			if(printme)
+			{
+				uint32_t first_pixel = ((uint32_t*)CurrentBuffer.video_buf->buffer)[0];
+				std::string value_blah = "First pixel: " + toHex<uint32_t>(first_pixel)  +"\n\r";
+				WriteOut(value_blah);
+				printme = 0;
+			}
+
+			StretchDIBits(hdc,
+			              10, 10,
+			              10 + CurrentBuffer.video_buf->width,
+			              10 + CurrentBuffer.video_buf->height,
+
+			              0, 0,
+			              CurrentBuffer.video_buf->width, CurrentBuffer.video_buf->height,
+			              CurrentBuffer.video_buf->buffer,
+			              &CurrentBuffer.map_info, DIB_RGB_COLORS, SRCCOPY);
 
 			// for(int i = 0; i < message_log.get_message_count(); i++)
 			// {
@@ -252,9 +285,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			// 	        message_log.messages[i],
 			// 	        _tcslen(message_log.messages[i]));
 			// }
-
-      
-
 
 			EndPaint(hWnd, &ps);
 		} break;
