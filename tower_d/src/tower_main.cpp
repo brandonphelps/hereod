@@ -3,6 +3,7 @@
 
 
 #include <iostream>
+#include <stdint.h>
 
 #include "video.h"
 
@@ -13,11 +14,7 @@
 // works fine on windows, but something about console doesn't allow writing to.
 int GameInit()
 {
-	#ifdef _WIN32
-	WriteOut("Hello world\n\r");
-	#endif
-	WriteOut("Hello world\n\r");
-	return 4;
+	return 0;
 }
 
 
@@ -26,6 +23,9 @@ int GameUpdate(int dt, ScreenData* screenData)
 {
 	// update the video buffer data as provided.
 	// the width and height, etc will be updated for you. 
+
+	drawBuf(screenData->buffer, screenData->width,
+	        screenData->height, screenData->pitch);
 
 	return 0;
 

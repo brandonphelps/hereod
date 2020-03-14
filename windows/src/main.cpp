@@ -156,22 +156,20 @@ int CALLBACK WinMain(
 	HINSTANCE tower_dLib;
 	tower_dLib = LoadLibrary(TEXT("bin/tower_d.dll"));
 
+	FGameInit GameInit; 
+	FGameUpdate GameUpdate;
+	FGameShutdown GameShutdown;
 	if(tower_dLib != NULL)
 	{
 		WriteOut("Succesfully loaded tower lib\n\r");
-		FGameInit GameInit = (FGameInit)GetProcAddress(tower_dLib, "GameInit");
-		FGameUpdate GameUpdate = (FGameUpdate)GetProcAddress(tower_dLib, "GameUpdate");
-		FGameShutdown GameShutdown = (FGameShutdown)GetProcAddress(tower_dLib, "GameShutdown");
+		GameInit = (FGameInit)GetProcAddress(tower_dLib, "GameInit");
+		GameUpdate = (FGameUpdate)GetProcAddress(tower_dLib, "GameUpdate");
+		GameShutdown = (FGameShutdown)GetProcAddress(tower_dLib, "GameShutdown");
 		WriteOut("Succesfully obtained GameInit\n\r");
 		if(GameInit == NULL || GameUpdate == NULL || GameShutdown == NULL)
 		{
 			WriteLine("Failed to initailzie game");
-		}
-		else
-		{
-			WriteOut("Calling gGame\n\r");
-			int k = GameInit();
-			WriteLine("Return: " + std::to_string(k));
+			return 0;
 		}
 	}
 	else
@@ -236,20 +234,22 @@ int CALLBACK WinMain(
 
 	WriteOut("Starting Running while loop\n\r");
 
-	// load custom game module 
-
-	
-
-	// GameInit();
-
-	// Main message loop:
 	MSG msg;
+
+	// load custom game module 
+	int initRest = GameInit();
+	if(initRest != 0)
+	{
+		WriteLine("Failed to init game");
+		return (int) msg.wParam;
+	}
+	// Main message loop:
+
 	while(Running)
 	{
-		drawBuf(currentScreen.buffer, currentScreen.width,
-		        currentScreen.height, currentScreen.pitch);
+		initRest = GameUpdate(0, &currentScreen);
 		
-
+		UpdateWindow(hWnd);
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
 		   
