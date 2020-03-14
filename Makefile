@@ -34,16 +34,27 @@ C_FLAGS += $(INCLUDE_DIRS)
 cool: bin/main.o bin/video.o
 	$(LD) $(LD_FLAGS) $(LIBS) -o $@ $^ $(LIB_DIRS)
 
-bin/main.o: mac_osx/src/main.mm
-	mkdir -p $(dir $@)
-	$(CC) $(C_FLAGS) $< $(C_OUTPUT_SPECIFIER) $@
-
 bin/video.o: src/video.cpp
 	mkdir -p $(dir $@)
-	$(CC) $(C_FLAGS) $< -o $@
+	$(CC) $(C_FLAGS) $< $(C_OUTPUT_SPECIFIER)$@
 
 clean:
 	rm -rf bin cool
 
 print_predefines:
 	$(CC) -dM -E -x c++ - < /dev/null
+
+ifeq ($(OS),Windows_NT)
+
+include windows/specific.mk
+
+else
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+
+include mac_osx/specific.mk
+
+endif
+
+endif
