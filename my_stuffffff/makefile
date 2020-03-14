@@ -8,7 +8,7 @@ INCLUDE_DIRS = include graphics/include
 LIB_DIRS = lib
 
 # todo(brandon): determine no logo option
-C_FLAGS = -nologo -DWIN32 -EHsc $(foreach tmp_dir,$(INCLUDE_DIRS),-I$(tmp_dir))
+
 
 LIB_LIST = user32.lib GDI32.lib Kernel32.lib $(MY_LIB_LIST)
 
@@ -32,7 +32,6 @@ lib/MyGraphics.lib: bin/graphics/bin/video.o
 bin/graphics/bin/video.o: graphics/src/video.cpp
 	mkdir -p $(dir $@)
 	$(CC) $(C_FLAGS) /std:c++17 -c -Fo$@ $<
-
 
 bin/%.o: src/%.cpp
 	mkdir -p $(dir $@)
