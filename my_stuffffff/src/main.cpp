@@ -110,8 +110,6 @@ int CALLBACK WinMain(
 	CurrentBuffer.video_buf = &my_display;
 
 	CurrentBuffer.map_info.bmiHeader.biSize = sizeof(CurrentBuffer.map_info.bmiHeader);
-	CurrentBuffer.map_info.bmiHeader.biWidth = 100;
-	CurrentBuffer.map_info.bmiHeader.biHeight = -1 * 100;
 	CurrentBuffer.map_info.bmiHeader.biPlanes = 1;
 	CurrentBuffer.map_info.bmiHeader.biBitCount = 32;
 	CurrentBuffer.map_info.bmiHeader.biCompression = BI_RGB;
