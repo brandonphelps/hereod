@@ -1,5 +1,19 @@
+.SUFFIXES:
+.PREFIXES:
+
+ifeq ($(OS),Windows_NT)
+
+else
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
 
 include mac_osx/toolchain.mk
+
+endif
+
+endif
+
+# include mac_osx/toolchain.mk
 
 INCLUDE_DIRS = -Imaco_osx/include -Iinclude
 
