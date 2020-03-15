@@ -20,6 +20,14 @@ bin/blue_d.dylib: bin/blue_main.o
 	@$(LD) $(LD_DLL_FLAGS) -exported_symbol "_GameShutdown" -exported_symbol "_GameInit" -exported_symbol "_GameUpdate" $^ -o $@	
 
 
-cool: bin/main.o bin/video.o bin/module_loading.o bin/keyboard.o bin/tower_d.dylib bin/blue_d.dylib
+cool: bin/main.o bin/video.o bin/module_loading.o bin/keyboard.o 
 	@echo "Linking $(filter %.o, $^) -> $@"
 	@$(LD) $(LD_FLAGS) $(LIBS) -o $@ $(filter %.o,$^) $(LIB_DIRS)
+
+cool.app/cool: cool mac_osx/resources/Info.plist bin/tower_d.dylib bin/blue_d.dylib
+	@echo "Creating Bundle $@"
+	@mkdir -p cool.app/bin
+	@cp cool cool.app/cool
+	@cp mac_osx/resources/Info.plist cool.app/Info.plist
+	@cp bin/tower_d.dylib cool.app/bin/tower_d.dylib
+	@cp bin/blue_d.dylib cool.app/bin/blue_d.dylib

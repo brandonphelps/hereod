@@ -1,5 +1,6 @@
 
 #include "game_module.h"
+#include <string>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -21,7 +22,7 @@ void LoadModule(ModuleFunctions& module_funcs, const std::string& lib_path)
 #ifdef _WIN32	
 		WriteLine("Failed to load library ./shrug");
 #else
-		printf("Failed to load library %s\n", dlerror());
+		NSLog(@"Failed to load library " + std::string(dlerror()));
 #endif
 		return;
 	}

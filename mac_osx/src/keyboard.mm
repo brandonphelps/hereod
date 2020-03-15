@@ -133,8 +133,9 @@ void updateKeyboardControllerWith(NSEvent* event, OSXController* keyboardControl
        keyboardController.dpadX != 1)
     {
       keyboardController.dpadX = -1;
+      NSLog(@"Hello controller left");
+      break;
     }
-    break;
   }
 }
 

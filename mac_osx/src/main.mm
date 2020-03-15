@@ -63,6 +63,7 @@ void ReDrawBuf(NSWindow* window, uint8_t* buffer, uint32_t bitmapWidth, uint32_t
 
 int main(int argc, const char* argv[])
 {
+  NSLog(@"Starting up");
   MainWindowDelegate* MainDele = [[MainWindowDelegate alloc] init];
 
   NSRect screenRect = [[NSScreen mainScreen] frame];
@@ -72,13 +73,14 @@ int main(int argc, const char* argv[])
 				   globalRenderWidth,
 				   globalRenderHeight);
 
-  NSWindow* window = [[NSWindow alloc] initWithContentRect : initialFrame
-						 styleMask : NSWindowStyleMaskTitled |
-				       NSWindowStyleMaskClosable |
-				       NSWindowStyleMaskMiniaturizable |
-				       NSWindowStyleMaskResizable
-						   backing : NSBackingStoreBuffered
-						     defer : NO];
+  NSWindow* window = [[NSWindow alloc]
+		       initWithContentRect : initialFrame
+				 styleMask : NSWindowStyleMaskTitled |
+		       NSWindowStyleMaskClosable |
+		       NSWindowStyleMaskMiniaturizable |
+		       NSWindowStyleMaskResizable
+				   backing : NSBackingStoreBuffered
+				     defer : NO];
 
   [window setBackgroundColor: NSColor.redColor];
   [window setTitle: @"Hello World"];
@@ -86,16 +88,16 @@ int main(int argc, const char* argv[])
   [window setDelegate: MainDele];
   window.contentView.wantsLayer = YES;
 
-  OSXController* ck;
-  OSXController* kk;
+  OSXController* ck = nil;
+  OSXController* kk = nil;
 
   macOSInitGameControllers(ck, kk);
 
   ModuleFunctions blueFuncs; 
-  LoadModule(blueFuncs, "bin/blue_d.dylib");
+  LoadModule(blueFuncs, "cool.app/bin/blue_d.dylib");
 
   ModuleFunctions modFuncs;
-  LoadModule(modFuncs, "bin/tower_d.dylib");
+  LoadModule(modFuncs, "cool.app/bin/tower_d.dylib");
 
   ScreenData currentScreen;
   currentScreen.buffer = 0;
@@ -103,15 +105,33 @@ int main(int argc, const char* argv[])
   currentScreen.bytesPerPixel = 4;
   RefreshBuf(window, currentScreen);
 
+  int offsetX = 10;
+
   while(Running) {
     // updates the temporary buffer with data.
     // modFuncs.GameUpdate(0, &currentScreen);
-    blueFuncs.GameUpdate(0, &currentScreen);
+    if(blueFuncs.GameUpdate != NULL)
+    {
+      blueFuncs.GameUpdate(0, &currentScreen);
+    }
 
     // takes the buffer data and puts it onto the screen.
     ReDrawBuf(window, currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
 
     OSXController* controller = kk;
+
+    if(controller != NULL)
+    {
+      if(controller.dpadX == -1)
+      {
+	offsetX--;
+      }
+      if(controller.dpadX == 1)
+      {
+    	offsetX++;
+      }
+    }
+
 
     NSEvent* event;
     do {
@@ -119,6 +139,15 @@ int main(int argc, const char* argv[])
 				 untilDate: nil
 				    inMode: NSDefaultRunLoopMode
 				   dequeue: YES];
+
+      if(event != nil &&
+	 controller == kk &&
+	 (event.type == NSEventTypeKeyDown ||
+	  event.type == NSEventTypeKeyUp))
+      {
+	updateKeyboardControllerWith(event, controller);
+      }
+
       switch([event type]) {
       default:
 	[NSApp sendEvent: event];
