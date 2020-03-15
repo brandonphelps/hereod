@@ -3,6 +3,7 @@
 
 #include "video.h"
 #include "game_state.h"
+#include "controller.h"
 
 #ifdef _WIN32
 #include "console_another.h"
@@ -69,7 +70,7 @@ extern "C" int GameInit(GameState* game_state)
 }
 
 // some sort of buffer for video data is passed back and forth here.
-extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state)
+extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state, GameInputController* controller)
 {
 	// update the video buffer data as provided.
 	// the width and height, etc will be updated for you. 

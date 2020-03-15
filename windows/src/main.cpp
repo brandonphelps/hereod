@@ -212,6 +212,18 @@ int CALLBACK WinMain(
 	{
 		initRest = towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
 
+		if(mahState.module_data != NULL)
+		{
+			uint8_t* tmpP = mahState.module_data;
+			if(tmpP != NULL)
+			{
+				WriteLine("Pointing to module data");
+				//uint8_t tmp = static_cast<uint8_t>(tmpP[0]);
+			}
+
+			// WriteLine("Current offset: " + std::to_string(tmp));
+		}
+
 		// using the specific windows classes and stuff, we need
 		// to invaliate the paint region, so the WM_PAINT event is sent to our class.
 		// using this we can also limite the amount of theings that need to be redrawn,
