@@ -4,7 +4,7 @@ bin/main.o: mac_osx/src/main.mm
 	@echo "Building $@"
 	@$(CC) $(C_FLAGS) $< $(C_OUTPUT_SPECIFIER)$@
 
-bin/keyboard.o: mac_osx/src/keyboard.mm
+bin/keyboard.o: mac_osx/src/keyboard.mm mac_osx/include/keyboard.h
 	@mkdir -p $(dir $@)
 	@echo "Building $@"
 	@$(CC) $(C_FLAGS) $< $(C_OUTPUT_SPECIFIER)$@

@@ -1,6 +1,6 @@
 LD=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld
 LD_COMMON = -arch x86_64 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
-LD_FLAGS= -framework AppKit -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -no_deduplicate $(LD_COMMON) -macosx_version_min 10.14.0 
+LD_FLAGS= -framework AppKit -framework IOKit -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -no_deduplicate $(LD_COMMON) -macosx_version_min 10.14.0 
 LD_DLL_FLAGS = -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -no_deduplicate -dynamic -dylib -arch x86_64 -macosx_version_min 10.14.0 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -L/usr/local/lib -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/lib/darwin/libclang_rt.osx.a
 
 CC=clang
