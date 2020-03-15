@@ -82,19 +82,18 @@ int CALLBACK WinMain(
 	InitializeDebugConsole();
 
 
-	WNDCLASSEX wcex;
+	WNDCLASSEX wcex = {};
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style          = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc    = WndProc;
-	wcex.cbClsExtra     = 0;
-	wcex.cbWndExtra     = 0;
 	wcex.hInstance      = hInstance;
-	wcex.hIcon          = LoadIcon(hInstance, IDI_APPLICATION);
 	wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName   = NULL;
 	wcex.lpszClassName  = szWindowClass;
-	wcex.hIconSm        = LoadIcon(wcex.hInstance, IDI_APPLICATION);
+	// wcex.hIcon          = LoadIcon(hInstance, IDI_APPLICATION);
+
+	// wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+	wcex.lpszMenuName   = NULL;
+	// wcex.hIconSm        = LoadIcon(wcex.hInstance, IDI_APPLICATION);
 
 	if (!RegisterClassEx(&wcex))
 	{
@@ -164,7 +163,7 @@ int CALLBACK WinMain(
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd, nCmdShow);
-	UpdateWindow(hWnd);
+	
 
 	WriteOut("Starting Running while loop\n\r");
 
@@ -179,11 +178,14 @@ int CALLBACK WinMain(
 	}
 	// Main message loop:
 
+	towerFuncs.GameUpdate(0, &currentScreen);
+	UpdateWindow(hWnd);
+
 	while(Running)
 	{
 		initRest = towerFuncs.GameUpdate(0, &currentScreen);
 		
-		UpdateWindow(hWnd);
+
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
 			switch(msg.message)
@@ -214,7 +216,7 @@ int CALLBACK WinMain(
 				{
 					
 					TranslateMessage(&msg);
-					DispatchMessage(&msg);
+					DispatchMessageA(&msg);
 				} break;
 			}
 		}
@@ -240,12 +242,12 @@ std::string toHex(T value)
 //  WM_DESTROY  - post a quit message and return
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	LRESULT Result = 0;
 	PAINTSTRUCT ps;
 	HDC hdc;
-	static int printme = 1;
 	switch (message)
 	{
-	case WM_PAINT:
+		case WM_PAINT:
 		{
 			hdc = BeginPaint(hWnd, &ps);
 		   
@@ -259,14 +261,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			PatBlt(hdc, 0, 0, 40, 40, BLACKNESS);
 			// xDest, yDest, DestWidth, DestHeight, xSrc, ySrc, SrcWidth, SrcHeight
-
-			if(printme)
-			{
-				uint32_t first_pixel = ((uint32_t*)CurrentBuffer.video_buf->buffer)[0];
-				std::string value_blah = "First pixel: " + toHex<uint32_t>(first_pixel)  +"\n\r";
-				WriteOut(value_blah);
-				printme = 0;
-			}
 
 			StretchDIBits(hdc,
 			              10, 10,
@@ -290,18 +284,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			EndPaint(hWnd, &ps);
 		} break;
-	case WM_DESTROY:
+		case WM_DESTROY:
 		{
 			PostQuitMessage(0);
 			Running = false;
 		} break;
-	default:
+		default:
 		{
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
-		break;
+			Result = DefWindowProcA(hWnd, message, wParam, lParam);
+		} break;
 	}
 
-	return 0;
+	return Result;
 }
 
