@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include "game_module.h"
+#include "game_state.h"
 #include "controller.h"
 #include "console_another.h"
 #include "video.h"
@@ -57,7 +58,7 @@ struct win32_pixel_buffer
 };
 
 win32_pixel_buffer CurrentBuffer;
-GameInputController mahKeyboard;
+
 
 
 void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, uint32_t new_height)
@@ -163,23 +164,33 @@ int CALLBACK WinMain(
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd, nCmdShow);
-	
 
 	WriteOut("Starting Running while loop\n\r");
 
 	MSG msg;
 
 	// load custom game module 
-	int initRest = towerFuncs.GameInit();
+	// Main message loop:
+
+	towerFuncs.GameUpdate(0, &currentScreen);
+	UpdateWindow(hWnd);
+	GameInputController mahKeyboard;
+	GameState mahState;
+
+	mahState.platformData = new uint8_t[100];
+	std::string PlatformIdent = "Windows";
+	for(int i =0; i < PlatformIdent.size(); i++)
+	{
+		mahState.platformData[i] = PlatformIdent[i];
+	}
+
+	int initRest = towerFuncs.GameInit(&mahState);
 	if(initRest != 0)
 	{
 		WriteLine("Failed to init game");
 		return 1;
 	}
-	// Main message loop:
 
-	towerFuncs.GameUpdate(0, &currentScreen);
-	UpdateWindow(hWnd);
 
 	RECT new_rec;
 	new_rec.left = 0;
@@ -214,11 +225,24 @@ int CALLBACK WinMain(
 					uint32_t VKCode = (uint32_t)msg.wParam;
 					bool WasDown = ((msg.lParam & (1 << 30)) != 0);
 					bool IsDown = ((msg.lParam & (1 << 31)) == 0);
+					// seems like this triggers on ups and downs
 					if(WasDown != IsDown)
 					{
 						if(VKCode == 'W')
 						{
-							WriteLine("W");
+							ProcessKeyMessage(&(mahKeyboard.MoveUp), IsDown);
+						}
+						if(VKCode == 'A')
+						{
+							ProcessKeyMessage(&(mahKeyboard.MoveLeft), IsDown);
+						}
+						if(VKCode == 'S')
+						{
+							ProcessKeyMessage(&(mahKeyboard.MoveDown), IsDown);
+						}
+						if(VKCode == 'D')
+						{
+							ProcessKeyMessage(&(mahKeyboard.MoveRight), IsDown);
 						}
 					}
 				} break;
