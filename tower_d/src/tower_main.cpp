@@ -8,7 +8,7 @@
 #endif
 
 // works fine on windows, but something about console doesn't allow writing to.
-int GameInit()
+__attribute__((__visibility__("default"))) int GameInit()
 {
 	return 0;
 }

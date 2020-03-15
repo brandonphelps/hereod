@@ -90,21 +90,24 @@ int main(int argc, const char* argv[])
   [window setDelegate: MainDele];
   window.contentView.wantsLayer = YES;
 
-  void* lib_handle = dlopen("bin/tower_d.dylib", RTLD_LOCAL|RTLD_LAZY);
+  void* lib_handle = dlopen("bin/tower_d.dylib", RTLD_LOCAL);
 
-  if(lib_handle != NULL)
+  if(!lib_handle)
   {
     printf("Failed to load library %s\n", dlerror());
     exit(1);
   }
 
-  FGameInit GameInit = (FGameInit)dlsym(lib_handle, "GameInit");
+  FGameInit GameInit = (FGameInit)dlsym(lib_handle, "__Z8GameInitv");
   FGameUpdate GameUpdate = (FGameUpdate)dlsym(lib_handle, "GameUpdate");
   FGameShutdown GameShutdown = (FGameShutdown)dlsym(lib_handle, "GameShutdown");
 
   if(GameInit == NULL || GameUpdate == NULL || GameShutdown == NULL)
   {
-    printf("Failed to get symbols");
+    if(!GameInit)
+    {
+      printf("Failed to get symbols GameInit: %s\n", dlerror());
+    }
     exit(1);
   }
 
