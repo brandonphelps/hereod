@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <AppKit/AppKit.h>
+#include <iostream>
+#include <fstream>
 #include <stdint.h>
 
 #include "keyboard.h" // mac os x specific
-
 
 #include "video.h"
 #include "game_module.h"
@@ -99,10 +100,11 @@ int main(int argc, const char* argv[])
   macOSInitGameControllers(ck, kk);
 
   ModuleFunctions blueFuncs; 
-  LoadModule(blueFuncs, "cool.app/bin/blue_d.dylib");
+  // todo(brandon): determine way of getting current path / loading dylibs inside an mac os x bundle. 
+  LoadModule(blueFuncs, std::string(DYLIB_DIR) + "blue_d.dylib");
 
   ModuleFunctions towerFuncs;
-  LoadModule(towerFuncs, "cool.app/bin/tower_d.dylib");
+  LoadModule(towerFuncs, std::string(DYLIB_DIR) + "tower_d.dylib");
 
   ScreenData currentScreen;
   currentScreen.buffer = 0;
@@ -126,8 +128,6 @@ int main(int argc, const char* argv[])
     }
   }
   int offsetX = 10;
-
-  
 
   while(Running)
   {

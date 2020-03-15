@@ -2,7 +2,7 @@
 bin/main.o: mac_osx/src/main.mm
 	@mkdir -p $(dir $@)
 	@echo "Building $@"
-	@$(CC) $(C_FLAGS) $< $(C_OUTPUT_SPECIFIER)$@
+	@$(CC) $(C_FLAGS) -D DYLIB_DIR=\""$(shell pwd)/bin/"\" $< $(C_OUTPUT_SPECIFIER)$@
 
 bin/keyboard.o: mac_osx/src/keyboard.mm mac_osx/include/keyboard.h
 	@mkdir -p $(dir $@)
@@ -26,7 +26,7 @@ cool: $(TARGET_OBJS) bin/main.o bin/keyboard.o
 cool.app/cool: cool mac_osx/resources/Info.plist bin/tower_d.dylib bin/blue_d.dylib
 	@echo "Creating Bundle $@"
 	@mkdir -p cool.app/bin
-	@cp cool cool.app/cool
 	@cp mac_osx/resources/Info.plist cool.app/Info.plist
 	@cp bin/tower_d.dylib cool.app/bin/tower_d.dylib
 	@cp bin/blue_d.dylib cool.app/bin/blue_d.dylib
+	@cp cool cool.app/cool
