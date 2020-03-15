@@ -30,20 +30,24 @@ C_FLAGS += $(INCLUDE_DIRS)
 all: $(TARGETS)
 
 bin/video.o: src/video.cpp
-	mkdir -p $(dir $@)
-	$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
+	@mkdir -p $(dir $@)
+	@echo "Building $@"
+	@$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
 
 bin/tower_main.o: tower_d/src/tower_main.cpp
-	mkdir -p $(dir $@)
-	$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
+	@mkdir -p $(dir $@)
+	@echo "Building $@"
+	@$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
 
 bin/module_loading.o: src/module_loading.cpp
-	mkdir -p $(dir $@)
-	$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
+	@mkdir -p $(dir $@)
+	@echo "Building $@"
+	@$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
 
 bin/blue_main.o: blue_d/src/blue_main.cpp
-	mkdir -p $(dir $@)
-	$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
+	@mkdir -p $(dir $@)
+	@echo "Building $@"
+	@$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
 
 clean:
 	rm -rf bin $(TARGETS)
