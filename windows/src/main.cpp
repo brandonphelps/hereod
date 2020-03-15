@@ -32,6 +32,7 @@ static bool Running = true;
 
 HINSTANCE hInst;
 
+// todo(brandon): this could be a platform indepdenant function?
 void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_height)
 {
 	if(screendata.buffer != NULL)
@@ -58,8 +59,6 @@ struct win32_pixel_buffer
 };
 
 win32_pixel_buffer CurrentBuffer;
-
-
 
 void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, uint32_t new_height)
 {
@@ -172,8 +171,6 @@ int CALLBACK WinMain(
 	// load custom game module 
 	// Main message loop:
 
-	towerFuncs.GameUpdate(0, &currentScreen);
-	UpdateWindow(hWnd);
 	GameInputController mahKeyboard;
 	GameState mahState;
 
@@ -191,6 +188,9 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
+	towerFuncs.GameUpdate(0, &currentScreen, &mahState);
+	// trigger a window update
+	UpdateWindow(hWnd);
 
 	RECT new_rec;
 	new_rec.left = 0;
@@ -200,7 +200,7 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
-		initRest = towerFuncs.GameUpdate(0, &currentScreen);
+		initRest = towerFuncs.GameUpdate(0, &currentScreen, &mahState);
 
 		// using the specific windows classes and stuff, we need
 		// to invaliate the paint region, so the WM_PAINT event is sent to our class.

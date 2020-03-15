@@ -2,12 +2,15 @@
 #ifndef CUSTOM_GAME_MODULE_H
 #define CUSTOM_GAME_MODULE_H
 #include "video.h"
+#include "game_state.h"
 #include <string>
 
 
-typedef int (*FGameInit)();
+typedef int (*FGameInit)(GameState*);
 typedef int (*FGameShutdown)();
-typedef int (*FGameUpdate)(int, ScreenData*);
+// todo(brandon): consider allowing for only specific implementations and or use dif names. 
+// typedef int (*FGameUpdateA)(int, ScreenData*);
+typedef int (*FGameUpdate)(int, ScreenData*, GameState*);
 
 typedef struct ModuleFunctions
 {
