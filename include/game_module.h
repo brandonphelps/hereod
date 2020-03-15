@@ -7,10 +7,12 @@
 
 
 typedef int (*FGameInit)(GameState*);
-typedef int (*FGameShutdown)();
+
 // todo(brandon): consider allowing for only specific implementations and or use dif names. 
 // typedef int (*FGameUpdateA)(int, ScreenData*);
 typedef int (*FGameUpdate)(int, ScreenData*, GameState*);
+
+typedef int (*FGameShutdown)();
 
 typedef struct ModuleFunctions
 {

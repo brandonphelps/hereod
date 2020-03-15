@@ -11,6 +11,16 @@
 // works fine on windows, but something about console doesn't allow writing to.
 extern "C" int GameInit(GameState* game_state)
 {
+	char coolio[10];
+	for(int i = 0; i < 10; i++)
+	{
+		coolio[i] = game_state->platformData[i];
+	}
+	if(coolio[0] == 'W')
+	{
+		return 0;
+	}
+
 	return 0;
 }
 
