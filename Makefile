@@ -33,7 +33,8 @@ define CommonSrcRule
 bin/$(1).o: src/$(1).cpp
 	@mkdir -p $(dir $$@)
 	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
-$$(TARGETS): bin/$(1).o
+TARGET_OBJS += bin/$(1).o
+
 endef
 
 bin/tower_main.o: tower_d/src/tower_main.cpp
@@ -43,7 +44,6 @@ bin/tower_main.o: tower_d/src/tower_main.cpp
 bin/blue_main.o: blue_d/src/blue_main.cpp
 	@mkdir -p $(dir $@)
 	@$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
-
 
 # Common sources, i.e not module specific
 $(eval $(call CommonSrcRule,module_loading))

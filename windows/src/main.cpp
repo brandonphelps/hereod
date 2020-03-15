@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include "game_module.h"
+#include "controller.h"
 #include "console_another.h"
 #include "video.h"
 
@@ -26,49 +27,9 @@ static TCHAR szWindowClass[] = _T("My cool dude");
 // The string that appears in the application's title bar.
 static TCHAR szTitle[] = _T("My cool title");
 
-static int counter = 0; 
-
 static bool Running = true;
 
 HINSTANCE hInst;
-
-class PixelBuffer
-{
-public:
-	PixelBuffer() : width(0), height(0), buffer(NULL)
-	{
-		
-	}
-
-	~PixelBuffer()
-	{
-		WriteOut("Pixel Buffer Deconstructor");
-		if(buffer != NULL)
-		{
-			delete buffer;
-			buffer = NULL;
-		}
-	}
-
-	uint32_t width; // in pixels
-	uint32_t height; // in pixels
-	uint32_t* buffer;
-
-	void DrawRect(uint32_t start_row, uint32_t start_col, uint32_t end_row, uint32_t end_col, uint32_t color_mask)
-	{
-		// todo(brandon): bounds checking
-
-
-		for(uint32_t row = start_row; row < end_row; row++)
-		{
-			for(uint32_t col = start_col; col < end_col; col++)
-			{
-				buffer[row * col + width] = color_mask;
-			}
-		}
-	}
-};
-
 
 void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_height)
 {
@@ -96,6 +57,8 @@ struct win32_pixel_buffer
 };
 
 win32_pixel_buffer CurrentBuffer;
+GameInputController mahKeyboard;
+
 
 void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, uint32_t new_height)
 {
@@ -218,16 +181,43 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
-		initRest = blueFuncs.GameUpdate(0, &currentScreen);
+		initRest = towerFuncs.GameUpdate(0, &currentScreen);
 		
 		UpdateWindow(hWnd);
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
-		   
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
+			switch(msg.message)
+			{
+				case WM_QUIT:
+				{
+					Running = false;
+				} break;
 
+				case WM_SYSKEYDOWN:
+				case WM_SYSKEYUP:
+				case WM_KEYDOWN:
+				case WM_KEYUP:
+				{
+					uint32_t VKCode = (uint32_t)msg.wParam;
+					bool WasDown = ((msg.lParam & (1 << 30)) != 0);
+					bool IsDown = ((msg.lParam & (1 << 31)) == 0);
+					if(WasDown != IsDown)
+					{
+						if(VKCode == 'W')
+						{
+							WriteLine("W");
+						}
+					}
+				} break;
+				
+				default:
+				{
+					
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				} break;
+			}
+		}
 	}
 
 	return (int) msg.wParam;

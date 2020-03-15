@@ -8,6 +8,16 @@
 #include <dlfcn.h>
 #endif
 
+void LocalPrinter(const std::string& msg)
+{
+#ifdef _WIN32
+	WriteLine(msg);
+#else
+	NSLog(msg);
+#endif
+}
+
+
 void LoadModule(ModuleFunctions& module_funcs, const std::string& lib_path)
 {
 #ifdef _WIN32	
@@ -18,11 +28,7 @@ void LoadModule(ModuleFunctions& module_funcs, const std::string& lib_path)
 
 	if(!module_funcs.lib_handle)
 	{
-#ifdef _WIN32	
-		WriteLine("Failed to load library ./shrug");
-#else
-		printf("Failed to load library %s\n", dlerror());
-#endif
+		LocalPrinter("Failed to load library " + lib_path);
 		return;
 	}
 
@@ -38,11 +44,19 @@ void LoadModule(ModuleFunctions& module_funcs, const std::string& lib_path)
 
   if(module_funcs.GameInit == NULL || module_funcs.GameUpdate == NULL || module_funcs.GameShutdown == NULL)
   {
-#ifdef _WIN32	
-		WriteLine("Failed to get symbols");
-#else
-    printf("Failed to get symbols, %s\n", dlerror());
-#endif
+	  LocalPrinter("Failed to get symbols");
+    if(module_funcs.GameInit == NULL)
+    {
+	    LocalPrinter("Failed to get symboal GameInit");
+    }
+    if(module_funcs.GameUpdate == NULL)
+    {
+	    LocalPrinter("Failed to get symboal GameUpdate");
+    }
+    if(module_funcs.GameShutdown == NULL)
+    {
+	    LocalPrinter("Failed to get symboal GameShutdown");
+    }
 
     module_funcs.GameInit = NULL;
     module_funcs.GameUpdate = NULL;
@@ -50,14 +64,9 @@ void LoadModule(ModuleFunctions& module_funcs, const std::string& lib_path)
   }
   else
   {
-#ifdef _WIN32	
-		WriteLine("Failed load module " + lib_path);
-#else
-	  printf("Succesfully loaded module\n");
-#endif
+	  LocalPrinter("Succesfully loaded module");
   }
 }
-
 
 void UnloadModule(ModuleFunctions& module_funcs)
 {

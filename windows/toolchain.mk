@@ -15,3 +15,6 @@ C_BIN_SPECIFIER = -c
 INCLUDE_DIRS += -Iwindows/include
 
 TARGETS = cool.exe
+
+
+TARGET_OBJS = 
