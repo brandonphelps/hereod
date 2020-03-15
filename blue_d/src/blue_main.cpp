@@ -19,7 +19,7 @@ void blueDraw(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t
 			#ifdef _WIN32
 
 			// blue
-			*pixel = static_cast<uint8_t>(y);
+			*pixel = 0;
 			++pixel;
 
 			// green
@@ -27,7 +27,7 @@ void blueDraw(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t
 			++pixel;
 
 			// red
-			*pixel = 0;
+			*pixel = static_cast<uint8_t>(y);;
 			++pixel;
 
 			// alpha 
