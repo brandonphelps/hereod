@@ -181,10 +181,21 @@ int CALLBACK WinMain(
 	towerFuncs.GameUpdate(0, &currentScreen);
 	UpdateWindow(hWnd);
 
+	RECT new_rec;
+	new_rec.left = 0;
+	new_rec.top = 0;
+	new_rec.right = 400;
+	new_rec.bottom = 400;
+
 	while(Running)
 	{
 		initRest = towerFuncs.GameUpdate(0, &currentScreen);
-		
+
+		// using the specific windows classes and stuff, we need
+		// to invaliate the paint region, so the WM_PAINT event is sent to our class.
+		// using this we can also limite the amount of theings that need to be redrawn,
+		// as well on when we need to perform a redraw.
+		InvalidateRect(hWnd, &new_rec, true);
 
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
@@ -243,14 +254,15 @@ std::string toHex(T value)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	LRESULT Result = 0;
-	PAINTSTRUCT ps;
+
 	HDC hdc;
 	switch (message)
 	{
 		case WM_PAINT:
 		{
+			PAINTSTRUCT ps;
 			hdc = BeginPaint(hWnd, &ps);
-		   
+			WriteLine("Painting!");
 			// Here your application is laid out.
 			// For this introduction, we just print out "Hello, Windows desktop!"
 			// in the top left corner.
