@@ -141,12 +141,6 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
-	ModuleFunctions blueFuncs;
-	ModuleFunctions towerFuncs;
-
-	LoadModule(blueFuncs, "bin/blue_d.dll");
-	LoadModule(towerFuncs, "bin/tower_d.dll");
-
 
 	ScreenData currentScreen;
 	currentScreen.bytesPerPixel = 4;
@@ -160,6 +154,12 @@ int CALLBACK WinMain(
 
 	ResizeGraphicsBuffer(CurrentBuffer, 400, 500);
 
+	ModuleFunctions blueFuncs;
+	ModuleFunctions towerFuncs;
+
+	LoadModule(blueFuncs, "bin/blue_d.dll");
+	LoadModule(towerFuncs, "bin/tower_d.dll");
+
 	// The parameters to ShowWindow explained:
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
@@ -171,11 +171,11 @@ int CALLBACK WinMain(
 	MSG msg;
 
 	// load custom game module 
-	int initRest = blueFuncs.GameInit();
+	int initRest = towerFuncs.GameInit();
 	if(initRest != 0)
 	{
 		WriteLine("Failed to init game");
-		return (int) msg.wParam;
+		return 1;
 	}
 	// Main message loop:
 
