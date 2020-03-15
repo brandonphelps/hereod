@@ -9,7 +9,6 @@ static bool Running = true;
 static uint32_t globalRenderWidth = 1078U;
 static uint32_t globalRenderHeight = 768U;
 
-
 void RefreshBuf(NSWindow* window, ScreenData& screendata)
 {
   if(screendata.buffer)
