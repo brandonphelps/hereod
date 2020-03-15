@@ -146,11 +146,6 @@ int CALLBACK WinMain(
 	// Store instance handle in our global variable
 	hInst = hInstance;
 
-	ModuleFunctions blueFuncs;
-	ModuleFunctions towerFuncs;
-
-	//LoadModule(blueFuncs, "bin/blue_d.dll");
-	LoadModule(towerFuncs, "bin/tower_d.dll");
 	// The parameters to CreateWindow explained:
 	// szWindowClass: the name of the application
 	// szTitle: the text that appears in the title bar
@@ -183,6 +178,13 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
+	ModuleFunctions blueFuncs;
+	ModuleFunctions towerFuncs;
+
+	LoadModule(blueFuncs, "bin/blue_d.dll");
+	LoadModule(towerFuncs, "bin/tower_d.dll");
+
+
 	ScreenData currentScreen;
 	currentScreen.bytesPerPixel = 4;
 	currentScreen.buffer = NULL;
@@ -195,10 +197,6 @@ int CALLBACK WinMain(
 
 	ResizeGraphicsBuffer(CurrentBuffer, 400, 500);
 
-	drawBuf(currentScreen.buffer, currentScreen.width,
-	        currentScreen.height, currentScreen.pitch);
-
-
 	// The parameters to ShowWindow explained:
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
@@ -210,7 +208,7 @@ int CALLBACK WinMain(
 	MSG msg;
 
 	// load custom game module 
-	int initRest = towerFuncs.GameInit();
+	int initRest = blueFuncs.GameInit();
 	if(initRest != 0)
 	{
 		WriteLine("Failed to init game");
@@ -220,7 +218,7 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
-		initRest = towerFuncs.GameUpdate(0, &currentScreen);
+		initRest = blueFuncs.GameUpdate(0, &currentScreen);
 		
 		UpdateWindow(hWnd);
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
