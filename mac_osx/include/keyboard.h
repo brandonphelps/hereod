@@ -4,6 +4,8 @@
 #import <AppKit/AppKit.h>
 #import <IOKit/hid/IOHIDLib.h>
 
+#import "game_controller.h"
+
 @interface HandmadeKeyIgnoringWindow : NSWindow
 @end
 
@@ -22,7 +24,7 @@
 
 @end
 
-void updateKeyboardControllerWith(NSEvent* event, OSXController* keyboard);
+void updateKeyboardControllerWith(NSEvent* event, GameInputController* keyboard);
 void macOSInitGameControllers(OSXController*, OSXController*);
 
 #endif

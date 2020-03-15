@@ -51,7 +51,7 @@ void towerDraw(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_
 			++pixel;
 
 			// green;
-			*pixel = (uint8_t)x;
+			*pixel = (uint8_t)x + greenOffset;
 			++pixel;
 
 			// alpha

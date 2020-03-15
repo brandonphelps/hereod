@@ -8,7 +8,6 @@
 
 #include "video.h"
 #include "game_module.h"
-
 #include "game_controller.h"
 
 static bool Running = true;
@@ -137,23 +136,14 @@ int main(int argc, const char* argv[])
       towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
     }
 
-    // takes the buffer data and puts it onto the screen.
-    ReDrawBuf(window, currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
-
-    OSXController* controller = kk;
-
-    if(controller != NULL)
+    if(mahState.module_data != NULL)
     {
-      if(controller.dpadX == -1)
-      {
-	offsetX--;
-      }
-      if(controller.dpadX == 1)
-      {
-    	offsetX++;
-      }
+      uint16_t* tmpP = reinterpret_cast<uint16_t*>(mahState.module_data);
+      NSLog(@"Current offset: %d", tmpP[0]);
     }
 
+    // takes the buffer data and puts it onto the screen.
+    ReDrawBuf(window, currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
 
     NSEvent* event;
     do {
@@ -163,11 +153,10 @@ int main(int argc, const char* argv[])
 				   dequeue: YES];
 
       if(event != nil &&
-	 controller == kk &&
 	 (event.type == NSEventTypeKeyDown ||
 	  event.type == NSEventTypeKeyUp))
       {
-	updateKeyboardControllerWith(event, controller);
+	updateKeyboardControllerWith(event, &mahKeyboard);
       }
 
       switch([event type]) {

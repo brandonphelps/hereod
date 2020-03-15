@@ -2,6 +2,7 @@
 #import <AppKit/AppKit.h>
 #import <IOKit/hid/IOHIDLib.h>
 #import <AudioToolbox/AudioToolbox.h>
+#import "game_controller.h"
 #import "keyboard.h"
 
 static IOHIDManagerRef HIDManager = NULL;
@@ -123,18 +124,50 @@ void controllerConnected(void *context, IOReturn result,
 @end
 
 const static unsigned short leftArrowKeyCode = 0x7B;
+const static unsigned short rightArrowKeyCode = 0x7C;
+const static unsigned short upArrowKeyCode = 0x7D;
+const static unsigned short downArrowKeyCode = 0x7E;
 
-void updateKeyboardControllerWith(NSEvent* event, OSXController* keyboardController)
+// updates the keyboardController
+void updateKeyboardControllerWith(NSEvent* event, GameInputController* keyboardController)
 {
+  bool IsDown;
   switch([event type])
   {
-  case NSEventTypeKeyDown:
-    if(event.keyCode == leftArrowKeyCode &&
-       keyboardController.dpadX != 1)
+    case NSEventTypeKeyDown:
+    case NSEventTypeKeyUp:
     {
-      keyboardController.dpadX = -1;
-      NSLog(@"Hello controller left");
-      break;
+      if([event type] == NSEventTypeKeyUp)
+      {
+	IsDown = false;
+      }
+      else
+      {
+	IsDown = true;
+      }
+      NSLog(@"Toggle key to %d", IsDown);
+      if(event.keyCode == leftArrowKeyCode)
+      {
+	ProcessKeyMessage(&(keyboardController->MoveLeft), IsDown);
+	break;
+      }
+
+      if(event.keyCode == rightArrowKeyCode)
+      {
+	ProcessKeyMessage(&(keyboardController->MoveRight), IsDown);
+	break;
+      }
+
+      if(event.keyCode == upArrowKeyCode)
+      {
+	ProcessKeyMessage(&(keyboardController->MoveUp), IsDown);
+	break;
+      }
+      if(event.keyCode == downArrowKeyCode)
+      {
+	ProcessKeyMessage(&(keyboardController->MoveDown), IsDown);
+	break;
+      }
     }
   }
 }
