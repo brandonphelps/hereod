@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include "game_module.h"
+#include "controller.h"
 #include "console_another.h"
 #include "video.h"
 
@@ -26,49 +27,9 @@ static TCHAR szWindowClass[] = _T("My cool dude");
 // The string that appears in the application's title bar.
 static TCHAR szTitle[] = _T("My cool title");
 
-static int counter = 0; 
-
 static bool Running = true;
 
 HINSTANCE hInst;
-
-class PixelBuffer
-{
-public:
-	PixelBuffer() : width(0), height(0), buffer(NULL)
-	{
-		
-	}
-
-	~PixelBuffer()
-	{
-		WriteOut("Pixel Buffer Deconstructor");
-		if(buffer != NULL)
-		{
-			delete buffer;
-			buffer = NULL;
-		}
-	}
-
-	uint32_t width; // in pixels
-	uint32_t height; // in pixels
-	uint32_t* buffer;
-
-	void DrawRect(uint32_t start_row, uint32_t start_col, uint32_t end_row, uint32_t end_col, uint32_t color_mask)
-	{
-		// todo(brandon): bounds checking
-
-
-		for(uint32_t row = start_row; row < end_row; row++)
-		{
-			for(uint32_t col = start_col; col < end_col; col++)
-			{
-				buffer[row * col + width] = color_mask;
-			}
-		}
-	}
-};
-
 
 void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_height)
 {
@@ -96,6 +57,8 @@ struct win32_pixel_buffer
 };
 
 win32_pixel_buffer CurrentBuffer;
+GameInputController mahKeyboard;
+
 
 void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, uint32_t new_height)
 {
@@ -119,19 +82,18 @@ int CALLBACK WinMain(
 	InitializeDebugConsole();
 
 
-	WNDCLASSEX wcex;
+	WNDCLASSEX wcex = {};
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style          = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc    = WndProc;
-	wcex.cbClsExtra     = 0;
-	wcex.cbWndExtra     = 0;
 	wcex.hInstance      = hInstance;
-	wcex.hIcon          = LoadIcon(hInstance, IDI_APPLICATION);
 	wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName   = NULL;
 	wcex.lpszClassName  = szWindowClass;
-	wcex.hIconSm        = LoadIcon(wcex.hInstance, IDI_APPLICATION);
+	// wcex.hIcon          = LoadIcon(hInstance, IDI_APPLICATION);
+
+	// wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+	wcex.lpszMenuName   = NULL;
+	// wcex.hIconSm        = LoadIcon(wcex.hInstance, IDI_APPLICATION);
 
 	if (!RegisterClassEx(&wcex))
 	{
@@ -178,12 +140,6 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
-	ModuleFunctions blueFuncs;
-	ModuleFunctions towerFuncs;
-
-	LoadModule(blueFuncs, "bin/blue_d.dll");
-	LoadModule(towerFuncs, "bin/tower_d.dll");
-
 
 	ScreenData currentScreen;
 	currentScreen.bytesPerPixel = 4;
@@ -197,37 +153,84 @@ int CALLBACK WinMain(
 
 	ResizeGraphicsBuffer(CurrentBuffer, 400, 500);
 
+	ModuleFunctions blueFuncs;
+	ModuleFunctions towerFuncs;
+
+	LoadModule(blueFuncs, "bin/blue_d.dll");
+	LoadModule(towerFuncs, "bin/tower_d.dll");
+
 	// The parameters to ShowWindow explained:
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd, nCmdShow);
-	UpdateWindow(hWnd);
+	
 
 	WriteOut("Starting Running while loop\n\r");
 
 	MSG msg;
 
 	// load custom game module 
-	int initRest = blueFuncs.GameInit();
+	int initRest = towerFuncs.GameInit();
 	if(initRest != 0)
 	{
 		WriteLine("Failed to init game");
-		return (int) msg.wParam;
+		return 1;
 	}
 	// Main message loop:
 
+	towerFuncs.GameUpdate(0, &currentScreen);
+	UpdateWindow(hWnd);
+
+	RECT new_rec;
+	new_rec.left = 0;
+	new_rec.top = 0;
+	new_rec.right = 400;
+	new_rec.bottom = 400;
+
 	while(Running)
 	{
-		initRest = blueFuncs.GameUpdate(0, &currentScreen);
-		
-		UpdateWindow(hWnd);
+		initRest = towerFuncs.GameUpdate(0, &currentScreen);
+
+		// using the specific windows classes and stuff, we need
+		// to invaliate the paint region, so the WM_PAINT event is sent to our class.
+		// using this we can also limite the amount of theings that need to be redrawn,
+		// as well on when we need to perform a redraw.
+		InvalidateRect(hWnd, &new_rec, true);
+
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
-		   
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
+			switch(msg.message)
+			{
+				case WM_QUIT:
+				{
+					Running = false;
+				} break;
 
+				case WM_SYSKEYDOWN:
+				case WM_SYSKEYUP:
+				case WM_KEYDOWN:
+				case WM_KEYUP:
+				{
+					uint32_t VKCode = (uint32_t)msg.wParam;
+					bool WasDown = ((msg.lParam & (1 << 30)) != 0);
+					bool IsDown = ((msg.lParam & (1 << 31)) == 0);
+					if(WasDown != IsDown)
+					{
+						if(VKCode == 'W')
+						{
+							WriteLine("W");
+						}
+					}
+				} break;
+				
+				default:
+				{
+					
+					TranslateMessage(&msg);
+					DispatchMessageA(&msg);
+				} break;
+			}
+		}
 	}
 
 	return (int) msg.wParam;
@@ -250,15 +253,15 @@ std::string toHex(T value)
 //  WM_DESTROY  - post a quit message and return
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	PAINTSTRUCT ps;
+	LRESULT Result = 0;
+
 	HDC hdc;
-	static int printme = 1;
 	switch (message)
 	{
-	case WM_PAINT:
+		case WM_PAINT:
 		{
+			PAINTSTRUCT ps;
 			hdc = BeginPaint(hWnd, &ps);
-		   
 			// Here your application is laid out.
 			// For this introduction, we just print out "Hello, Windows desktop!"
 			// in the top left corner.
@@ -266,23 +269,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//    5, 5,
 			//    greeting, _tcslen(greeting));
 			// End application-specific layout section.
-
 			PatBlt(hdc, 0, 0, 40, 40, BLACKNESS);
 			// xDest, yDest, DestWidth, DestHeight, xSrc, ySrc, SrcWidth, SrcHeight
-
-			if(printme)
-			{
-				uint32_t first_pixel = ((uint32_t*)CurrentBuffer.video_buf->buffer)[0];
-				std::string value_blah = "First pixel: " + toHex<uint32_t>(first_pixel)  +"\n\r";
-				WriteOut(value_blah);
-				printme = 0;
-			}
 
 			StretchDIBits(hdc,
 			              10, 10,
 			              10 + CurrentBuffer.video_buf->width,
 			              10 + CurrentBuffer.video_buf->height,
-
 			              0, 0,
 			              CurrentBuffer.video_buf->width, CurrentBuffer.video_buf->height,
 			              CurrentBuffer.video_buf->buffer,
@@ -300,18 +293,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			EndPaint(hWnd, &ps);
 		} break;
-	case WM_DESTROY:
+		case WM_DESTROY:
 		{
 			PostQuitMessage(0);
 			Running = false;
 		} break;
-	default:
+		default:
 		{
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
-		break;
+			Result = DefWindowProcA(hWnd, message, wParam, lParam);
+		} break;
 	}
 
-	return 0;
+	return Result;
 }
 
