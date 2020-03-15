@@ -7,6 +7,10 @@
 
 static bool Running = true;
 
+static uint32_t globalRenderWidth = 1078U;
+static uint32_t globalRenderHeight = 768U;
+
+
 void RefreshBuf(NSWindow* window, ScreenData& screendata)
 {
   if(screendata.buffer)
@@ -34,14 +38,6 @@ void RefreshBuf(NSWindow* window, ScreenData& screendata)
   RefreshBuf(window, *_screenRef);
 }
 @end
-
-uint32_t globalRenderWidth = 1078U;
-uint32_t globalRenderHeight = 768U;
-
-typedef int (*FGameInit)();
-typedef int (*FGameShutdown)();
-typedef int (*FGameUpdate)(int, ScreenData*);
-
 
 
 void ReDrawBuf(NSWindow* window, uint8_t* buffer, uint32_t bitmapWidth, uint32_t bitmapHeight, uint32_t pitch)
@@ -118,8 +114,8 @@ int main(int argc, const char* argv[])
 
   while(Running) {
     // updates the temporary buffer with data.
-    drawBuf(currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
-
+    // drawBuf(currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
+    GameUpdate(0, &currentScreen);
     // takes the buffer data and puts it onto the screen.
     ReDrawBuf(window, currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
 
