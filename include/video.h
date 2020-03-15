@@ -2,6 +2,9 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include <stdint.h>
+
+
 typedef struct ScreenData
 {
   uint32_t width;

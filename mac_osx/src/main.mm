@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <AppKit/AppKit.h>
 #include <stdint.h>
-#include <dlfcn.h>
 #include "video.h"
 #include "game_module.h"
 
@@ -87,24 +86,11 @@ int main(int argc, const char* argv[])
   [window setDelegate: MainDele];
   window.contentView.wantsLayer = YES;
 
-  void* lib_handle = dlopen("bin/tower_d.dylib", RTLD_LOCAL);
+  ModuleFunctions blueFuncs; 
+  LoadModule(blueFuncs, "bin/blue_d.dylib");
 
-  if(!lib_handle)
-  {
-    printf("Failed to load library %s\n", dlerror());
-    exit(1);
-  }
-
-  FGameInit GameInit = (FGameInit)dlsym(lib_handle, "GameInit");
-  FGameUpdate GameUpdate = (FGameUpdate)dlsym(lib_handle, "GameUpdate");
-  FGameShutdown GameShutdown = (FGameShutdown)dlsym(lib_handle, "GameShutdown");
-
-  if(GameInit == NULL || GameUpdate == NULL || GameShutdown == NULL)
-  {
-    printf("Failed to get symbols, %s\n", dlerror());
-    exit(1);
-  }
-
+  ModuleFunctions modFuncs;
+  LoadModule(modFuncs, "bin/tower_d.dylib");
 
   ScreenData currentScreen;
   currentScreen.buffer = 0;
@@ -114,8 +100,9 @@ int main(int argc, const char* argv[])
 
   while(Running) {
     // updates the temporary buffer with data.
-    // drawBuf(currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
-    GameUpdate(0, &currentScreen);
+    // modFuncs.GameUpdate(0, &currentScreen);
+    blueFuncs.GameUpdate(0, &currentScreen);
+
     // takes the buffer data and puts it onto the screen.
     ReDrawBuf(window, currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
 

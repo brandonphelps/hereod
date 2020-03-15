@@ -23,7 +23,6 @@ extern "C" int GameUpdate(int dt, ScreenData* screenData)
 	        screenData->height, screenData->pitch);
 
 	return 0;
-
 }
 
 extern "C" int GameShutdown()
