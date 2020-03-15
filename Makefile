@@ -33,6 +33,10 @@ bin/video.o: src/video.cpp
 	mkdir -p $(dir $@)
 	$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
 
+bin/tower_main.o: tower_d/src/tower_main.cpp
+	mkdir -p $(dir $@)
+	$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
+
 clean:
 	rm -rf bin $(TARGETS)
 
