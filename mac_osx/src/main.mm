@@ -1,8 +1,14 @@
 #include <stdio.h>
 #include <AppKit/AppKit.h>
+#include <iostream>
+#include <fstream>
 #include <stdint.h>
+
+#include "keyboard.h" // mac os x specific
+
 #include "video.h"
 #include "game_module.h"
+#include "game_controller.h"
 
 static bool Running = true;
 
@@ -62,6 +68,7 @@ void ReDrawBuf(NSWindow* window, uint8_t* buffer, uint32_t bitmapWidth, uint32_t
 
 int main(int argc, const char* argv[])
 {
+  NSLog(@"Starting up");
   MainWindowDelegate* MainDele = [[MainWindowDelegate alloc] init];
 
   NSRect screenRect = [[NSScreen mainScreen] frame];
@@ -71,13 +78,14 @@ int main(int argc, const char* argv[])
 				   globalRenderWidth,
 				   globalRenderHeight);
 
-  NSWindow* window = [[NSWindow alloc] initWithContentRect : initialFrame
-						 styleMask : NSWindowStyleMaskTitled |
-				       NSWindowStyleMaskClosable |
-				       NSWindowStyleMaskMiniaturizable |
-				       NSWindowStyleMaskResizable
-						   backing : NSBackingStoreBuffered
-						     defer : NO];
+  NSWindow* window = [[HandmadeKeyIgnoringWindow alloc]
+		       initWithContentRect : initialFrame
+				 styleMask : NSWindowStyleMaskTitled |
+		       NSWindowStyleMaskClosable |
+		       NSWindowStyleMaskMiniaturizable |
+		       NSWindowStyleMaskResizable
+				   backing : NSBackingStoreBuffered
+				     defer : NO];
 
   [window setBackgroundColor: NSColor.redColor];
   [window setTitle: @"Hello World"];
@@ -85,11 +93,17 @@ int main(int argc, const char* argv[])
   [window setDelegate: MainDele];
   window.contentView.wantsLayer = YES;
 
-  ModuleFunctions blueFuncs; 
-  LoadModule(blueFuncs, "bin/blue_d.dylib");
+  OSXController* ck = nil;
+  OSXController* kk = nil;
 
-  ModuleFunctions modFuncs;
-  LoadModule(modFuncs, "bin/tower_d.dylib");
+  macOSInitGameControllers(ck, kk);
+
+  ModuleFunctions blueFuncs; 
+  // todo(brandon): determine way of getting current path / loading dylibs inside an mac os x bundle. 
+  LoadModule(blueFuncs, std::string(DYLIB_DIR) + "blue_d.dylib");
+
+  ModuleFunctions towerFuncs;
+  LoadModule(towerFuncs, std::string(DYLIB_DIR) + "tower_d.dylib");
 
   ScreenData currentScreen;
   currentScreen.buffer = 0;
@@ -97,10 +111,36 @@ int main(int argc, const char* argv[])
   currentScreen.bytesPerPixel = 4;
   RefreshBuf(window, currentScreen);
 
-  while(Running) {
+
+  GameState mahState;
+  GameInputController mahKeyboard;
+  GameInputControllerInit(&mahKeyboard);
+  mahState.platformData = new uint8_t[100];
+
+  if(towerFuncs.GameInit != NULL)
+  {
+    int res = towerFuncs.GameInit(&mahState);
+    if(res != 0)
+    {
+      NSLog(@"Failed to init tower");
+      return 1;
+    }
+  }
+  int offsetX = 10;
+
+  while(Running)
+  {
     // updates the temporary buffer with data.
-    // modFuncs.GameUpdate(0, &currentScreen);
-    blueFuncs.GameUpdate(0, &currentScreen);
+    if(towerFuncs.GameUpdate != NULL)
+    {
+      towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
+    }
+
+    if(mahState.module_data != NULL)
+    {
+      uint16_t* tmpP = reinterpret_cast<uint16_t*>(mahState.module_data);
+      NSLog(@"Current offset: %d", tmpP[0]);
+    }
 
     // takes the buffer data and puts it onto the screen.
     ReDrawBuf(window, currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
@@ -111,6 +151,14 @@ int main(int argc, const char* argv[])
 				 untilDate: nil
 				    inMode: NSDefaultRunLoopMode
 				   dequeue: YES];
+
+      if(event != nil &&
+	 (event.type == NSEventTypeKeyDown ||
+	  event.type == NSEventTypeKeyUp))
+      {
+	updateKeyboardControllerWith(event, &mahKeyboard);
+      }
+
       switch([event type]) {
       default:
 	[NSApp sendEvent: event];

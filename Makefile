@@ -31,7 +31,7 @@ all: $(TARGETS)
 
 define CommonSrcRule
 bin/$(1).o: src/$(1).cpp
-	@mkdir -p $(dir $$@)
+	@mkdir -p bin
 	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
 TARGET_OBJS += bin/$(1).o
 
@@ -43,13 +43,13 @@ bin/tower_main.o: tower_d/src/tower_main.cpp
 
 bin/blue_main.o: blue_d/src/blue_main.cpp
 	@mkdir -p $(dir $@)
+	@echo "Building $@"
 	@$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
 
 # Common sources, i.e not module specific
 $(eval $(call CommonSrcRule,module_loading))
 $(eval $(call CommonSrcRule,video))
-$(eval $(call CommonSrcRule,controller))
-
+$(eval $(call CommonSrcRule,game_controller))
 
 clean:
 	rm -rf bin $(TARGETS)

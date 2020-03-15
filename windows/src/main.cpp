@@ -16,9 +16,20 @@
 #include <stdint.h>
 
 #include "game_module.h"
+#include "game_state.h"
 #include "controller.h"
 #include "console_another.h"
 #include "video.h"
+
+template <typename T>
+std::string toHex(T value)
+{
+	std::stringstream stream;
+	stream << "0x" << std::hex << value;
+	std::string msg = stream.str();
+	return msg;
+}
+
 
 // Global variables
 // The main window class name.
@@ -31,6 +42,7 @@ static bool Running = true;
 
 HINSTANCE hInst;
 
+// todo(brandon): this could be a platform indepdenant function?
 void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_height)
 {
 	if(screendata.buffer != NULL)
@@ -57,8 +69,6 @@ struct win32_pixel_buffer
 };
 
 win32_pixel_buffer CurrentBuffer;
-GameInputController mahKeyboard;
-
 
 void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, uint32_t new_height)
 {
@@ -163,22 +173,36 @@ int CALLBACK WinMain(
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd, nCmdShow);
-	
 
 	WriteOut("Starting Running while loop\n\r");
 
 	MSG msg;
 
 	// load custom game module 
-	int initRest = towerFuncs.GameInit();
+	// Main message loop:
+
+	GameInputController mahKeyboard;
+	GameInputControllerInit(&mahKeyboard);
+	GameState mahState;
+	mahState.platformData = NULL;
+	mahState.module_data = NULL;
+
+	mahState.platformData = new uint8_t[100];
+	std::string PlatformIdent = "Windows";
+	for(int i =0; i < PlatformIdent.size(); i++)
+	{
+		mahState.platformData[i] = PlatformIdent[i];
+	}
+
+	int initRest = towerFuncs.GameInit(&mahState);
 	if(initRest != 0)
 	{
 		WriteLine("Failed to init game");
 		return 1;
 	}
-	// Main message loop:
 
-	towerFuncs.GameUpdate(0, &currentScreen);
+	towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
+	// trigger a window update
 	UpdateWindow(hWnd);
 
 	RECT new_rec;
@@ -189,7 +213,13 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
-		initRest = towerFuncs.GameUpdate(0, &currentScreen);
+		initRest = towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
+
+		if(mahState.module_data != NULL)
+		{
+			uint16_t* tmpP = reinterpret_cast<uint16_t*>(mahState.module_data);
+			WriteLine("Current offset: " + std::to_string(tmpP[0]));
+		}
 
 		// using the specific windows classes and stuff, we need
 		// to invaliate the paint region, so the WM_PAINT event is sent to our class.
@@ -214,11 +244,24 @@ int CALLBACK WinMain(
 					uint32_t VKCode = (uint32_t)msg.wParam;
 					bool WasDown = ((msg.lParam & (1 << 30)) != 0);
 					bool IsDown = ((msg.lParam & (1 << 31)) == 0);
+					// seems like this triggers on ups and downs
 					if(WasDown != IsDown)
 					{
 						if(VKCode == 'W')
 						{
-							WriteLine("W");
+							ProcessKeyMessage(&(mahKeyboard.MoveUp), IsDown);
+						}
+						if(VKCode == 'A')
+						{
+							ProcessKeyMessage(&(mahKeyboard.MoveLeft), IsDown);
+						}
+						if(VKCode == 'S')
+						{
+							ProcessKeyMessage(&(mahKeyboard.MoveDown), IsDown);
+						}
+						if(VKCode == 'D')
+						{
+							ProcessKeyMessage(&(mahKeyboard.MoveRight), IsDown);
 						}
 					}
 				} break;
@@ -236,14 +279,6 @@ int CALLBACK WinMain(
 	return (int) msg.wParam;
 }
 
-template <typename T>
-std::string toHex(T value)
-{
-	std::stringstream stream;
-	stream << "0x" << std::hex << value;
-	std::string msg = stream.str();
-	return msg;
-}
 
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
