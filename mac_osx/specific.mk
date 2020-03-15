@@ -19,7 +19,6 @@ bin/blue_d.dylib: bin/blue_main.o
 	@echo "Linking $@"
 	@$(LD) $(LD_DLL_FLAGS) -exported_symbol "_GameShutdown" -exported_symbol "_GameInit" -exported_symbol "_GameUpdate" $^ -o $@	
 
-
 cool: $(TARGET_OBJS) bin/main.o bin/keyboard.o
 	@echo "Linking $(filter %.o, $^) -> $@"
 	@$(LD) $(LD_FLAGS) $(LIBS) -o $@ $(filter %.o,$^) $(LIB_DIRS)

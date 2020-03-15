@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <AppKit/AppKit.h>
 #include <stdint.h>
+
 #include "keyboard.h" // mac os x specific
 
 
@@ -77,7 +78,7 @@ int main(int argc, const char* argv[])
 				   globalRenderWidth,
 				   globalRenderHeight);
 
-  NSWindow* window = [[NSWindow alloc]
+  NSWindow* window = [[HandmadeKeyIgnoringWindow alloc]
 		       initWithContentRect : initialFrame
 				 styleMask : NSWindowStyleMaskTitled |
 		       NSWindowStyleMaskClosable |
@@ -115,16 +116,21 @@ int main(int argc, const char* argv[])
   GameInputControllerInit(&mahKeyboard);
   mahState.platformData = new uint8_t[100];
 
-  int res = towerFuncs.GameInit(&mahState);
-  if(res != 0)
+  if(towerFuncs.GameInit != NULL)
   {
-    NSLog(@"Failed to init tower");
-    return 1;
+    int res = towerFuncs.GameInit(&mahState);
+    if(res != 0)
+    {
+      NSLog(@"Failed to init tower");
+      return 1;
+    }
   }
-
   int offsetX = 10;
 
-  while(Running) {
+  
+
+  while(Running)
+  {
     // updates the temporary buffer with data.
     if(towerFuncs.GameUpdate != NULL)
     {

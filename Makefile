@@ -31,7 +31,7 @@ all: $(TARGETS)
 
 define CommonSrcRule
 bin/$(1).o: src/$(1).cpp
-	@mkdir -p $(dir $$@)
+	@mkdir -p bin
 	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
 TARGET_OBJS += bin/$(1).o
 
