@@ -13,3 +13,4 @@ void ProcessKeyMessage(GameButtonState* buttonState, bool IsDown)
 		++(buttonState->HalfTransitionCount);
 	}
 }
+
