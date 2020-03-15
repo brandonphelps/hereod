@@ -1,7 +1,3 @@
-
-
-
-
 #include <iostream>
 #include <stdint.h>
 
@@ -16,7 +12,6 @@ int GameInit()
 {
 	return 0;
 }
-
 
 // some sort of buffer for video data is passed back and forth here.
 int GameUpdate(int dt, ScreenData* screenData)
