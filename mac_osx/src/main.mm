@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <AppKit/AppKit.h>
 #include <stdint.h>
+#include <dlfcn.h>
 #include "video.h"
 
 static bool Running = true;
@@ -35,6 +36,12 @@ void RefreshBuf(NSWindow* window, ScreenData& screendata)
 
 uint32_t globalRenderWidth = 1078U;
 uint32_t globalRenderHeight = 768U;
+
+typedef int (*FGameInit)();
+typedef int (*FGameShutdown)();
+typedef int (*FGameUpdate)(int, ScreenData*);
+
+
 
 void ReDrawBuf(NSWindow* window, uint8_t* buffer, uint32_t bitmapWidth, uint32_t bitmapHeight, uint32_t pitch)
 {
@@ -82,6 +89,25 @@ int main(int argc, const char* argv[])
   [window makeKeyAndOrderFront: nil];
   [window setDelegate: MainDele];
   window.contentView.wantsLayer = YES;
+
+  void* lib_handle = dlopen("bin/tower_d.dylib", RTLD_LOCAL|RTLD_LAZY);
+
+  if(lib_handle != NULL)
+  {
+    printf("Failed to load library %s\n", dlerror());
+    exit(1);
+  }
+
+  FGameInit GameInit = (FGameInit)dlsym(lib_handle, "GameInit");
+  FGameUpdate GameUpdate = (FGameUpdate)dlsym(lib_handle, "GameUpdate");
+  FGameShutdown GameShutdown = (FGameShutdown)dlsym(lib_handle, "GameShutdown");
+
+  if(GameInit == NULL || GameUpdate == NULL || GameShutdown == NULL)
+  {
+    printf("Failed to get symbols");
+    exit(1);
+  }
+
 
   ScreenData currentScreen;
   currentScreen.buffer = 0;
