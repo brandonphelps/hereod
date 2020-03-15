@@ -8,13 +8,13 @@
 #endif
 
 // works fine on windows, but something about console doesn't allow writing to.
-__attribute__((__visibility__("default"))) int GameInit()
+extern "C" int GameInit()
 {
 	return 0;
 }
 
 // some sort of buffer for video data is passed back and forth here.
-int GameUpdate(int dt, ScreenData* screenData)
+extern "C" int GameUpdate(int dt, ScreenData* screenData)
 {
 	// update the video buffer data as provided.
 	// the width and height, etc will be updated for you. 
@@ -26,7 +26,7 @@ int GameUpdate(int dt, ScreenData* screenData)
 
 }
 
-int GameShutdown()
+extern "C" int GameShutdown()
 {
 	return 0;
 }

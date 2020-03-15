@@ -98,16 +98,13 @@ int main(int argc, const char* argv[])
     exit(1);
   }
 
-  FGameInit GameInit = (FGameInit)dlsym(lib_handle, "__Z8GameInitv");
+  FGameInit GameInit = (FGameInit)dlsym(lib_handle, "GameInit");
   FGameUpdate GameUpdate = (FGameUpdate)dlsym(lib_handle, "GameUpdate");
   FGameShutdown GameShutdown = (FGameShutdown)dlsym(lib_handle, "GameShutdown");
 
   if(GameInit == NULL || GameUpdate == NULL || GameShutdown == NULL)
   {
-    if(!GameInit)
-    {
-      printf("Failed to get symbols GameInit: %s\n", dlerror());
-    }
+    printf("Failed to get symbols, %s\n", dlerror());
     exit(1);
   }
 
