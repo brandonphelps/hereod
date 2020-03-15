@@ -262,7 +262,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			PAINTSTRUCT ps;
 			hdc = BeginPaint(hWnd, &ps);
-			WriteLine("Painting!");
 			// Here your application is laid out.
 			// For this introduction, we just print out "Hello, Windows desktop!"
 			// in the top left corner.
@@ -270,7 +269,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//    5, 5,
 			//    greeting, _tcslen(greeting));
 			// End application-specific layout section.
-
 			PatBlt(hdc, 0, 0, 40, 40, BLACKNESS);
 			// xDest, yDest, DestWidth, DestHeight, xSrc, ySrc, SrcWidth, SrcHeight
 
@@ -278,7 +276,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			              10, 10,
 			              10 + CurrentBuffer.video_buf->width,
 			              10 + CurrentBuffer.video_buf->height,
-
 			              0, 0,
 			              CurrentBuffer.video_buf->width, CurrentBuffer.video_buf->height,
 			              CurrentBuffer.video_buf->buffer,
