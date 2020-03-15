@@ -1,27 +1,28 @@
 // Common Input layer
 
-#ifndef CUSTOM_KEYBOARD_H
-#define CUSTOM_KEYBOARD_H
+#ifndef MY_CUSTOM_KEYBOARD_H
+#define MY_CUSTOM_KEYBOARD_H
 
 #include <stdint.h>
 
-typedef struct GameButtonState
+class GameButtonState
 {
+public:
 	int HalfTransitionCount;
 	bool EndedDown;
-} GameButtonState;
+};
 
-typedef struct GameInputController
+
+class GameInputController
 {
-
+public:
 	bool isConnected;
 	bool isAnalog;
 	GameButtonState MoveUp;
 	GameButtonState MoveDown;
 	GameButtonState MoveLeft;
 	GameButtonState MoveRight;
-
-} GameInputController;
+};
 
 
 

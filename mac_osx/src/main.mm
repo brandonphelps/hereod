@@ -7,7 +7,7 @@
 #include "video.h"
 #include "game_module.h"
 
-#include "controller.h"
+#include "game_controller.h"
 
 static bool Running = true;
 

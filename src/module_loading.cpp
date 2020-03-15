@@ -6,6 +6,7 @@
 #include <windows.h>
 #include "console_another.h"
 #else
+#include <AppKit/AppKit.h>
 #include <dlfcn.h>
 #endif
 
@@ -14,7 +15,8 @@ void LocalPrinter(const std::string& msg)
 #ifdef _WIN32
 	WriteLine(msg);
 #else
-	NSLog(msg);
+	NSString* error_msg = [NSString stringWithUTF8String:msg.c_str()];
+	NSLog(@"%@", error_msg);
 #endif
 }
 

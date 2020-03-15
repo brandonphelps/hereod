@@ -3,7 +3,7 @@
 
 #include "video.h"
 #include "game_state.h"
-#include "controller.h"
+#include "game_controller.h"
 
 #ifdef _WIN32
 #include "console_another.h"
@@ -76,7 +76,6 @@ extern "C" int GameInit(GameState* game_state)
 	}
 
 	game_state->module_data = new uint8_t[100];
-
 	if(game_state->module_data == NULL)
 	{
 		return 1;

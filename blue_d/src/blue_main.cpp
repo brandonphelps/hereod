@@ -3,7 +3,7 @@
 
 #include "video.h"
 #include "game_state.h"
-#include "controller.h"
+#include "game_controller.h"
 
 #ifdef _WIN32
 #include "console_another.h"

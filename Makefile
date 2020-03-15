@@ -49,7 +49,7 @@ bin/blue_main.o: blue_d/src/blue_main.cpp
 # Common sources, i.e not module specific
 $(eval $(call CommonSrcRule,module_loading))
 $(eval $(call CommonSrcRule,video))
-$(eval $(call CommonSrcRule,controller))
+$(eval $(call CommonSrcRule,game_controller))
 
 clean:
 	rm -rf bin $(TARGETS)

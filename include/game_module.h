@@ -5,8 +5,7 @@
 #include <string>
 #include "video.h"
 #include "game_state.h"
-#include "controller.h"
-
+#include "game_controller.h"
 
 
 typedef int (*FGameInit)(GameState*);

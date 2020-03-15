@@ -1,7 +1,7 @@
 
 
 #include <stdint.h>
-#include "controller.h"
+#include "game_controller.h"
 
 void GameInputControllerInit(GameInputController* controller)
 {
