@@ -217,9 +217,8 @@ int CALLBACK WinMain(
 
 		if(mahState.module_data != NULL)
 		{
-			uint8_t* tmpP = mahState.module_data;
-			uint8_t tmp = static_cast<uint8_t>(tmpP[1]);
-			WriteLine("Current offset: " + std::to_string(tmp));
+			uint16_t* tmpP = reinterpret_cast<uint16_t*>(mahState.module_data);
+			WriteLine("Current offset: " + std::to_string(tmpP[0]));
 		}
 
 		// using the specific windows classes and stuff, we need

@@ -41,18 +41,21 @@ extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state,
 {
 	if(game_controller != NULL && game_state != NULL)
 	{
+
 		if(game_controller->MoveRight.EndedDown)
 		{
+			uint16_t* tmp = reinterpret_cast<uint16_t*>(game_state->module_data);
 			if(game_state->module_data != NULL)
 			{
-				game_state->module_data[1]++;
+				tmp[0]++;
 			}
 		}
 		if(game_controller->MoveLeft.EndedDown)
 		{
+			uint16_t* tmp = reinterpret_cast<uint16_t*>(game_state->module_data);
 			if(game_state->module_data != NULL)
 			{
-				game_state->module_data[1]--;
+				tmp[0]--;
 			}
 		}
 	}
