@@ -29,6 +29,15 @@ C_FLAGS += $(INCLUDE_DIRS)
 
 all: $(TARGETS)
 
+define CommonSrcRule
+bin/controller.o: src/controller.cpp
+	mkdir -p $(dir $$@)
+	$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
+
+cool.exe: bin/$(1).o
+endef
+
+
 bin/video.o: src/video.cpp
 	mkdir -p $(dir $@)
 	$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
@@ -40,6 +49,10 @@ bin/tower_main.o: tower_d/src/tower_main.cpp
 bin/module_loading.o: src/module_loading.cpp
 	mkdir -p $(dir $@)
 	$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
+
+
+$(eval $(call CommonSrcRule,controller))
+
 
 bin/blue_main.o: blue_d/src/blue_main.cpp
 	mkdir -p $(dir $@)
