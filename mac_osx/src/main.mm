@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <AppKit/AppKit.h>
 #include <stdint.h>
+#include "keyboard.h" // mac os x specific
+
+
 #include "video.h"
-#include "keyboard.h"
 #include "game_module.h"
+
+#include "controller.h"
 
 static bool Running = true;
 
@@ -96,8 +100,8 @@ int main(int argc, const char* argv[])
   ModuleFunctions blueFuncs; 
   LoadModule(blueFuncs, "cool.app/bin/blue_d.dylib");
 
-  ModuleFunctions modFuncs;
-  LoadModule(modFuncs, "cool.app/bin/tower_d.dylib");
+  ModuleFunctions towerFuncs;
+  LoadModule(towerFuncs, "cool.app/bin/tower_d.dylib");
 
   ScreenData currentScreen;
   currentScreen.buffer = 0;
@@ -105,14 +109,26 @@ int main(int argc, const char* argv[])
   currentScreen.bytesPerPixel = 4;
   RefreshBuf(window, currentScreen);
 
+
+  GameState mahState;
+  GameInputController mahKeyboard;
+  GameInputControllerInit(&mahKeyboard);
+  mahState.platformData = new uint8_t[100];
+
+  int res = towerFuncs.GameInit(&mahState);
+  if(res != 0)
+  {
+    NSLog(@"Failed to init tower");
+    return 1;
+  }
+
   int offsetX = 10;
 
   while(Running) {
     // updates the temporary buffer with data.
-    // modFuncs.GameUpdate(0, &currentScreen);
-    if(blueFuncs.GameUpdate != NULL)
+    if(towerFuncs.GameUpdate != NULL)
     {
-      blueFuncs.GameUpdate(0, &currentScreen);
+      towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
     }
 
     // takes the buffer data and puts it onto the screen.

@@ -1,10 +1,12 @@
 
 #ifndef CUSTOM_GAME_MODULE_H
 #define CUSTOM_GAME_MODULE_H
+
+#include <string>
 #include "video.h"
 #include "game_state.h"
 #include "controller.h"
-#include <string>
+
 
 
 typedef int (*FGameInit)(GameState*);

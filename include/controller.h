@@ -16,20 +16,13 @@ typedef struct GameInputController
 
 	bool isConnected;
 	bool isAnalog;
-	union
-	{
-		GameButtonState Buttons[4];
-		struct 
-		{
-			GameButtonState MoveUp;
-			GameButtonState MoveDown;
-			GameButtonState MoveLeft;
-			GameButtonState MoveRight;
+	GameButtonState MoveUp;
+	GameButtonState MoveDown;
+	GameButtonState MoveLeft;
+	GameButtonState MoveRight;
 
-			GameButtonState count;
-		};
-	};
 } GameInputController;
+
 
 
 void GameInputControllerInit(GameInputController* controller);
