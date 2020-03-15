@@ -10,7 +10,7 @@
 @interface OSXController: NSObject
 
 @property NSInteger dpadX;
-@property NSInteger dpaxY;
+@property NSInteger dpadY;
 
 @property BOOL buttonAState;
 @property BOOL buttonBState;
@@ -22,6 +22,7 @@
 
 @end
 
-
+void updateKeyboardControllerWith(NSEvent* event, OSXController* keyboard);
+void macOSInitGameControllers(OSXController*, OSXController*);
 
 #endif

@@ -2,6 +2,7 @@
 #include <AppKit/AppKit.h>
 #include <stdint.h>
 #include "video.h"
+#include "keyboard.h"
 #include "game_module.h"
 
 static bool Running = true;
@@ -85,6 +86,11 @@ int main(int argc, const char* argv[])
   [window setDelegate: MainDele];
   window.contentView.wantsLayer = YES;
 
+  OSXController* ck;
+  OSXController* kk;
+
+  macOSInitGameControllers(ck, kk);
+
   ModuleFunctions blueFuncs; 
   LoadModule(blueFuncs, "bin/blue_d.dylib");
 
@@ -104,6 +110,8 @@ int main(int argc, const char* argv[])
 
     // takes the buffer data and puts it onto the screen.
     ReDrawBuf(window, currentScreen.buffer, currentScreen.width, currentScreen.height, currentScreen.pitch);
+
+    OSXController* controller = kk;
 
     NSEvent* event;
     do {
