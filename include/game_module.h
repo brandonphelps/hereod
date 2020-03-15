@@ -3,6 +3,7 @@
 #define CUSTOM_GAME_MODULE_H
 #include "video.h"
 #include "game_state.h"
+#include "controller.h"
 #include <string>
 
 
@@ -10,7 +11,8 @@ typedef int (*FGameInit)(GameState*);
 
 // todo(brandon): consider allowing for only specific implementations and or use dif names. 
 // typedef int (*FGameUpdateA)(int, ScreenData*);
-typedef int (*FGameUpdate)(int, ScreenData*, GameState*);
+// todo(brandon): make controller, a list or something so games can be multi controllered.
+typedef int (*FGameUpdate)(int, ScreenData*, GameState*, GameInputController*);
 
 typedef int (*FGameShutdown)();
 

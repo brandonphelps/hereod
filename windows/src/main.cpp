@@ -21,6 +21,16 @@
 #include "console_another.h"
 #include "video.h"
 
+template <typename T>
+std::string toHex(T value)
+{
+	std::stringstream stream;
+	stream << "0x" << std::hex << value;
+	std::string msg = stream.str();
+	return msg;
+}
+
+
 // Global variables
 // The main window class name.
 static TCHAR szWindowClass[] = _T("My cool dude");
@@ -188,7 +198,7 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
-	towerFuncs.GameUpdate(0, &currentScreen, &mahState);
+	towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
 	// trigger a window update
 	UpdateWindow(hWnd);
 
@@ -200,7 +210,7 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
-		initRest = towerFuncs.GameUpdate(0, &currentScreen, &mahState);
+		initRest = towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
 
 		// using the specific windows classes and stuff, we need
 		// to invaliate the paint region, so the WM_PAINT event is sent to our class.
@@ -260,14 +270,6 @@ int CALLBACK WinMain(
 	return (int) msg.wParam;
 }
 
-template <typename T>
-std::string toHex(T value)
-{
-	std::stringstream stream;
-	stream << "0x" << std::hex << value;
-	std::string msg = stream.str();
-	return msg;
-}
 
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
