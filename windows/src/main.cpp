@@ -109,10 +109,6 @@ void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, ui
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-
-typedef void (*FPin)();
-
-
 int CALLBACK WinMain(
                      HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -150,32 +146,6 @@ int CALLBACK WinMain(
 	// Store instance handle in our global variable
 	hInst = hInstance;
 
-
-	HINSTANCE tower_dLib;
-	tower_dLib = LoadLibrary(TEXT("bin/tower_d.dll"));
-
-	FGameInit GameInit; 
-	FGameUpdate GameUpdate;
-	FGameShutdown GameShutdown;
-	if(tower_dLib != NULL)
-	{
-		WriteOut("Succesfully loaded tower lib\n\r");
-		GameInit = (FGameInit)GetProcAddress(tower_dLib, "GameInit");
-		GameUpdate = (FGameUpdate)GetProcAddress(tower_dLib, "GameUpdate");
-		GameShutdown = (FGameShutdown)GetProcAddress(tower_dLib, "GameShutdown");
-		WriteOut("Succesfully obtained GameInit\n\r");
-		if(GameInit == NULL || GameUpdate == NULL || GameShutdown == NULL)
-		{
-			WriteLine("Failed to initailzie game");
-			return 0;
-		}
-	}
-	else
-	{
-		WriteOut("Failed to loaded tower lib\n\r");
-	}
-
-
 	// The parameters to CreateWindow explained:
 	// szWindowClass: the name of the application
 	// szTitle: the text that appears in the title bar
@@ -208,6 +178,13 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
+	ModuleFunctions blueFuncs;
+	ModuleFunctions towerFuncs;
+
+	LoadModule(blueFuncs, "bin/blue_d.dll");
+	LoadModule(towerFuncs, "bin/tower_d.dll");
+
+
 	ScreenData currentScreen;
 	currentScreen.bytesPerPixel = 4;
 	currentScreen.buffer = NULL;
@@ -220,10 +197,6 @@ int CALLBACK WinMain(
 
 	ResizeGraphicsBuffer(CurrentBuffer, 400, 500);
 
-	drawBuf(currentScreen.buffer, currentScreen.width,
-	        currentScreen.height, currentScreen.pitch);
-
-
 	// The parameters to ShowWindow explained:
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
@@ -235,7 +208,7 @@ int CALLBACK WinMain(
 	MSG msg;
 
 	// load custom game module 
-	int initRest = GameInit();
+	int initRest = blueFuncs.GameInit();
 	if(initRest != 0)
 	{
 		WriteLine("Failed to init game");
@@ -245,7 +218,7 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
-		initRest = GameUpdate(0, &currentScreen);
+		initRest = blueFuncs.GameUpdate(0, &currentScreen);
 		
 		UpdateWindow(hWnd);
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))

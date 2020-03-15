@@ -2,10 +2,21 @@
 #ifndef CUSTOM_GAME_MODULE_H
 #define CUSTOM_GAME_MODULE_H
 #include "video.h"
+#include <string>
 
 
 typedef int (*FGameInit)();
 typedef int (*FGameShutdown)();
 typedef int (*FGameUpdate)(int, ScreenData*);
 
+typedef struct ModuleFunctions
+{
+	FGameInit GameInit;
+	FGameUpdate GameUpdate;
+	FGameShutdown GameShutdown;
+	void* lib_handle;
+} ModuleFunctions;
+
+void UnloadModule(ModuleFunctions& module_funcs);
+void LoadModule(ModuleFunctions& module_funcs, const std::string& lib_path);
 #endif
