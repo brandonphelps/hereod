@@ -32,6 +32,7 @@ typedef struct GameInputController
 } GameInputController;
 
 
+void GameInputControllerInit(GameInputController* controller);
 void ProcessKeyMessage(GameButtonState* buttonState, bool IsDown);
 
 

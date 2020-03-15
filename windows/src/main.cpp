@@ -182,7 +182,10 @@ int CALLBACK WinMain(
 	// Main message loop:
 
 	GameInputController mahKeyboard;
+	GameInputControllerInit(&mahKeyboard);
 	GameState mahState;
+	mahState.platformData = NULL;
+	mahState.module_data = NULL;
 
 	mahState.platformData = new uint8_t[100];
 	std::string PlatformIdent = "Windows";
@@ -215,13 +218,8 @@ int CALLBACK WinMain(
 		if(mahState.module_data != NULL)
 		{
 			uint8_t* tmpP = mahState.module_data;
-			if(tmpP != NULL)
-			{
-				WriteLine("Pointing to module data");
-				//uint8_t tmp = static_cast<uint8_t>(tmpP[0]);
-			}
-
-			// WriteLine("Current offset: " + std::to_string(tmp));
+			uint8_t tmp = static_cast<uint8_t>(tmpP[1]);
+			WriteLine("Current offset: " + std::to_string(tmp));
 		}
 
 		// using the specific windows classes and stuff, we need

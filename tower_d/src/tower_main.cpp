@@ -17,20 +17,21 @@ extern "C" int GameInit(GameState* game_state)
 	{
 		coolio[i] = game_state->platformData[i];
 	}
-	if(coolio[0] == 'W')
+
+	game_state->module_data = new uint8_t[100];
+
+	if(game_state->module_data == NULL)
 	{
-		return 0;
+		return 1;
 	}
 
-	// game_state->module_data = new uint8_t[100];
+	// uint16 offset X
+	game_state->module_data[0] = 0;
+	game_state->module_data[1] = 0;
 
-	// // uint16 offset X
-	// game_state->module_data[0] = 0;
-	// game_state->module_data[1] = 0;
-
-	// // uint16 offset Y
-	// game_state->module_data[2] = 0;
-	// game_state->module_data[3] = 0;
+	// uint16 offset Y
+	game_state->module_data[2] = 0;
+	game_state->module_data[3] = 0;
 
 	return 0;
 }
@@ -38,23 +39,23 @@ extern "C" int GameInit(GameState* game_state)
 // some sort of buffer for video data is passed back and forth here.
 extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state, GameInputController* game_controller)
 {
-	// if(game_controller != NULL && game_state != NULL)
-	// {
-	// 	if(game_controller->MoveRight.EndedDown)
-	// 	{
-	// 		if(game_state->module_data != NULL)
-	// 		{
-	// 			game_state->module_data[1]++;
-	// 		}
-	// 	}
-	// 	if(game_controller->MoveLeft.EndedDown)
-	// 	{
-	// 		if(game_state->module_data != NULL)
-	// 		{
-	// 			game_state->module_data[1]--;
-	// 		}
-	// 	}
-	// }
+	if(game_controller != NULL && game_state != NULL)
+	{
+		if(game_controller->MoveRight.EndedDown)
+		{
+			if(game_state->module_data != NULL)
+			{
+				game_state->module_data[1]++;
+			}
+		}
+		if(game_controller->MoveLeft.EndedDown)
+		{
+			if(game_state->module_data != NULL)
+			{
+				game_state->module_data[1]--;
+			}
+		}
+	}
 
 	// update the video buffer data as provided.
 	// the width and height, etc will be updated for you. 
