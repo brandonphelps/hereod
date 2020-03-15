@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <dlfcn.h>
 #include "video.h"
+#include "game_module.h"
 
 static bool Running = true;
 

@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 
+#include "game_module.h"
 #include "console_another.h"
 #include "video.h"
 
@@ -110,9 +111,6 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 
 typedef void (*FPin)();
-typedef int (*FGameInit)();
-typedef int (*FGameShutdown)();
-typedef int (*FGameUpdate)(int, ScreenData*);
 
 
 int CALLBACK WinMain(
