@@ -17,7 +17,7 @@
 
 #include "game_module.h"
 #include "game_state.h"
-#include "controller.h"
+#include "game_controller.h"
 #include "console_another.h"
 #include "video.h"
 
