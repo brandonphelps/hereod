@@ -62,10 +62,56 @@ void blueDraw(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t
 
 }
 
+class Point
+{
+public:
+	uint8_t x_pos;
+	uint8_t y_pos;
+};
+
+class Map
+{
+public:
+	// 10 by 10 grid
+	uint8_t tile_info[100];
+	uint8_t width;
+	uint8_t height;
+
+
+
+};
+
 
 // works fine on windows, but something about console doesn't allow writing to.
 extern "C" int GameInit(GameState* game_state)
 {
+	game_state->module_data = new uint8_t[sizeof(Map) + sizeof(Point)];
+
+	Map* p = reinterpret_cast<Map*>(game_state->module_data);
+	if(p != NULL)
+	{
+		p->width = 10;
+		p->height = 10;
+
+		for(int row = 0; row < p->height; row++)
+		{
+			for(int i = 0; i < p->width; i++)
+			{
+				p->tile_info[i] = 0;
+			}
+		}
+
+		p->tile_info[0] = 1;
+		p->tile_info[1] = 1;
+
+	}
+
+	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
+
+	toon->x_pos = 0;
+	toon->y_pos = 0;
+
+	
 	return 0;
 }
 
