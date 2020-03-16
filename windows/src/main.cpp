@@ -304,7 +304,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//    5, 5,
 			//    greeting, _tcslen(greeting));
 			// End application-specific layout section.
-			PatBlt(hdc, 0, 0, 40, 40, BLACKNESS);
+			// PatBlt(hdc, 0, 0, 40, 40, BLACKNESS);
 			// xDest, yDest, DestWidth, DestHeight, xSrc, ySrc, SrcWidth, SrcHeight
 
 			StretchDIBits(hdc,
