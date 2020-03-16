@@ -9,6 +9,24 @@
 #include "console_another.h"
 #endif
 
+const uint8_t TileWidth = 30;
+const uint8_t TileHeight = 30;
+
+void DrawRectangle(uint8_t* buffer, uint8_t buf_width, uint8_t x, uint8_t y, uint8_t width, uint8_t height)
+{
+	
+}
+
+void DrawMap(uint8_t* buffer, uint32_t buf_width, uint32_t, buf_height, uint32_t pitch, uint8_t* tiles)
+{
+	uint8_t* row = (uint8_t*)buffer;
+	for(int y = 0; y < buf_height; ++y)
+	{
+		uint8_t* pixel = (uint8_t*)row;
+		
+	}
+}
+
 void blueDraw(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t pitch)
 {
 
@@ -110,7 +128,6 @@ extern "C" int GameInit(GameState* game_state)
 
 	toon->x_pos = 0;
 	toon->y_pos = 0;
-
 	
 	return 0;
 }
@@ -118,6 +135,14 @@ extern "C" int GameInit(GameState* game_state)
 // some sort of buffer for video data is passed back and forth here.
 extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state, GameInputController* controller)
 {
+
+	Map* p = reinterpret_cast<Map*>(game_state->module_data);
+	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
+
+
+	
+
+
 	// update the video buffer data as provided.
 	// the width and height, etc will be updated for you. 
 	blueDraw(screenData->buffer, screenData->width,
