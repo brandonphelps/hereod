@@ -12,27 +12,6 @@
 const uint8_t TileWidth = 30;
 const uint8_t TileHeight = 30;
 
-void DrawRectangle(uint8_t* buffer, uint8_t buf_width, uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t red, uint8_t blue, uint8_t green)
-{
-	for(int s_y = y; s_y < height; s_y++)
-	{
-		for(int s_x = x; s_x < width; s_x++)
-		{
-			uint8_t* pixel = &(buffer[s_x + s_y * buf_width]);
-			*pixel = red;
-			++pixel;
-
-			*pixel = blue;
-			++pixel;
-
-			*pixel = green;
-			++pixel;
-
-			*pixel = 0xFF;
-			++pixel;
-		}
-	}
-}
 
 void DrawMap(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint8_t* tiles)
 {

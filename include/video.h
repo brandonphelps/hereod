@@ -16,4 +16,6 @@ typedef struct ScreenData
 
 void drawBuf(uint8_t*, uint32_t, uint32_t, uint32_t);
 
+void DrawRectangle(uint8_t* buffer, uint8_t buf_width, uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t red, uint8_t blue, uint8_t green);
+
 #endif
