@@ -12,18 +12,50 @@
 const uint8_t TileWidth = 30;
 const uint8_t TileHeight = 30;
 
-void DrawRectangle(uint8_t* buffer, uint8_t buf_width, uint8_t x, uint8_t y, uint8_t width, uint8_t height)
+void DrawRectangle(uint8_t* buffer, uint8_t buf_width, uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t red, uint8_t blue, uint8_t green)
 {
-	
+	for(int s_y = y; s_y < height; s_y++)
+	{
+		for(int s_x = x; s_x < width; s_x++)
+		{
+			uint8_t* pixel = &(buffer[s_x + s_y * buf_width]);
+			*pixel = red;
+			++pixel;
+
+			*pixel = blue;
+			++pixel;
+
+			*pixel = green;
+			++pixel;
+
+			*pixel = 0xFF;
+			++pixel;
+		}
+	}
 }
 
-void DrawMap(uint8_t* buffer, uint32_t buf_width, uint32_t, buf_height, uint32_t pitch, uint8_t* tiles)
+void DrawMap(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint8_t* tiles)
 {
-	uint8_t* row = (uint8_t*)buffer;
-	for(int y = 0; y < buf_height; ++y)
+	for(int i = 0; i < 10; i++)
 	{
-		uint8_t* pixel = (uint8_t*)row;
-		
+		for(int j = 0; j < 10; j++)
+		{
+			if(tiles[i + j * 10] == 0)
+			{
+				DrawRectangle(buffer, buf_width,
+				              i * TileWidth,
+				              j * TileHeight,
+				              TileWidth, TileHeight, 0xFF, 0xFF, 0xFF);
+			}
+			else
+			{
+				DrawRectangle(buffer, buf_width,
+				              i * TileWidth,
+				              j * TileHeight,
+				              TileWidth, TileHeight,
+				              0x00, 0x00, 0x00);
+			}
+		}
 	}
 }
 
@@ -118,7 +150,7 @@ extern "C" int GameInit(GameState* game_state)
 				p->tile_info[i] = 0;
 			}
 		}
-
+		std::memset(p->tile_info, 0, 100); 
 		p->tile_info[0] = 1;
 		p->tile_info[1] = 1;
 
@@ -139,14 +171,15 @@ extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state,
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
 
-
-	
-
-
 	// update the video buffer data as provided.
 	// the width and height, etc will be updated for you. 
 	blueDraw(screenData->buffer, screenData->width,
 	         screenData->height, screenData->pitch);
+
+
+	DrawMap(screenData->buffer, screenData->width, screenData->height, p->tile_info);
+
+
 	return 0;
 }
 

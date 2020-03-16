@@ -194,14 +194,14 @@ int CALLBACK WinMain(
 		mahState.platformData[i] = PlatformIdent[i];
 	}
 
-	int initRest = towerFuncs.GameInit(&mahState);
+	int initRest = blueFuncs.GameInit(&mahState);
 	if(initRest != 0)
 	{
 		WriteLine("Failed to init game");
 		return 1;
 	}
 
-	towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
+	blueFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
 	// trigger a window update
 	UpdateWindow(hWnd);
 
@@ -213,7 +213,7 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
-		initRest = towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
+		initRest = blueFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
 
 		if(mahState.module_data != NULL)
 		{
