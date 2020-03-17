@@ -218,7 +218,6 @@ int CALLBACK WinMain(
 		if(mahState.module_data != NULL)
 		{
 			uint16_t* tmpP = reinterpret_cast<uint16_t*>(mahState.module_data);
-			WriteLine("Current offset: " + std::to_string(tmpP[0]));
 		}
 
 		// using the specific windows classes and stuff, we need

@@ -67,12 +67,18 @@ void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t 
 	printme = 0;
 }
 
-void DrawRectangle(uint8_t* buffer, uint32_t buf_width, uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint8_t red, uint8_t blue, uint8_t green)
+void DrawRectangle(uint8_t* buffer, uint32_t buf_width, uint32_t x, uint32_t y,
+                   uint32_t width, uint32_t height, uint8_t red, uint8_t blue, uint8_t green)
 {
+	static int printme = 1;
 	for(uint32_t s_y = y; s_y < height; s_y++)
 	{
 		for(uint32_t s_x = x; s_x < width; s_x++)
 		{
+			if(printme)
+			{
+				WriteOut(std::to_string(s_x) + ", ");
+			}
 			uint8_t* pixel = &(buffer[s_x + s_y * 10]);
 			#ifdef _WIN32
 			*pixel = blue;
@@ -100,4 +106,5 @@ void DrawRectangle(uint8_t* buffer, uint32_t buf_width, uint32_t x, uint32_t y, 
 			++pixel;
 		}
 	}
+	printme = 0;
 }
