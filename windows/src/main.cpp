@@ -194,14 +194,14 @@ int CALLBACK WinMain(
 		mahState.platformData[i] = PlatformIdent[i];
 	}
 
-	int initRest = towerFuncs.GameInit(&mahState);
+	int initRest = blueFuncs.GameInit(&mahState);
 	if(initRest != 0)
 	{
 		WriteLine("Failed to init game");
 		return 1;
 	}
 
-	towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
+	blueFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
 	// trigger a window update
 	UpdateWindow(hWnd);
 
@@ -213,12 +213,11 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
-		initRest = towerFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
+		initRest = blueFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
 
 		if(mahState.module_data != NULL)
 		{
 			uint16_t* tmpP = reinterpret_cast<uint16_t*>(mahState.module_data);
-			WriteLine("Current offset: " + std::to_string(tmpP[0]));
 		}
 
 		// using the specific windows classes and stuff, we need
@@ -304,7 +303,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//    5, 5,
 			//    greeting, _tcslen(greeting));
 			// End application-specific layout section.
-			PatBlt(hdc, 0, 0, 40, 40, BLACKNESS);
+			// PatBlt(hdc, 0, 0, 40, 40, BLACKNESS);
 			// xDest, yDest, DestWidth, DestHeight, xSrc, ySrc, SrcWidth, SrcHeight
 
 			StretchDIBits(hdc,
