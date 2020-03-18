@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "video.h"
+#include "grid_helpers.h"
 #include "game_state.h"
 #include "game_controller.h"
 
@@ -18,9 +19,20 @@ void DrawMap(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint8_t* 
 	// 
 	//drawBuf(buffer, buf_width, buf_height, 1);
 	// DrawRectangle(buffer, buf_width, buf_height, 30, 30, 100, 100, 0xFF, 0xFF, 0);
-	for(int i = 0; i < 10; i++)
+	for(int row = 0; row < 10; row++)
 	{
-		
+		uint32_t offset = get_2d_offset(0, row, 10, 10);
+		if(tiles[offset] == 1)
+		{
+			DrawRectangle(buffer, buf_width, buf_height, row*TileHeight, 0*TileWidth,
+			              TileWidth-10, TileHeight-10, 0xFF, 0x00, 0x00);
+		}
+		else
+		{
+			DrawRectangle(buffer, buf_width, buf_height, row*TileHeight, 0*TileWidth,
+			              TileWidth-10, TileHeight-10, 0x00, 0xFF, 0x00);
+
+		}
 	}
 }
 
@@ -108,17 +120,10 @@ extern "C" int GameInit(GameState* game_state)
 		p->width = 10;
 		p->height = 10;
 
-		for(int row = 0; row < p->height; row++)
-		{
-			for(int i = 0; i < p->width; i++)
-			{
-				p->tile_info[i] = 0;
-			}
-		}
-		std::memset(p->tile_info, 0, 100); 
+		std::memset(p->tile_info, 1, 100); 
 		p->tile_info[0] = 1;
 		p->tile_info[1] = 1;
-
+		p->tile_info[10] =1;
 	}
 
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
@@ -140,7 +145,6 @@ extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state,
 	// the width and height, etc will be updated for you. 
 	blueDraw(screenData->buffer, screenData->width,
 	         screenData->height, screenData->pitch);
-
 
 	DrawMap(screenData->buffer, screenData->width, screenData->height, p->tile_info);
 

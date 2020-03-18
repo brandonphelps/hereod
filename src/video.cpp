@@ -79,6 +79,16 @@ void DrawRectangle(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uin
 	uint32_t MaxX = s_x + width;
 	uint32_t MaxY = s_y + height;
 
+	if(MaxX > buf_width)
+	{
+		MaxX = buf_width;
+	}
+
+	if(MaxY > buf_height)
+	{
+		MaxY = buf_height;
+	}
+
 	uint8_t* row = (buffer + s_x*4 + s_y*buf_width*4);
 
 	for(int y = s_x; y < MaxY; ++y)
