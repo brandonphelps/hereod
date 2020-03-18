@@ -16,29 +16,12 @@ const uint8_t TileHeight = 30;
 void DrawMap(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint8_t* tiles)
 {
 	// 
-	drawBuf(buffer, buf_width, buf_height, 1);
-	DrawRectangle(buffer, buf_width, buf_height, 30, 30, 100, 100, 0xFF, 0xFF, 0);
-	// for(int i = 0; i < 10; i++)
-	// {
-	// 	for(int j = 0; j < 10; j++)
-	// 	{
-	// 		if(tiles[i + j * 10] == 0)
-	// 		{
-	// 			DrawRectangle(buffer, buf_width,
-	// 			              i * TileWidth,
-	// 			              j * TileHeight,
-	// 			              TileWidth, TileHeight, 0xFF, 0xFF, 0xFF);
-	// 		}
-	// 		else
-	// 		{
-	// 			DrawRectangle(buffer, buf_width,
-	// 			              i * TileWidth,
-	// 			              j * TileHeight,
-	// 			              TileWidth, TileHeight,
-	// 			              0x00, 0x00, 0x00);
-	// 		}
-	// 	}
-	// }
+	//drawBuf(buffer, buf_width, buf_height, 1);
+	// DrawRectangle(buffer, buf_width, buf_height, 30, 30, 100, 100, 0xFF, 0xFF, 0);
+	for(int i = 0; i < 10; i++)
+	{
+		
+	}
 }
 
 void blueDraw(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t pitch)
