@@ -1,8 +1,15 @@
 #include <stdint.h>
 
+#include "video.h"
+
 #ifdef _WIN32
 #include "console_another.h"
 #endif
+
+void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height)
+{
+	drawBuf(buffer, buf_width, buf_height, 4 * buf_width);
+}
 
 void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t pitch)
 {
@@ -58,53 +65,29 @@ void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t 
 			++pixel;
 
 			#endif
-
-			
-
 		}
-		row += pitch;
+		row += buf_width * 4; 
 	}
 	printme = 0;
 }
 
-void DrawRectangle(uint8_t* buffer, uint32_t buf_width, uint32_t x, uint32_t y,
+void DrawRectangle(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t s_x, uint32_t s_y,
                    uint32_t width, uint32_t height, uint8_t red, uint8_t blue, uint8_t green)
 {
-	static int printme = 1;
-	for(uint32_t s_y = y; s_y < height; s_y++)
+	uint32_t color = red << 16 | green << 8 | blue << 0;
+
+	uint32_t MaxX = s_x + width;
+	uint32_t MaxY = s_y + height;
+
+	uint8_t* row = (buffer + s_x*4 + s_y*buf_width*4);
+
+	for(int y = s_x; y < MaxY; ++y)
 	{
-		for(uint32_t s_x = x; s_x < width; s_x++)
+		uint32_t *pixel = (uint32_t*)row;
+		for(int x = s_x; x < MaxX; ++x)
 		{
-			if(printme)
-			{
-				WriteOut(std::to_string(s_x) + ", ");
-			}
-			uint8_t* pixel = &(buffer[s_x + s_y * 10]);
-			#ifdef _WIN32
-			*pixel = blue;
-			++pixel;
-
-			*pixel = green;
-			++pixel;
-
-			*pixel = red;
-			++pixel;
-
-			#else
-
-			*pixel = red;
-			++pixel;
-
-			*pixel = blue;
-			++pixel;
-			
-			*pixel = green;
-			++pixel;
-			#endif
-
-			*pixel = 0xFF;
-			++pixel;
+			*pixel++ = color;
 		}
+		row += buf_width * 4;
 	}
-	printme = 0;
 }
