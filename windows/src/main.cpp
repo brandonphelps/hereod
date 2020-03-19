@@ -183,6 +183,7 @@ int CALLBACK WinMain(
 
 	GameInputController mahKeyboard;
 	GameInputControllerInit(&mahKeyboard);
+
 	GameState mahState;
 	mahState.platformData = NULL;
 	mahState.module_data = NULL;

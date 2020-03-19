@@ -12,28 +12,49 @@
 
 const uint8_t TileWidth = 30;
 const uint8_t TileHeight = 30;
-
+uint8_t pos = 3;
 
 void DrawMap(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint8_t* tiles)
 {
 	// 
 	//drawBuf(buffer, buf_width, buf_height, 1);
-	// DrawRectangle(buffer, buf_width, buf_height, 30, 30, 100, 100, 0xFF, 0xFF, 0);
+	DrawRectangle(buffer, buf_width, buf_height, 30, 30, 100, 100, 0xFF, 0xFF, 0);
+	DrawRectangle(buffer, buf_width, buf_height, 130, 130, 90, 90, 0x00, 0xFF, 0xFF);
 	for(int row = 0; row < 10; row++)
 	{
-		uint32_t offset = get_2d_offset(0, row, 10, 10);
-		if(tiles[offset] == 1)
+		for(int col = 0; col < 10; col++)
 		{
-			DrawRectangle(buffer, buf_width, buf_height, row*TileHeight, 0*TileWidth,
-			              TileWidth-10, TileHeight-10, 0xFF, 0x00, 0x00);
-		}
-		else
-		{
-			DrawRectangle(buffer, buf_width, buf_height, row*TileHeight, 0*TileWidth,
-			              TileWidth-10, TileHeight-10, 0x00, 0xFF, 0x00);
-
+			if(tiles[col + (row * 10)] == 1)
+			{
+				DrawRectangle(buffer, buf_width, buf_height,
+				              10 + (col * TileWidth), 10 + (row * TileHeight),
+				              TileWidth, TileHeight, 0xFF, 0x00, 0xFF);
+			}
 		}
 	}
+
+	// DrawRectangle(buffer, buf_width, buf_height,
+	//               20 + 0 * 10, 20 + 0 * 10,
+	//               10, 10, 0xFF, 0x00, 0xFF);
+
+	// DrawRectangle(buffer, buf_width, buf_height,
+	//               1, pos,
+	//               10, 10, 0xFF, 0x00, 0xFF);
+
+
+	// {
+	// 	uint32_t offset = get_2d_offset(0, row, 10, 10);
+	// 	if(tiles[offset] == 1)
+	// 	{
+	// 		DrawRectangle(buffer, buf_width, buf_height, row*TileHeight, 0*TileWidth,
+	// 		              TileWidth-10, TileHeight-10, 0xFF, 0x00, 0x00);
+	// 	}
+	// 	else
+	// 	{
+	// 		DrawRectangle(buffer, buf_width, buf_height, row*TileHeight, 0*TileWidth,
+	// 		              TileWidth-10, TileHeight-10, 0x00, 0xFF, 0x00);
+	// 	}
+	// }
 }
 
 void blueDraw(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t pitch)
@@ -120,10 +141,9 @@ extern "C" int GameInit(GameState* game_state)
 		p->width = 10;
 		p->height = 10;
 
-		std::memset(p->tile_info, 1, 100); 
+		std::memset(p->tile_info, 0, 100);
 		p->tile_info[0] = 1;
-		p->tile_info[1] = 1;
-		p->tile_info[10] =1;
+		p->tile_info[2] = 1;
 	}
 
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
@@ -137,7 +157,6 @@ extern "C" int GameInit(GameState* game_state)
 // some sort of buffer for video data is passed back and forth here.
 extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state, GameInputController* controller)
 {
-
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
 
@@ -145,6 +164,19 @@ extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state,
 	// the width and height, etc will be updated for you. 
 	blueDraw(screenData->buffer, screenData->width,
 	         screenData->height, screenData->pitch);
+
+	if(controller != NULL)
+	{
+		if(controller->MoveRight.EndedDown)
+		{
+			pos++;
+		}
+		if(controller->MoveLeft.EndedDown)
+		{
+			pos--;
+		}
+	}
+
 
 	DrawMap(screenData->buffer, screenData->width, screenData->height, p->tile_info);
 
