@@ -71,8 +71,11 @@ void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t 
 	printme = 0;
 }
 
-void DrawRectangle(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t s_x, uint32_t s_y,
-                   uint32_t width, uint32_t height, uint8_t red, uint8_t blue, uint8_t green)
+void DrawRectangle(uint8_t* buffer,
+                   uint32_t buf_width, uint32_t buf_height,
+                   uint32_t s_x, uint32_t s_y,
+                   uint32_t width, uint32_t height,
+                   uint8_t red, uint8_t blue, uint8_t green)
 {
 	uint32_t color = red << 16 | green << 8 | blue << 0;
 
@@ -91,12 +94,13 @@ void DrawRectangle(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uin
 
 	uint8_t* row = (buffer + s_x*4 + s_y*buf_width*4);
 
-	for(int y = s_x; y < MaxY; ++y)
+	for(int y = s_y; y < MaxY; ++y)
 	{
 		uint32_t *pixel = (uint32_t*)row;
 		for(int x = s_x; x < MaxX; ++x)
 		{
-			*pixel++ = color;
+			*pixel = color;
+			pixel++;
 		}
 		row += buf_width * 4;
 	}
