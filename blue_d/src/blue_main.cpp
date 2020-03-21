@@ -30,9 +30,6 @@ public:
 	uint8_t tile_info[100];
 	uint8_t width;
 	uint8_t height;
-
-
-
 };
 
 const uint8_t currentmap[10 * 10] = {
@@ -49,29 +46,26 @@ const uint8_t currentmap[10 * 10] = {
                                      1, 0, 0, 0, 0,  0, 0, 1, 1, 1, };
 
 
-
-void DrawMap(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint8_t* tiles)
+void DrawMap(ScreenData* screenData, uint8_t* tiles)
 {
 	// 
 	//drawBuf(buffer, buf_width, buf_height, 1);
-	DrawRectangle(buffer, buf_width, buf_height, 30, 30, 100, 100, 0xFF, 0xFF, 0);
-	DrawRectangle(buffer, buf_width, buf_height, 130, 130, 90, 90, 0x00, 0xFF, 0xFF);
 	for(int row = 0; row < 10; row++)
 	{
 		for(int col = 0; col < 10; col++)
 		{
 			if(tiles[col + (row * 10)] == 1)
 			{
-				DrawRectangle(buffer, buf_width, buf_height,
+				DrawRectangle(screenData,
 				              MapXOffset + (col * TileWidth), MapXOffset + (row * TileHeight),
-				              TileWidth, TileHeight, 0xFF, 0x00, 0xFF);
+				              TileWidth, TileHeight, 0xFF00FFFF);
 			}
 			else
 			{
-				DrawRectangle(buffer, buf_width, buf_height,
+				DrawRectangle(screenData,
 				              MapXOffset + (col * TileWidth),
 				              MapYOffset + (row * TileHeight),
-				              TileWidth, TileHeight, 0xFF, 0xFF, 0x00);
+				              TileWidth, TileHeight, 0xFFFF00FF);
 			}
 		}
 	}
@@ -239,7 +233,7 @@ extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state,
 
 
 	
-	DrawMap(screenData->buffer, screenData->width, screenData->height, p->tile_info);
+	DrawMap(screenData, p->tile_info);
 	DrawToon(screenData, toon);
 
 	return 0;
