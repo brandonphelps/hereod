@@ -136,9 +136,7 @@ void DrawCircle(ScreenData* screenData,
 	uint32_t x = center_x;
 	uint32_t y = center_y;
 	
-	uint32_t pixelIndex = x + (y  * screenData->width);
-	uint32_t* pixel = (uint32_t*)(screenData->buffer + pixelIndex);
-	*pixel = 0xFF00FFFF;
+	screenData->set_pixel_color(x, y, 0xFF00FFFF);
 }
 
 void DrawToon(ScreenData* screenData, Point* toon)
@@ -261,7 +259,7 @@ extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state,
 		toon->x_pos = 0;
 	}
 
-	toon->y_pos = 10;
+
 	
 	DrawMap(screenData->buffer, screenData->width, screenData->height, p->tile_info);
 	DrawToon(screenData, toon);
