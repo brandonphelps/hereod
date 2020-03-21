@@ -6,6 +6,17 @@
 #include "console_another.h"
 #endif
 
+
+
+
+
+
+
+
+
+
+
+
 void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height)
 {
 	drawBuf(buffer, buf_width, buf_height, 4 * buf_width);
