@@ -82,15 +82,23 @@ void draw_circle_helper(ScreenData* screenData,
                         uint32_t center_x, uint32_t center_y,
                         uint32_t x, uint32_t y)
 {
-	screenData->set_pixel_color(center_x + x, center_y + y, 0xFF00FFFF);
-	screenData->set_pixel_color(center_x - x, center_y + y, 0xFF00FFFF);
-	screenData->set_pixel_color(center_x + x, center_y - y, 0xFF00FFFF);
-	screenData->set_pixel_color(center_x - x, center_y - y, 0xFF00FFFF);
+	uint32_t pixelIndex;
+	uint32_t* pixel;
+	pixelIndex = (center_x + x) + ((y + center_y) * screenData->width);
+	if(pixelIndex > (screenData->width * screenData->height))
+	{
+		return;
+	}
+	pixel = (uint32_t*)(screenData->buffer + pixelIndex);
+	*pixel = 0x0000FFFF;
 
-	screenData->set_pixel_color(center_x + y, center_y + x, 0xFF00FFFF);
-	screenData->set_pixel_color(center_x - y, center_y + x, 0xFF00FFFF);
-	screenData->set_pixel_color(center_x + y, center_y - x, 0xFF00FFFF);
-	screenData->set_pixel_color(center_x - y, center_y - x, 0xFF00FFFF);
+	pixelIndex = (center_x - x) + ((y + center_y) * screenData->width);
+	if(pixelIndex > (screenData->width * screenData->height))
+	{
+		return;
+	}
+	pixel = (uint32_t*)(screenData->buffer + pixelIndex);
+	*pixel = 0x0000FFFF;
 }
 
 void DrawCircle(ScreenData* screenData,
@@ -117,9 +125,25 @@ void DrawCircle(ScreenData* screenData,
 	}
 }
 
+void DrawCircle(ScreenData* screenData,
+                uint32_t center_x, uint32_t center_y,
+                uint32_t r, bool t)
+{
+	// draw_circle_helper(screenData, center_x, center_y, x, y);
+
+	// draw_circle_helper(screenData, center_x, center_y, 0, r);
+
+	uint32_t x = center_x;
+	uint32_t y = center_y;
+	
+	uint32_t pixelIndex = x + (y  * screenData->width);
+	uint32_t* pixel = (uint32_t*)(screenData->buffer + pixelIndex);
+	*pixel = 0xFF00FFFF;
+}
+
 void DrawToon(ScreenData* screenData, Point* toon)
 {
-	DrawCircle(screenData, toon->x_pos, toon->y_pos, 30);
+	DrawCircle(screenData, toon->x_pos, toon->y_pos, 20, true);
 }
 
 void blueDraw(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t pitch)
@@ -237,7 +261,7 @@ extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state,
 		toon->x_pos = 0;
 	}
 
-
+	toon->y_pos = 10;
 	
 	DrawMap(screenData->buffer, screenData->width, screenData->height, p->tile_info);
 	DrawToon(screenData, toon);

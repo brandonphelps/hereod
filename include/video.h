@@ -8,8 +8,8 @@
 class ScreenData
 {
 public:
-	// set the pixel at pos x, y, if out of bounds nothing changes.
-	void set_pixel_color(uint32_t x, uint32_t y,
+	// set the pixel at pos x, y 
+	void get_color_pixel(uint32_t x, uint32_t y,
 	                     uint32_t color_mask);
 
 public:
