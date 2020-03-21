@@ -13,6 +13,8 @@
 const uint8_t TileWidth = 30;
 const uint8_t TileHeight = 30;
 uint8_t pos = 3;
+const uint16_t MapXOffset = 10;
+const uint16_t MapYOffset = 10;
 
 void DrawMap(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint8_t* tiles)
 {
@@ -27,8 +29,15 @@ void DrawMap(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint8_t* 
 			if(tiles[col + (row * 10)] == 1)
 			{
 				DrawRectangle(buffer, buf_width, buf_height,
-				              10 + (col * TileWidth), 10 + (row * TileHeight),
+				              MapXOffset + (col * TileWidth), MapXOffset + (row * TileHeight),
 				              TileWidth, TileHeight, 0xFF, 0x00, 0xFF);
+			}
+			else
+			{
+				DrawRectangle(buffer, buf_width, buf_height,
+				              MapXOffset + (col * TileWidth),
+				              MapYOffset + (row * TileHeight),
+				              TileWidth, TileHeight, 0xFF, 0xFF, 0x00);
 			}
 		}
 	}
@@ -129,6 +138,18 @@ public:
 
 };
 
+const uint8_t currentmap[10 * 10] = {
+                                     1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 
+                                     1, 0, 0, 0, 0,  0, 0, 1, 1, 1, 
+                                     1, 0, 1, 0, 0,  0, 0, 0, 0, 1, 
+                                     1, 0, 1, 0, 0,  0, 0, 1, 1, 1, 
+                                     1, 0, 1, 0, 0,  1, 0, 1, 1, 1, 
+                                     
+                                     1, 0, 1, 0, 0,  0, 0, 1, 1, 1, 
+                                     1, 0, 1, 1, 1,  0, 0, 0, 0, 1, 
+                                     1, 0, 1, 0, 0,  0, 0, 1, 1, 1, 
+                                     1, 0, 0, 0, 0,  0, 0, 0, 0, 1, 
+                                     1, 0, 0, 0, 0,  0, 0, 1, 1, 1, };
 
 // works fine on windows, but something about console doesn't allow writing to.
 extern "C" int GameInit(GameState* game_state)
@@ -142,8 +163,7 @@ extern "C" int GameInit(GameState* game_state)
 		p->height = 10;
 
 		std::memset(p->tile_info, 0, 100);
-		p->tile_info[0] = 1;
-		p->tile_info[2] = 1;
+		std::memcpy(p->tile_info, currentmap, 100);
 	}
 
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
