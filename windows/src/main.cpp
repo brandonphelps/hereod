@@ -227,6 +227,9 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
+
+
+
 		// using the specific windows classes and stuff, we need
 		// to invaliate the paint region, so the WM_PAINT event is sent to our class.
 		// using this we can also limite the amount of theings that need to be redrawn,
@@ -259,7 +262,12 @@ int CALLBACK WinMain(
 			}
 		}
 
-		initRest = blueFuncs.GameUpdate(0, &currentScreen, &mahState, &newKeyboard);
+		// so basically we give the module reference to teh current screen, the key inputs that the user presed on the last frame
+		// the state also corresponds to the current screen?
+		initRest = blueFuncs.GameUpdate(0, &currentScreen,
+		                                &mahState,
+		                                &newKeyboard);
+
 	}
 
 	return (int) msg.wParam;
@@ -294,9 +302,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			// xDest, yDest, DestWidth, DestHeight, xSrc, ySrc, SrcWidth, SrcHeight
 
 			StretchDIBits(hdc,
-			              10, 10,
-			              10 + CurrentBuffer.video_buf->width,
-			              10 + CurrentBuffer.video_buf->height,
+			              0, 0,
+			              CurrentBuffer.video_buf->width,
+			              CurrentBuffer.video_buf->height,
 			              0, 0,
 			              CurrentBuffer.video_buf->width, CurrentBuffer.video_buf->height,
 			              CurrentBuffer.video_buf->buffer,
