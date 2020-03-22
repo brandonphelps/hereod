@@ -72,10 +72,10 @@ extern "C" int GameInit(GameState* game_state)
 	char coolio[10];
 	for(int i = 0; i < 10; i++)
 	{
-		coolio[i] = game_state->platformData[i];
+		coolio[i] = game_state->platform_data[i];
 	}
-
 	game_state->module_data = new uint8_t[100];
+	game_state->module_size = 100;
 	if(game_state->module_data == NULL)
 	{
 		return 1;

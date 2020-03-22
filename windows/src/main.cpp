@@ -186,14 +186,17 @@ int CALLBACK WinMain(
 	GameInputControllerInit(&newKeyboard);
 
 	GameState mahState;
-	mahState.platformData = NULL;
+	mahState.platform_data = NULL;
+	mahState.platform_size = 0;
 	mahState.module_data = NULL;
+	mahState.module_size = 0;
 
-	mahState.platformData = new uint8_t[100];
+	mahState.platform_data = new uint8_t[100];
+	mahState.platform_size = 100;
 	std::string PlatformIdent = "Windows";
 	for(int i =0; i < PlatformIdent.size(); i++)
 	{
-		mahState.platformData[i] = PlatformIdent[i];
+		mahState.platform_data[i] = PlatformIdent[i];
 	}
 
 	int initRest = blueFuncs.GameInit(&mahState);
@@ -215,13 +218,6 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
-
-
-		if(mahState.module_data != NULL)
-		{
-			uint16_t* tmpP = reinterpret_cast<uint16_t*>(mahState.module_data);
-		}
-
 		// using the specific windows classes and stuff, we need
 		// to invaliate the paint region, so the WM_PAINT event is sent to our class.
 		// using this we can also limite the amount of theings that need to be redrawn,

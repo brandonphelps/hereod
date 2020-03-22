@@ -3,11 +3,14 @@
 
 #include <stdint.h>
 
-typedef struct GameState
+class GameState
 {
-	uint8_t* platformData;
+	
+public:
+	uint8_t* platform_data;
+	uint32_t platform_size;
 	uint8_t* module_data;
-} GameState;
-
+	uint32_t module_size;
+};
 
 #endif
