@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 
+#include "performance.h"
 #include "keyboard_updates.h"
 
 #include "game_module.h"
@@ -107,6 +108,7 @@ int CALLBACK WinMain(
                      int       nCmdShow
 )
 {
+	InitPerformance();
 	InitializeDebugConsole();
 
 	WNDCLASSEX wcex = {};
@@ -293,16 +295,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			PAINTSTRUCT ps;
 			hdc = BeginPaint(hWnd, &ps);
 			WindowDimension window_dim = GetWindowDimension(hWnd);
-			
-			// Here your application is laid out.
-			// For this introduction, we just print out "Hello, Windows desktop!"
-			// in the top left corner.
-			// TextOut(hdc,
-			//    5, 5,
-			//    greeting, _tcslen(greeting));
-			// End application-specific layout section.
-			// PatBlt(hdc, 0, 0, 40, 40, BLACKNESS);
-			// xDest, yDest, DestWidth, DestHeight, xSrc, ySrc, SrcWidth, SrcHeight
 
 			StretchDIBits(hdc,
 			              0, 0,
@@ -313,15 +305,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			              CurrentBuffer.video_buf->buffer,
 			              &CurrentBuffer.map_info, DIB_RGB_COLORS, SRCCOPY);
 
-			// for(int i = 0; i < message_log.get_message_count(); i++)
-			// {
-
-			// 	TextOut(hdc,
-			// 	        // todo(brandon): how to get size of characters? in pixels?
-			// 	        50, 40+(20 * i),
-			// 	        message_log.messages[i],
-			// 	        _tcslen(message_log.messages[i]));
-			// }
+			// TextOut(hdc,
+			//         5, 5,
+			//         "Hello World", _tcslen("hello World"));
 
 			EndPaint(hWnd, &ps);
 		} break;
