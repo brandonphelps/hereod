@@ -4,16 +4,16 @@
 
 #include <string>
 #include "video.h"
+#include "game_input.h"
 #include "game_state.h"
 #include "game_controller.h"
-
 
 typedef int (*FGameInit)(GameState*);
 
 // todo(brandon): consider allowing for only specific implementations and or use dif names. 
 // typedef int (*FGameUpdateA)(int, ScreenData*);
 // todo(brandon): make controller, a list or something so games can be multi controllered.
-typedef int (*FGameUpdate)(int, ScreenData*, GameState*, GameInputController*);
+typedef int (*FGameUpdate)(ScreenData*, GameState*, GameInput*);
 
 typedef int (*FGameShutdown)();
 

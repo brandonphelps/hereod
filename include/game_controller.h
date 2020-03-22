@@ -24,8 +24,6 @@ public:
 	GameButtonState MoveRight;
 };
 
-
-
 void GameInputControllerInit(GameInputController* controller);
 void ProcessKeyMessage(GameButtonState* buttonState, bool IsDown);
 

@@ -3,11 +3,25 @@
 
 #include <stdint.h>
 
-typedef struct GameState
+class GameState
 {
-	uint8_t* platformData;
-	uint8_t* module_data;
-} GameState;
+	
+public:
+	GameState(); 
+	GameState(const GameState& other);
 
+	GameState& operator=(const GameState& other);
+	bool operator!=(const GameState& other) const;
+	bool operator==(const GameState& other) const;
+
+	// de allocates everything.
+	void clear();
+
+public:
+	uint8_t* platform_data;
+	uint32_t platform_size;
+	uint8_t* module_data;
+	uint32_t module_size;
+};
 
 #endif
