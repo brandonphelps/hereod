@@ -71,19 +71,18 @@ void DrawMap(ScreenData* screenData, uint8_t* tiles)
 	}
 }
 
-
 void draw_circle_helper(ScreenData* screenData,
                         uint32_t center_x, uint32_t center_y,
-                        int32_t x, int32_t y)
+                        uint32_t x, uint32_t y)
 {
-	screenData->set_pixel_color(center_x + x, center_y + y, 0xFF00FFFF);
-	screenData->set_pixel_color(center_x - x, center_y + y, 0xFF00FFFF);
-	screenData->set_pixel_color(center_x + x, center_y - y, 0xFF00FFFF);
-	screenData->set_pixel_color(center_x - x, center_y - y, 0xFF00FFFF);
+	screenData->set_pixel_color(center_x + x, center_y + y, 0xFF0000FF);
+	screenData->set_pixel_color(center_x - x, center_y + y, 0xFF0000FF);
+	screenData->set_pixel_color(center_x + x, center_y - y, 0xFF0000FF);
+	screenData->set_pixel_color(center_x - x, center_y - y, 0xFF0000FF);
 
-	screenData->set_pixel_color(center_x + y, center_y + x, 0xFF00FFFF);
-	screenData->set_pixel_color(center_x - y, center_y + x, 0xFF00FFFF);
-	screenData->set_pixel_color(center_x + y, center_y - x, 0xFF00FFFF);
+	screenData->set_pixel_color(center_x + y, center_y + x, 0xFF0000FF);
+	screenData->set_pixel_color(center_x - y, center_y + x, 0xFF0000FF);
+	screenData->set_pixel_color(center_x + y, center_y - x, 0xFF0000FF);
 	screenData->set_pixel_color(center_x - y, center_y - x, 0xFF00FFFF);
 }
 
@@ -91,8 +90,8 @@ void DrawCircle(ScreenData* screenData,
                 uint32_t center_x, uint32_t center_y,
                 uint32_t r)
 {
-	int32_t x = 0;
-	int32_t y = r;
+	uint32_t x = 0;
+	uint32_t y = r;
 	uint32_t d = 3 - y * r;
 	draw_circle_helper(screenData, center_x, center_y, x, y);
 	while(y >= x)
@@ -113,62 +112,8 @@ void DrawCircle(ScreenData* screenData,
 
 void DrawToon(ScreenData* screenData, Point* toon)
 {
-	DrawCircle(screenData, toon->x_pos, toon->y_pos, 30);
+	DrawRectangle(screenData, toon->x_pos, toon->y_pos, 30, 30, 0xAAAA00FF);
 }
-
-void blueDraw(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t pitch)
-{
-
-	uint8_t* row = (uint8_t*)buffer;
-	for(int y = 0; y < buf_height; ++y)
-	{
-		uint8_t* pixel = (uint8_t*)row;
-		for(int x = 0; x < buf_width; ++x)
-		{
-			#ifdef _WIN32
-
-			// blue
-			*pixel = 0;
-			++pixel;
-
-			// green
-			*pixel = static_cast<uint8_t>(x);
-			++pixel;
-
-			// red
-			*pixel = static_cast<uint8_t>(y);;
-			++pixel;
-
-			// alpha 
-			*pixel = 0xFF;
-			++pixel;
-
-			#else
-
-			// red
-			*pixel = (uint8_t)y;
-			++pixel;
-
-			// blue;
-			*pixel = 0;
-			++pixel;
-
-			// green;
-			*pixel = (uint8_t)x;
-			++pixel;
-
-			// alpha
-			*pixel = 0xFF;
-			++pixel;
-
-			#endif
-
-		}
-		row += pitch;
-	}
-
-}
-
 
 // works fine on windows, but something about console doesn't allow writing to.
 extern "C" int GameInit(GameState* game_state)
@@ -198,12 +143,6 @@ extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state,
 {
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
-
-	// update the video buffer data as provided.
-	// the width and height, etc will be updated for you. 
-	blueDraw(screenData->buffer, screenData->width,
-	         screenData->height, screenData->pitch);
-
 	if(controller != NULL)
 	{
 		if(controller->MoveUp.EndedDown)
@@ -225,13 +164,6 @@ extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state,
 			toon->x_pos--;
 		}
 	}
-
-	if(toon->x_pos < 0)
-	{
-		toon->x_pos = 0;
-	}
-
-
 	
 	DrawMap(screenData, p->tile_info);
 	DrawToon(screenData, toon);
