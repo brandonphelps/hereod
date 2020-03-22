@@ -7,7 +7,7 @@ AR="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\
 
 C_FLAGS = -nologo -DWIN32 -EHsc /std:c++17 
 
-LIBS = user32.lib GDI32.lib Kernel32.lib 
+LIBS = user32.lib GDI32.lib Kernel32.lib Winmm.lib
 
 C_OUTPUT_SPECIFIER = -Fo
 C_BIN_SPECIFIER = -c

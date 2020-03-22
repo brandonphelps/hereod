@@ -19,8 +19,8 @@ const uint16_t MapYOffset = 10;
 class Point
 {
 public:
-	uint8_t x_pos;
-	uint8_t y_pos;
+	uint16_t x_pos;
+	uint16_t y_pos;
 };
 
 class Map

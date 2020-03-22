@@ -1,6 +1,8 @@
 #include <windows.h>
-#include <stdlib.h>
 #include <wingdi.h>
+#include <timeapi.h>
+#include <stdlib.h>
+
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -98,8 +100,54 @@ WindowDimension GetWindowDimension(HWND Window)
 	return result;
 }
 
-// Forward declarations of functions included in this code module:
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
+//
+//  PURPOSE:  Processes messages for the main window.
+//
+//  WM_PAINT    - Paint the main window
+//  WM_DESTROY  - post a quit message and return
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	LRESULT Result = 0;
+
+	HDC hdc;
+	switch (message)
+	{
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			hdc = BeginPaint(hWnd, &ps);
+			WindowDimension window_dim = GetWindowDimension(hWnd);
+
+			StretchDIBits(hdc,
+			              0, 0,
+			              CurrentBuffer.video_buf->width,
+			              CurrentBuffer.video_buf->height,
+			              0, 0,
+			              CurrentBuffer.video_buf->width, CurrentBuffer.video_buf->height,
+			              CurrentBuffer.video_buf->buffer,
+			              &CurrentBuffer.map_info, DIB_RGB_COLORS, SRCCOPY);
+
+			// TextOut(hdc,
+			//         5, 5,
+			//         "Hello World", _tcslen("hello World"));
+
+			EndPaint(hWnd, &ps);
+		} break;
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+			Running = false;
+		} break;
+		default:
+		{
+			Result = DefWindowProcA(hWnd, message, wParam, lParam);
+		} break;
+	}
+
+	return Result;
+}
+
 
 int CALLBACK WinMain(
                      HINSTANCE hInstance,
@@ -168,6 +216,9 @@ int CALLBACK WinMain(
 
 		return 1;
 	}
+
+	uint32_t desired_scheduler_ms = 1;
+	bool is_sleep_granular = (timeBeginPeriod(desired_scheduler_ms) == TIMERR_NOERROR);
 
 
 	ScreenData currentScreen;
@@ -272,56 +323,7 @@ int CALLBACK WinMain(
 		                                &newKeyboard);
 
 	}
-
 	return (int) msg.wParam;
 }
 
-
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE:  Processes messages for the main window.
-//
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	LRESULT Result = 0;
-
-	HDC hdc;
-	switch (message)
-	{
-		case WM_PAINT:
-		{
-			PAINTSTRUCT ps;
-			hdc = BeginPaint(hWnd, &ps);
-			WindowDimension window_dim = GetWindowDimension(hWnd);
-
-			StretchDIBits(hdc,
-			              0, 0,
-			              CurrentBuffer.video_buf->width,
-			              CurrentBuffer.video_buf->height,
-			              0, 0,
-			              CurrentBuffer.video_buf->width, CurrentBuffer.video_buf->height,
-			              CurrentBuffer.video_buf->buffer,
-			              &CurrentBuffer.map_info, DIB_RGB_COLORS, SRCCOPY);
-
-			// TextOut(hdc,
-			//         5, 5,
-			//         "Hello World", _tcslen("hello World"));
-
-			EndPaint(hWnd, &ps);
-		} break;
-		case WM_DESTROY:
-		{
-			PostQuitMessage(0);
-			Running = false;
-		} break;
-		default:
-		{
-			Result = DefWindowProcA(hWnd, message, wParam, lParam);
-		} break;
-	}
-
-	return Result;
-}
 
