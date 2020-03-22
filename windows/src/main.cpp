@@ -199,6 +199,15 @@ int CALLBACK WinMain(
 		mahState.platform_data[i] = PlatformIdent[i];
 	}
 
+	GameState two(mahState);
+
+	for(int i = 0; i < mahState.platform_size; i++)
+	{
+		if(two.platform_data[i] != mahState.platform_data[i])
+		{
+		}
+	}
+
 	int initRest = blueFuncs.GameInit(&mahState);
 	if(initRest != 0)
 	{

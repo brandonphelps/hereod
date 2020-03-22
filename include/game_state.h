@@ -7,6 +7,13 @@ class GameState
 {
 	
 public:
+	GameState(); 
+	GameState(const GameState& other);
+
+	// de allocates everything.
+	void clear();
+
+public:
 	uint8_t* platform_data;
 	uint32_t platform_size;
 	uint8_t* module_data;
