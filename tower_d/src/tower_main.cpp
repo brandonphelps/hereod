@@ -2,13 +2,13 @@
 #include <stdint.h>
 
 #include "video.h"
+#include "game_input.h"
 #include "game_state.h"
 #include "game_controller.h"
 
 #ifdef _WIN32
 #include "console_another.h"
 #endif
-
 
 void towerDraw(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t pitch,
                uint16_t xOffset, uint16_t yOffset)
@@ -93,8 +93,9 @@ extern "C" int GameInit(GameState* game_state)
 }
 
 // some sort of buffer for video data is passed back and forth here.
-extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state, GameInputController* game_controller)
+extern "C" int GameUpdate(float dt, ScreenData* screenData, GameState* game_state, GameInput* game_input)
 {
+	GameInputController* game_controller = game_input->keyboard;
 	uint16_t xOffset;
 	if(game_controller != NULL && game_state != NULL)
 	{

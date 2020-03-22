@@ -1,6 +1,8 @@
 #include <windows.h>
-#include <stdlib.h>
 #include <wingdi.h>
+#include <timeapi.h>
+#include <stdlib.h>
+
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -12,6 +14,7 @@
 
 #include <stdint.h>
 
+#include "performance.h"
 #include "keyboard_updates.h"
 
 #include "game_module.h"
@@ -78,8 +81,73 @@ void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, ui
 	WriteOut("Finished with graphics buffer " + std::to_string(pixel_buff.map_info.bmiHeader.biWidth) + "\n\r");
 }
 
-// Forward declarations of functions included in this code module:
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+class WindowDimension
+{
+public:
+	uint32_t width;
+	uint32_t height;
+};
+
+WindowDimension GetWindowDimension(HWND Window)
+{
+	WindowDimension result;
+
+	RECT ClientRect;
+	GetClientRect(Window, &ClientRect);
+	result.width = ClientRect.right - ClientRect.left;
+	result.height = ClientRect.bottom - ClientRect.top;
+	return result;
+}
+
+//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
+//
+//  PURPOSE:  Processes messages for the main window.
+//
+//  WM_PAINT    - Paint the main window
+//  WM_DESTROY  - post a quit message and return
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	LRESULT Result = 0;
+
+	HDC hdc;
+	switch (message)
+	{
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			hdc = BeginPaint(hWnd, &ps);
+			WindowDimension window_dim = GetWindowDimension(hWnd);
+
+			StretchDIBits(hdc,
+			              0, 0,
+			              CurrentBuffer.video_buf->width,
+			              CurrentBuffer.video_buf->height,
+			              0, 0,
+			              CurrentBuffer.video_buf->width, CurrentBuffer.video_buf->height,
+			              CurrentBuffer.video_buf->buffer,
+			              &CurrentBuffer.map_info, DIB_RGB_COLORS, SRCCOPY);
+
+			// TextOut(hdc,
+			//         5, 5,
+			//         "Hello World", _tcslen("hello World"));
+
+			EndPaint(hWnd, &ps);
+		} break;
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+			Running = false;
+		} break;
+		default:
+		{
+			Result = DefWindowProcA(hWnd, message, wParam, lParam);
+		} break;
+	}
+
+	return Result;
+}
+
 
 int CALLBACK WinMain(
                      HINSTANCE hInstance,
@@ -89,7 +157,7 @@ int CALLBACK WinMain(
 )
 {
 	InitializeDebugConsole();
-
+	InitPerformance();
 
 	WNDCLASSEX wcex = {};
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -132,7 +200,7 @@ int CALLBACK WinMain(
 	                         szTitle,
 	                         WS_OVERLAPPEDWINDOW,
 	                         CW_USEDEFAULT, CW_USEDEFAULT,
-	                         500, 400,
+	                         960, 540,
 	                         NULL,
 	                         NULL,
 	                         hInstance,
@@ -149,7 +217,22 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
+	uint32_t desired_scheduler_ms = 1;
+	bool is_sleep_granular = (timeBeginPeriod(desired_scheduler_ms) == TIMERR_NOERROR);
 
+	uint8_t MonitorRefreshHz = 120;
+
+
+	HDC RefreshDC = GetDC(hWnd);
+	int Win32RefreshRate = GetDeviceCaps(RefreshDC, VREFRESH);
+	ReleaseDC(hWnd, RefreshDC);
+
+	if(Win32RefreshRate > 1)
+	{
+		MonitorRefreshHz = Win32RefreshRate;
+	}
+	float GameUpdateHz = (MonitorRefreshHz / 2);
+	float TargetSecondsPerFrame = 1.0f / (float)GameUpdateHz;
 	ScreenData currentScreen;
 	currentScreen.bytesPerPixel = 4;
 	currentScreen.buffer = NULL;
@@ -160,7 +243,7 @@ int CALLBACK WinMain(
 	CurrentBuffer.map_info.bmiHeader.biBitCount = 32;
 	CurrentBuffer.map_info.bmiHeader.biCompression = BI_RGB;
 
-	ResizeGraphicsBuffer(CurrentBuffer, 400, 500);
+	ResizeGraphicsBuffer(CurrentBuffer, 960, 540);
 
 	ModuleFunctions blueFuncs;
 	ModuleFunctions towerFuncs;
@@ -179,33 +262,22 @@ int CALLBACK WinMain(
 
 	// load custom game module 
 	// Main message loop:
-
 	GameInputController oldKeyboard;
 	GameInputController newKeyboard;
 	GameInputControllerInit(&oldKeyboard);
 	GameInputControllerInit(&newKeyboard);
 
 	GameState mahState;
-	mahState.platform_data = NULL;
-	mahState.platform_size = 0;
-	mahState.module_data = NULL;
-	mahState.module_size = 0;
-
 	mahState.platform_data = new uint8_t[100];
 	mahState.platform_size = 100;
+
+	GameInput mahInput;
+	mahInput.keyboard = &newKeyboard;
+
 	std::string PlatformIdent = "Windows";
 	for(int i =0; i < PlatformIdent.size(); i++)
 	{
 		mahState.platform_data[i] = PlatformIdent[i];
-	}
-
-	GameState two(mahState);
-
-	for(int i = 0; i < mahState.platform_size; i++)
-	{
-		if(two.platform_data[i] != mahState.platform_data[i])
-		{
-		}
 	}
 
 	int initRest = blueFuncs.GameInit(&mahState);
@@ -214,22 +286,20 @@ int CALLBACK WinMain(
 		WriteLine("Failed to init game");
 		return 1;
 	}
-
-	blueFuncs.GameUpdate(0, &currentScreen, &mahState, &oldKeyboard);
 	// trigger a window update
 	UpdateWindow(hWnd);
 
 	RECT new_rec;
 	new_rec.left = 0;
 	new_rec.top = 0;
-	new_rec.right = 400;
-	new_rec.bottom = 400;
+	new_rec.right = 960;
+	new_rec.bottom = 540;
+
+	LARGE_INTEGER LastCounter = Win32GetWallClock();
+	float SecondsElapsedForFrame = 0;
 
 	while(Running)
 	{
-
-
-
 		// using the specific windows classes and stuff, we need
 		// to invaliate the paint region, so the WM_PAINT event is sent to our class.
 		// using this we can also limite the amount of theings that need to be redrawn,
@@ -262,77 +332,49 @@ int CALLBACK WinMain(
 			}
 		}
 
+		mahInput.dtForFrame = SecondsElapsedForFrame;
+
 		// so basically we give the module reference to teh current screen, the key inputs that the user presed on the last frame
 		// the state also corresponds to the current screen?
-		initRest = blueFuncs.GameUpdate(0, &currentScreen,
+		initRest = blueFuncs.GameUpdate(&currentScreen,
 		                                &mahState,
-		                                &newKeyboard);
+		                                &mahInput);
 
+
+		// timing information to ensure a steady framerate.
+		LARGE_INTEGER WorkCounter = Win32GetWallClock();
+		float WorkSecondsElapsed = Win32GetSecondsElapsed(LastCounter, WorkCounter);
+		SecondsElapsedForFrame = WorkSecondsElapsed;
+		if(SecondsElapsedForFrame < TargetSecondsPerFrame)
+		{
+			if(is_sleep_granular)
+			{
+				DWORD sleepMS = (DWORD)(1000.0f * (TargetSecondsPerFrame -
+				                                   SecondsElapsedForFrame));
+				if(sleepMS > 0)
+				{
+					Sleep(sleepMS);
+				}
+			}
+
+			while(SecondsElapsedForFrame < TargetSecondsPerFrame)
+			{
+				SecondsElapsedForFrame = Win32GetSecondsElapsed(LastCounter,
+				                                                Win32GetWallClock());
+			}
+		}
+		else
+		{
+			// missed frame rate
+			WriteLine("Missed frame rate: " + std::to_string(SecondsElapsedForFrame) + ", " + std::to_string(TargetSecondsPerFrame));
+		}
+
+		LARGE_INTEGER EndCounter = Win32GetWallClock();
+		float MSPerFrame = 1000.0f * Win32GetSecondsElapsed(LastCounter, EndCounter);
+		WriteLine("MS Per Frame: " + std::to_string(SecondsElapsedForFrame));
+		LastCounter = EndCounter;
 	}
-
 	return (int) msg.wParam;
 }
 
-
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE:  Processes messages for the main window.
-//
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	LRESULT Result = 0;
-
-	HDC hdc;
-	switch (message)
-	{
-		case WM_PAINT:
-		{
-			PAINTSTRUCT ps;
-			hdc = BeginPaint(hWnd, &ps);
-			// Here your application is laid out.
-			// For this introduction, we just print out "Hello, Windows desktop!"
-			// in the top left corner.
-			// TextOut(hdc,
-			//    5, 5,
-			//    greeting, _tcslen(greeting));
-			// End application-specific layout section.
-			// PatBlt(hdc, 0, 0, 40, 40, BLACKNESS);
-			// xDest, yDest, DestWidth, DestHeight, xSrc, ySrc, SrcWidth, SrcHeight
-
-			StretchDIBits(hdc,
-			              0, 0,
-			              CurrentBuffer.video_buf->width,
-			              CurrentBuffer.video_buf->height,
-			              0, 0,
-			              CurrentBuffer.video_buf->width, CurrentBuffer.video_buf->height,
-			              CurrentBuffer.video_buf->buffer,
-			              &CurrentBuffer.map_info, DIB_RGB_COLORS, SRCCOPY);
-
-			// for(int i = 0; i < message_log.get_message_count(); i++)
-			// {
-
-			// 	TextOut(hdc,
-			// 	        // todo(brandon): how to get size of characters? in pixels?
-			// 	        50, 40+(20 * i),
-			// 	        message_log.messages[i],
-			// 	        _tcslen(message_log.messages[i]));
-			// }
-
-			EndPaint(hWnd, &ps);
-		} break;
-		case WM_DESTROY:
-		{
-			PostQuitMessage(0);
-			Running = false;
-		} break;
-		default:
-		{
-			Result = DefWindowProcA(hWnd, message, wParam, lParam);
-		} break;
-	}
-
-	return Result;
-}
 

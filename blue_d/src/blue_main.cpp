@@ -4,6 +4,7 @@
 #include "video.h"
 #include "grid_helpers.h"
 #include "game_state.h"
+#include "game_input.h"
 #include "game_controller.h"
 
 #ifdef _WIN32
@@ -19,8 +20,8 @@ const uint16_t MapYOffset = 10;
 class Point
 {
 public:
-	uint8_t x_pos;
-	uint8_t y_pos;
+	float x_pos;
+	float y_pos;
 };
 
 class Map
@@ -110,9 +111,21 @@ void DrawCircle(ScreenData* screenData,
 	}
 }
 
+void towerDraw(ScreenData* screenData)
+{
+	for(int y = 0; y < screenData->height; ++y)
+	{
+		for(int x = 0; x < screenData->width; ++x)
+		{
+			uint32_t color = (0xFF << 24 | static_cast<uint8_t>(x) << 16 | static_cast<uint8_t>(y) << 8 | 0xFF);
+			screenData->set_pixel_color(x, y, color);
+		}
+	}
+}
+
 void DrawToon(ScreenData* screenData, Point* toon)
 {
-	DrawRectangle(screenData, toon->x_pos, toon->y_pos, 30, 30, 0xAAAA00FF);
+	DrawRectangle(screenData, static_cast<uint32_t>(toon->x_pos), static_cast<uint32_t>(toon->y_pos), 30, 30, 0xAAAA00FF);
 }
 
 // works fine on windows, but something about console doesn't allow writing to.
@@ -139,35 +152,47 @@ extern "C" int GameInit(GameState* game_state)
 }
 
 // some sort of buffer for video data is passed back and forth here.
-extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state, GameInputController* controller)
+extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInput* game_input)
 {
+	GameInputController* controller = game_input->keyboard;
+	float dt = game_input->dtForFrame;
+
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
+
+	float vel_x;
+	float vel_y;
+	int move_speed = 30; // in pixels per second.
 	if(controller != NULL)
 	{
 		if(controller->MoveUp.EndedDown)
 		{
-			toon->y_pos--;
+			vel_y = -1 * move_speed;
 		}
 
 		if(controller->MoveDown.EndedDown)
 		{
-			toon->y_pos++;
+			vel_y = move_speed;
 		}
 
 		if(controller->MoveRight.EndedDown)
 		{
-			toon->x_pos++;
+			vel_x = move_speed;
 		}
 		if(controller->MoveLeft.EndedDown)
 		{
-			toon->x_pos--;
+			vel_x = -1 * move_speed;
 		}
 	}
 	
+
+	toon->x_pos = dt * vel_x + toon->x_pos;
+	toon->y_pos = dt * vel_y + toon->y_pos;
+
+	towerDraw(screenData);
 	DrawMap(screenData, p->tile_info);
 	DrawToon(screenData, toon);
-
+	
 	return 0;
 }
 
