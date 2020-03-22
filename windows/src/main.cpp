@@ -78,6 +78,25 @@ void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, ui
 	WriteOut("Finished with graphics buffer " + std::to_string(pixel_buff.map_info.bmiHeader.biWidth) + "\n\r");
 }
 
+
+class WindowDimension
+{
+public:
+	uint32_t width;
+	uint32_t height;
+};
+
+WindowDimension GetWindowDimension(HWND Window)
+{
+	WindowDimension result;
+
+	RECT ClientRect;
+	GetClientRect(Window, &ClientRect);
+	result.width = ClientRect.right - ClientRect.left;
+	result.height = ClientRect.bottom - ClientRect.top;
+	return result;
+}
+
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -89,7 +108,6 @@ int CALLBACK WinMain(
 )
 {
 	InitializeDebugConsole();
-
 
 	WNDCLASSEX wcex = {};
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -132,7 +150,7 @@ int CALLBACK WinMain(
 	                         szTitle,
 	                         WS_OVERLAPPEDWINDOW,
 	                         CW_USEDEFAULT, CW_USEDEFAULT,
-	                         500, 400,
+	                         960, 540,
 	                         NULL,
 	                         NULL,
 	                         hInstance,
@@ -160,7 +178,7 @@ int CALLBACK WinMain(
 	CurrentBuffer.map_info.bmiHeader.biBitCount = 32;
 	CurrentBuffer.map_info.bmiHeader.biCompression = BI_RGB;
 
-	ResizeGraphicsBuffer(CurrentBuffer, 400, 500);
+	ResizeGraphicsBuffer(CurrentBuffer, 960, 540);
 
 	ModuleFunctions blueFuncs;
 	ModuleFunctions towerFuncs;
@@ -179,33 +197,19 @@ int CALLBACK WinMain(
 
 	// load custom game module 
 	// Main message loop:
-
 	GameInputController oldKeyboard;
 	GameInputController newKeyboard;
 	GameInputControllerInit(&oldKeyboard);
 	GameInputControllerInit(&newKeyboard);
 
 	GameState mahState;
-	mahState.platform_data = NULL;
-	mahState.platform_size = 0;
-	mahState.module_data = NULL;
-	mahState.module_size = 0;
-
 	mahState.platform_data = new uint8_t[100];
 	mahState.platform_size = 100;
+
 	std::string PlatformIdent = "Windows";
 	for(int i =0; i < PlatformIdent.size(); i++)
 	{
 		mahState.platform_data[i] = PlatformIdent[i];
-	}
-
-	GameState two(mahState);
-
-	for(int i = 0; i < mahState.platform_size; i++)
-	{
-		if(two.platform_data[i] != mahState.platform_data[i])
-		{
-		}
 	}
 
 	int initRest = blueFuncs.GameInit(&mahState);
@@ -222,14 +226,11 @@ int CALLBACK WinMain(
 	RECT new_rec;
 	new_rec.left = 0;
 	new_rec.top = 0;
-	new_rec.right = 400;
-	new_rec.bottom = 400;
+	new_rec.right = 960;
+	new_rec.bottom = 540;
 
 	while(Running)
 	{
-
-
-
 		// using the specific windows classes and stuff, we need
 		// to invaliate the paint region, so the WM_PAINT event is sent to our class.
 		// using this we can also limite the amount of theings that need to be redrawn,
@@ -291,6 +292,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			PAINTSTRUCT ps;
 			hdc = BeginPaint(hWnd, &ps);
+			WindowDimension window_dim = GetWindowDimension(hWnd);
+			
 			// Here your application is laid out.
 			// For this introduction, we just print out "Hello, Windows desktop!"
 			// in the top left corner.

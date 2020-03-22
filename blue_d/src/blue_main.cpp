@@ -110,6 +110,18 @@ void DrawCircle(ScreenData* screenData,
 	}
 }
 
+void towerDraw(ScreenData* screenData)
+{
+	for(int y = 0; y < screenData->height; ++y)
+	{
+		for(int x = 0; x < screenData->width; ++x)
+		{
+			uint32_t color = (0xFF << 24 | static_cast<uint8_t>(x) << 16 | static_cast<uint8_t>(y) << 8 | 0xFF);
+			screenData->set_pixel_color(x, y, color);
+		}
+	}
+}
+
 void DrawToon(ScreenData* screenData, Point* toon)
 {
 	DrawRectangle(screenData, toon->x_pos, toon->y_pos, 30, 30, 0xAAAA00FF);
@@ -165,9 +177,10 @@ extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state,
 		}
 	}
 	
+	towerDraw(screenData);
 	DrawMap(screenData, p->tile_info);
 	DrawToon(screenData, toon);
-
+	
 	return 0;
 }
 
