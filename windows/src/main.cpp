@@ -1,6 +1,3 @@
-// HelloWindowsDesktop.cpp
-// compile with: /D_UNICODE /DUNICODE /DWIN32 /D_WINDOWS /c
-
 #include <windows.h>
 #include <stdlib.h>
 #include <wingdi.h>
@@ -14,6 +11,8 @@
 #include <sstream>
 
 #include <stdint.h>
+
+#include "keyboard_updates.h"
 
 #include "game_module.h"
 #include "game_state.h"
@@ -181,8 +180,10 @@ int CALLBACK WinMain(
 	// load custom game module 
 	// Main message loop:
 
-	GameInputController mahKeyboard;
-	GameInputControllerInit(&mahKeyboard);
+	GameInputController oldKeyboard;
+	GameInputController newKeyboard;
+	GameInputControllerInit(&oldKeyboard);
+	GameInputControllerInit(&newKeyboard);
 
 	GameState mahState;
 	mahState.platformData = NULL;
@@ -202,7 +203,7 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
-	blueFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
+	blueFuncs.GameUpdate(0, &currentScreen, &mahState, &oldKeyboard);
 	// trigger a window update
 	UpdateWindow(hWnd);
 
@@ -214,7 +215,7 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
-		initRest = blueFuncs.GameUpdate(0, &currentScreen, &mahState, &mahKeyboard);
+		initRest = blueFuncs.GameUpdate(0, &currentScreen, &mahState, &oldKeyboard);
 
 		if(mahState.module_data != NULL)
 		{
@@ -241,29 +242,7 @@ int CALLBACK WinMain(
 				case WM_KEYDOWN:
 				case WM_KEYUP:
 				{
-					uint32_t VKCode = (uint32_t)msg.wParam;
-					bool WasDown = ((msg.lParam & (1 << 30)) != 0);
-					bool IsDown = ((msg.lParam & (1 << 31)) == 0);
-					// seems like this triggers on ups and downs
-					if(WasDown != IsDown)
-					{
-						if(VKCode == 'W')
-						{
-							ProcessKeyMessage(&(mahKeyboard.MoveUp), IsDown);
-						}
-						if(VKCode == 'A')
-						{
-							ProcessKeyMessage(&(mahKeyboard.MoveLeft), IsDown);
-						}
-						if(VKCode == 'S')
-						{
-							ProcessKeyMessage(&(mahKeyboard.MoveDown), IsDown);
-						}
-						if(VKCode == 'D')
-						{
-							ProcessKeyMessage(&(mahKeyboard.MoveRight), IsDown);
-						}
-					}
+					UpdateKeyboardInputs(msg, oldKeyboard, newKeyboard);
 				} break;
 				
 				default:

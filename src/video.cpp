@@ -6,6 +6,19 @@
 #include "console_another.h"
 #endif
 
+void ScreenData::set_pixel_color(uint32_t x, uint32_t y, uint32_t color_mask)
+{
+	if(x > width || y > height)
+	{
+		return;
+	}
+
+	uint32_t offset = 0;
+	uint32_t* pixel = (uint32_t*)(buffer + x * bytesPerPixel + y * bytesPerPixel * width);
+	*pixel = color_mask;
+}
+
+
 void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height)
 {
 	drawBuf(buffer, buf_width, buf_height, 4 * buf_width);
@@ -69,6 +82,32 @@ void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t 
 		row += buf_width * 4; 
 	}
 	printme = 0;
+}
+
+void DrawRectangle(ScreenData* data,
+                   uint32_t s_x, uint32_t s_y,
+                   uint32_t width, uint32_t height,
+                   uint32_t color_mask)
+{
+	uint32_t MaxX = s_x + width;
+	uint32_t MaxY = s_y + height;
+	if(MaxX > data->width)
+	{
+		MaxX = data->width;
+	}
+
+	if(MaxY > data->height)
+	{
+		MaxY = data->height;
+	}
+
+	for(int y = s_y; y < MaxY; ++y)
+	{
+		for(int x = s_x; x < MaxX; ++x)
+		{
+			data->set_pixel_color(x, y, color_mask);
+		}
+	}
 }
 
 void DrawRectangle(uint8_t* buffer,
