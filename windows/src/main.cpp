@@ -271,6 +271,9 @@ int CALLBACK WinMain(
 	mahState.platform_data = new uint8_t[100];
 	mahState.platform_size = 100;
 
+	GameInput mahInput;
+	mahInput.keyboard = &newKeyboard;
+
 	std::string PlatformIdent = "Windows";
 	for(int i =0; i < PlatformIdent.size(); i++)
 	{
@@ -283,8 +286,6 @@ int CALLBACK WinMain(
 		WriteLine("Failed to init game");
 		return 1;
 	}
-
-	blueFuncs.GameUpdate(0, &currentScreen, &mahState, &oldKeyboard);
 	// trigger a window update
 	UpdateWindow(hWnd);
 
@@ -331,11 +332,13 @@ int CALLBACK WinMain(
 			}
 		}
 
+		mahInput.dtForFrame = SecondsElapsedForFrame;
+
 		// so basically we give the module reference to teh current screen, the key inputs that the user presed on the last frame
 		// the state also corresponds to the current screen?
-		initRest = blueFuncs.GameUpdate(SecondsElapsedForFrame, &currentScreen,
+		initRest = blueFuncs.GameUpdate(&currentScreen,
 		                                &mahState,
-		                                &newKeyboard);
+		                                &mahInput);
 
 
 		// timing information to ensure a steady framerate.

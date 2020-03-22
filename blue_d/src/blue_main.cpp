@@ -4,6 +4,7 @@
 #include "video.h"
 #include "grid_helpers.h"
 #include "game_state.h"
+#include "game_input.h"
 #include "game_controller.h"
 
 #ifdef _WIN32
@@ -151,14 +152,17 @@ extern "C" int GameInit(GameState* game_state)
 }
 
 // some sort of buffer for video data is passed back and forth here.
-extern "C" int GameUpdate(float dt, ScreenData* screenData, GameState* game_state, GameInputController* controller)
+extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInput* game_input)
 {
+	GameInputController* controller = game_input->keyboard;
+	float dt = game_input->dtForFrame;
+
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
 
 	float vel_x;
 	float vel_y;
-	int move_speed = 100;
+	int move_speed = 30; // in pixels per second.
 	if(controller != NULL)
 	{
 		if(controller->MoveUp.EndedDown)
