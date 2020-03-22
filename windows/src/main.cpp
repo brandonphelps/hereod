@@ -81,7 +81,6 @@ void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, ui
 	WriteOut("Finished with graphics buffer " + std::to_string(pixel_buff.map_info.bmiHeader.biWidth) + "\n\r");
 }
 
-
 class WindowDimension
 {
 public:
@@ -262,17 +261,13 @@ int CALLBACK WinMain(
 
 	// load custom game module 
 	// Main message loop:
-	GameInputController oldKeyboard;
-	GameInputController newKeyboard;
-	GameInputControllerInit(&oldKeyboard);
-	GameInputControllerInit(&newKeyboard);
-
 	GameState mahState;
 	mahState.platform_data = new uint8_t[100];
 	mahState.platform_size = 100;
 
 	GameInput mahInput;
-	mahInput.keyboard = &newKeyboard;
+	GameInputController* newKeyboard = &(mahInput.keyboard);
+	GameInputControllerInit(newKeyboard);
 
 	std::string PlatformIdent = "Windows";
 	for(int i =0; i < PlatformIdent.size(); i++)
@@ -320,7 +315,7 @@ int CALLBACK WinMain(
 				case WM_KEYDOWN:
 				case WM_KEYUP:
 				{
-					UpdateKeyboardInputs(msg, oldKeyboard, newKeyboard);
+					UpdateKeyboardInputs(msg, newKeyboard);
 				} break;
 				
 				default:

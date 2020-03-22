@@ -95,7 +95,7 @@ extern "C" int GameInit(GameState* game_state)
 // some sort of buffer for video data is passed back and forth here.
 extern "C" int GameUpdate(float dt, ScreenData* screenData, GameState* game_state, GameInput* game_input)
 {
-	GameInputController* game_controller = game_input->keyboard;
+	GameInputController* game_controller = &(game_input->keyboard);
 	uint16_t xOffset;
 	if(game_controller != NULL && game_state != NULL)
 	{

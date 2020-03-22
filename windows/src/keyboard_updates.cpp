@@ -2,9 +2,7 @@
 #include <windows.h>
 #include "game_controller.h"
 
-void UpdateKeyboardInputs(const MSG& msg,
-                          GameInputController& oldkeyboard,
-                          GameInputController& newKeyboard)
+void UpdateKeyboardInputs(const MSG& msg, GameInputController* newKeyboard)
 {
 	uint32_t VKCode = (uint32_t)msg.wParam;
 	bool WasDown = ((msg.lParam & (1 << 30)) != 0);
@@ -14,19 +12,19 @@ void UpdateKeyboardInputs(const MSG& msg,
 	{
 		if(VKCode == 'W')
 		{
-			ProcessKeyMessage(&(newKeyboard.MoveUp), IsDown);
+			ProcessKeyMessage(&(newKeyboard->MoveUp), IsDown);
 		}
 		if(VKCode == 'A')
 		{
-			ProcessKeyMessage(&(newKeyboard.MoveLeft), IsDown);
+			ProcessKeyMessage(&(newKeyboard->MoveLeft), IsDown);
 		}
 		if(VKCode == 'S')
 		{
-			ProcessKeyMessage(&(newKeyboard.MoveDown), IsDown);
+			ProcessKeyMessage(&(newKeyboard->MoveDown), IsDown);
 		}
 		if(VKCode == 'D')
 		{
-			ProcessKeyMessage(&(newKeyboard.MoveRight), IsDown);
+			ProcessKeyMessage(&(newKeyboard->MoveRight), IsDown);
 		}
 	}
 	

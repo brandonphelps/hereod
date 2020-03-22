@@ -6,10 +6,12 @@
 #include "game_controller.h"
 
 
-typedef struct GameInput
+class GameInput
 {
-	GameInputController* keyboard;
+public:
+	GameInputController keyboard;
 	float dtForFrame; // in seconds. 
-} GameInput;
+};
+
 
 #endif

@@ -154,7 +154,7 @@ extern "C" int GameInit(GameState* game_state)
 // some sort of buffer for video data is passed back and forth here.
 extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInput* game_input)
 {
-	GameInputController* controller = game_input->keyboard;
+	GameInputController* controller = &(game_input->keyboard);
 	float dt = game_input->dtForFrame;
 
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);

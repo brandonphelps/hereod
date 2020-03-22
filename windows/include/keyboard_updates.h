@@ -6,9 +6,7 @@
 
 #include "game_controller.h"
 
-void UpdateKeyboardInputs(const MSG& msg,
-                          GameInputController& oldkeyboard,
-                          GameInputController& newKeyboard);
+void UpdateKeyboardInputs(const MSG& msg, GameInputController* newKeyboard);
 
 
 #endif
