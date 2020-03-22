@@ -215,7 +215,7 @@ int CALLBACK WinMain(
 
 	while(Running)
 	{
-		initRest = blueFuncs.GameUpdate(0, &currentScreen, &mahState, &oldKeyboard);
+
 
 		if(mahState.module_data != NULL)
 		{
@@ -253,6 +253,8 @@ int CALLBACK WinMain(
 				} break;
 			}
 		}
+
+		initRest = blueFuncs.GameUpdate(0, &currentScreen, &mahState, &newKeyboard);
 	}
 
 	return (int) msg.wParam;
