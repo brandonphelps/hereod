@@ -15,7 +15,7 @@ GameState::GameState()
 
 GameState::GameState(const GameState& other)
 {
-	WriteLine("Copy GameState");
+	WriteLine("GameState Copy Constructor");
 
 	platform_size = other.platform_size;
 	platform_data = new uint8_t[platform_size];
@@ -35,7 +35,9 @@ GameState& GameState::operator=(const GameState& other)
 	
 	clear();
 
-	WriteLine("Copy assignment");
+	WriteLine("GameState Copy assignment");
+
+	WriteLine("Copying from: " + std::to_string(other.module_size));
 
 	platform_size = other.platform_size;
 	platform_data = new uint8_t[platform_size];

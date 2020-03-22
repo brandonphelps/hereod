@@ -284,28 +284,6 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
-	GameState tmp = mahState;
-	uint8_t* tmpper = 0;
-	GameState tjpf;
-	tjpf = tmp;
-
-	if(tmp != mahState)
-	{
-		*tmpper;
-	}
-
-	if(tjpf == mahState)
-	{
-	}
-	else
-	{
-		*tmpper;
-	}
-
-	Sleep(10000);
-
-
-
 	// trigger a window update
 	UpdateWindow(hWnd);
 

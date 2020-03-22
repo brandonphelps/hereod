@@ -24,6 +24,7 @@ void ClearPlayback(GameState* state)
 
 void BeginRecordingInput(GameState* initialState)
 {
+	WriteLine("Begin Recording input copy");
 	initial_state = *initialState;
 	
 	replayIndex = 0;
@@ -36,9 +37,10 @@ void GetNextInputStateUpdate(GameState* State, GameInput* input)
 	playbackIndex = playbackIndex % replaySize;
 	if(playbackIndex == 0)
 	{
-		WriteLine("Copying intiail stake");
-		// start the replay over, set state to intial state.
+		WriteLine("Directly before copying intial state");
 		*State = initial_state;
+		WriteLine("Copying intiail stake: " + std::to_string(State->module_size));
+		// start the replay over, set state to intial state.
 
 	}
 	*input = replay_buff[playbackIndex];

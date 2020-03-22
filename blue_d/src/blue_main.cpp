@@ -132,6 +132,7 @@ void DrawToon(ScreenData* screenData, Point* toon)
 extern "C" int GameInit(GameState* game_state)
 {
 	game_state->module_data = new uint8_t[sizeof(Map) + sizeof(Point)];
+	game_state->module_size = sizeof(Map) + sizeof(Point);
 
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);
 	if(p != NULL)
