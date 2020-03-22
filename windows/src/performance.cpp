@@ -1,14 +1,16 @@
 
 #include <windows.h>
 #include <stdint.h>
+#include "console_another.h"
 
-LARGE_INTEGER PerfCountFrequencyResult;
-int64_t GlobalPerfCountFrequency;
+static LARGE_INTEGER PerfCountFrequencyResult;
+static int64_t GlobalPerfCountFrequency;
 
 void InitPerformance()
 {
-	QueryPerformanceCounter(&PerfCountFrequencyResult);
+	QueryPerformanceFrequency(&PerfCountFrequencyResult);
 	GlobalPerfCountFrequency = PerfCountFrequencyResult.QuadPart;
+	WriteLine("Global PerfCount: " + std::to_string(GlobalPerfCountFrequency));
 }
 
 LARGE_INTEGER Win32GetWallClock(void)
@@ -20,7 +22,9 @@ LARGE_INTEGER Win32GetWallClock(void)
 
 float Win32GetSecondsElapsed(LARGE_INTEGER Start, LARGE_INTEGER End)
 {
-	float result = ((float)(End.QuadPart - Start.QuadPart) /
-	                (float)GlobalPerfCountFrequency);
-	return result;
+	LARGE_INTEGER ElapsedMicroseconds;
+	ElapsedMicroseconds.QuadPart = End.QuadPart - Start.QuadPart;
+	ElapsedMicroseconds.QuadPart *= 1000000;
+	ElapsedMicroseconds.QuadPart /= PerfCountFrequencyResult.QuadPart;
+	return (float)(ElapsedMicroseconds.QuadPart / 1000000.f);
 }

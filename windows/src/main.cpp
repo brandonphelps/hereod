@@ -156,8 +156,8 @@ int CALLBACK WinMain(
                      int       nCmdShow
 )
 {
-	InitPerformance();
 	InitializeDebugConsole();
+	InitPerformance();
 
 	WNDCLASSEX wcex = {};
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -220,7 +220,9 @@ int CALLBACK WinMain(
 	uint32_t desired_scheduler_ms = 1;
 	bool is_sleep_granular = (timeBeginPeriod(desired_scheduler_ms) == TIMERR_NOERROR);
 
-	uint8_t MonitorRefreshHz = 60;
+	uint8_t MonitorRefreshHz = 120;
+
+
 	HDC RefreshDC = GetDC(hWnd);
 	int Win32RefreshRate = GetDeviceCaps(RefreshDC, VREFRESH);
 	ReleaseDC(hWnd, RefreshDC);
@@ -229,10 +231,8 @@ int CALLBACK WinMain(
 	{
 		MonitorRefreshHz = Win32RefreshRate;
 	}
-
 	float GameUpdateHz = (MonitorRefreshHz / 2);
 	float TargetSecondsPerFrame = 1.0f / (float)GameUpdateHz;
-
 	ScreenData currentScreen;
 	currentScreen.bytesPerPixel = 4;
 	currentScreen.buffer = NULL;
@@ -336,6 +336,8 @@ int CALLBACK WinMain(
 		                                &mahState,
 		                                &newKeyboard);
 
+
+		// timing information to ensure a steady framerate.
 		LARGE_INTEGER WorkCounter = Win32GetWallClock();
 		float WorkSecondsElapsed = Win32GetSecondsElapsed(LastCounter, WorkCounter);
 		float SecondsElapsedForFrame = WorkSecondsElapsed;
@@ -350,14 +352,22 @@ int CALLBACK WinMain(
 					Sleep(sleepMS);
 				}
 			}
+
+			while(SecondsElapsedForFrame < TargetSecondsPerFrame)
+			{
+				SecondsElapsedForFrame = Win32GetSecondsElapsed(LastCounter,
+				                                                Win32GetWallClock());
+			}
 		}
 		else
 		{
 			// missed frame rate
+			WriteLine("Missed frame rate: " + std::to_string(SecondsElapsedForFrame) + ", " + std::to_string(TargetSecondsPerFrame));
 		}
 
 		LARGE_INTEGER EndCounter = Win32GetWallClock();
 		float MSPerFrame = 1000.0f * Win32GetSecondsElapsed(LastCounter, EndCounter);
+		WriteLine("MS Per Frame: " + std::to_string(MSPerFrame));
 		LastCounter = EndCounter;
 	}
 	return (int) msg.wParam;
