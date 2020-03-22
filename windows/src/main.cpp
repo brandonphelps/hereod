@@ -220,6 +220,18 @@ int CALLBACK WinMain(
 	uint32_t desired_scheduler_ms = 1;
 	bool is_sleep_granular = (timeBeginPeriod(desired_scheduler_ms) == TIMERR_NOERROR);
 
+	uint8_t MonitorRefreshHz = 60;
+	HDC RefreshDC = GetDC(hWnd);
+	int Win32RefreshRate = GetDeviceCaps(RefreshDC, VREFRESH);
+	ReleaseDC(hWnd, RefreshDC);
+
+	if(Win32RefreshRate > 1)
+	{
+		MonitorRefreshHz = Win32RefreshRate;
+	}
+
+	float GameUpdateHz = (MonitorRefreshHz / 2);
+	float TargetSecondsPerFrame = 1.0f / (float)GameUpdateHz;
 
 	ScreenData currentScreen;
 	currentScreen.bytesPerPixel = 4;
@@ -282,6 +294,8 @@ int CALLBACK WinMain(
 	new_rec.right = 960;
 	new_rec.bottom = 540;
 
+	LARGE_INTEGER LastCounter = Win32GetWallClock();
+	
 	while(Running)
 	{
 		// using the specific windows classes and stuff, we need
@@ -322,6 +336,29 @@ int CALLBACK WinMain(
 		                                &mahState,
 		                                &newKeyboard);
 
+		LARGE_INTEGER WorkCounter = Win32GetWallClock();
+		float WorkSecondsElapsed = Win32GetSecondsElapsed(LastCounter, WorkCounter);
+		float SecondsElapsedForFrame = WorkSecondsElapsed;
+		if(SecondsElapsedForFrame < TargetSecondsPerFrame)
+		{
+			if(is_sleep_granular)
+			{
+				DWORD sleepMS = (DWORD)(1000.0f * (TargetSecondsPerFrame -
+				                                   SecondsElapsedForFrame));
+				if(sleepMS > 0)
+				{
+					Sleep(sleepMS);
+				}
+			}
+		}
+		else
+		{
+			// missed frame rate
+		}
+
+		LARGE_INTEGER EndCounter = Win32GetWallClock();
+		float MSPerFrame = 1000.0f * Win32GetSecondsElapsed(LastCounter, EndCounter);
+		LastCounter = EndCounter;
 	}
 	return (int) msg.wParam;
 }
