@@ -8,6 +8,12 @@
 
 using namespace std;
 
+// FILE *fDummy;
+// freopen_s(&fDummy, "CONIN$", "r", stdin);
+// freopen_s(&fDummy, "CONOUT$", "w", stderr);
+// freopen_s(&fDummy, "CONOUT$", "w", stdout);
+
+
 HANDLE ConsoleStdout = NULL;
 HANDLE ConsoleStdin = NULL;
 
@@ -17,7 +23,6 @@ void WriteOut(const std::string& tmp)
 	{
 		WriteConsole(ConsoleStdout, reinterpret_cast<const VOID*>(tmp.c_str()), tmp.size(), NULL, NULL);
 	}
-	
 }
 
 void WriteLine(const std::string& tmp)
@@ -33,6 +38,7 @@ BOOL InitializeDebugConsole()
   {
 	  return false;
   }
+
   if(ConsoleStdout == NULL)
   {
 	  ConsoleStdout = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -40,21 +46,12 @@ BOOL InitializeDebugConsole()
   
   if(ConsoleStdout == INVALID_HANDLE_VALUE || ConsoleStdout == NULL)
   {
-	  // fprintf(tmp, "Failed to get STd handle\n");
 	  return false;
   }
 
   // int SystemOutput =  _open_osfhandle(intptr_t(ConsoleOutput), _O_TEXT);
   // FILE *COutputHandle = _fdopen(SystemOutput, "w" );
   // *stdout = *COutputHandle;
-
-  // fprintf(COutputHandle, "Hello World Yo\n\r");
-  DWORD writtenChars;
-
-  // WriteConsole(ConsoleStdout, reinterpret_cast<const VOID*>("hello world"), 5, &writtenChars, NULL);
-  // WriteConsole(ConsoleStdout, reinterpret_cast<const VOID*>("Hello World yo"), 7, NULL, NULL);
-
-  // WriteOut("\n\rWakka wakka\n\r");
   return true;
 }
 

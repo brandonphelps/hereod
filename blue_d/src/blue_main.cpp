@@ -19,8 +19,8 @@ const uint16_t MapYOffset = 10;
 class Point
 {
 public:
-	uint16_t x_pos;
-	uint16_t y_pos;
+	float x_pos;
+	float y_pos;
 };
 
 class Map
@@ -124,7 +124,7 @@ void towerDraw(ScreenData* screenData)
 
 void DrawToon(ScreenData* screenData, Point* toon)
 {
-	DrawRectangle(screenData, toon->x_pos, toon->y_pos, 30, 30, 0xAAAA00FF);
+	DrawRectangle(screenData, static_cast<uint32_t>(toon->x_pos), static_cast<uint32_t>(toon->y_pos), 30, 30, 0xAAAA00FF);
 }
 
 // works fine on windows, but something about console doesn't allow writing to.
@@ -151,32 +151,40 @@ extern "C" int GameInit(GameState* game_state)
 }
 
 // some sort of buffer for video data is passed back and forth here.
-extern "C" int GameUpdate(int dt, ScreenData* screenData, GameState* game_state, GameInputController* controller)
+extern "C" int GameUpdate(float dt, ScreenData* screenData, GameState* game_state, GameInputController* controller)
 {
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
+
+	float vel_x;
+	float vel_y;
+	int move_speed = 100;
 	if(controller != NULL)
 	{
 		if(controller->MoveUp.EndedDown)
 		{
-			toon->y_pos--;
+			vel_y = -1 * move_speed;
 		}
 
 		if(controller->MoveDown.EndedDown)
 		{
-			toon->y_pos++;
+			vel_y = move_speed;
 		}
 
 		if(controller->MoveRight.EndedDown)
 		{
-			toon->x_pos++;
+			vel_x = move_speed;
 		}
 		if(controller->MoveLeft.EndedDown)
 		{
-			toon->x_pos--;
+			vel_x = -1 * move_speed;
 		}
 	}
 	
+
+	toon->x_pos = dt * vel_x + toon->x_pos;
+	toon->y_pos = dt * vel_y + toon->y_pos;
+
 	towerDraw(screenData);
 	DrawMap(screenData, p->tile_info);
 	DrawToon(screenData, toon);

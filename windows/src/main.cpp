@@ -295,7 +295,8 @@ int CALLBACK WinMain(
 	new_rec.bottom = 540;
 
 	LARGE_INTEGER LastCounter = Win32GetWallClock();
-	
+	float SecondsElapsedForFrame = 0;
+
 	while(Running)
 	{
 		// using the specific windows classes and stuff, we need
@@ -332,7 +333,7 @@ int CALLBACK WinMain(
 
 		// so basically we give the module reference to teh current screen, the key inputs that the user presed on the last frame
 		// the state also corresponds to the current screen?
-		initRest = blueFuncs.GameUpdate(0, &currentScreen,
+		initRest = blueFuncs.GameUpdate(SecondsElapsedForFrame, &currentScreen,
 		                                &mahState,
 		                                &newKeyboard);
 
@@ -340,7 +341,7 @@ int CALLBACK WinMain(
 		// timing information to ensure a steady framerate.
 		LARGE_INTEGER WorkCounter = Win32GetWallClock();
 		float WorkSecondsElapsed = Win32GetSecondsElapsed(LastCounter, WorkCounter);
-		float SecondsElapsedForFrame = WorkSecondsElapsed;
+		SecondsElapsedForFrame = WorkSecondsElapsed;
 		if(SecondsElapsedForFrame < TargetSecondsPerFrame)
 		{
 			if(is_sleep_granular)
@@ -367,7 +368,7 @@ int CALLBACK WinMain(
 
 		LARGE_INTEGER EndCounter = Win32GetWallClock();
 		float MSPerFrame = 1000.0f * Win32GetSecondsElapsed(LastCounter, EndCounter);
-		WriteLine("MS Per Frame: " + std::to_string(MSPerFrame));
+		WriteLine("MS Per Frame: " + std::to_string(SecondsElapsedForFrame));
 		LastCounter = EndCounter;
 	}
 	return (int) msg.wParam;
