@@ -10,6 +10,10 @@ public:
 	GameState(); 
 	GameState(const GameState& other);
 
+	GameState& operator=(const GameState& other);
+	bool operator!=(const GameState& other) const;
+	bool operator==(const GameState& other) const;
+
 	// de allocates everything.
 	void clear();
 

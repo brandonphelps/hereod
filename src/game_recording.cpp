@@ -1,6 +1,7 @@
 
 #include <string>
 
+#include "console_another.h"
 #include "game_state.h"
 #include "game_input.h"
 #include "game_recording.h"
@@ -11,11 +12,37 @@ static GameInput replay_buff[ReplayBuffSize];
 static uint32_t replayIndex;
 static uint32_t replaySize;
 
+static uint32_t playbackIndex;
+
+void ClearPlayback(GameState* state)
+{
+	playbackIndex = 0;
+	replayIndex = 0;
+	replaySize = 0;
+	*state = initial_state;
+}
+
 void BeginRecordingInput(GameState* initialState)
 {
 	initial_state = *initialState;
+	
 	replayIndex = 0;
 	replaySize = 0;
+	playbackIndex = 0;
+}
+
+void GetNextInputStateUpdate(GameState* State, GameInput* input)
+{
+	playbackIndex = playbackIndex % replaySize;
+	if(playbackIndex == 0)
+	{
+		WriteLine("Copying intiail stake");
+		// start the replay over, set state to intial state.
+		*State = initial_state;
+
+	}
+	*input = replay_buff[playbackIndex];
+	playbackIndex++;
 }
 
 GameInput* GetInputState(uint32_t index)

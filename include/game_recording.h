@@ -6,7 +6,9 @@
 
 void BeginRecordingInput(GameState* initialState);
 
+void ClearPlayback(GameState* state);
 void AppendInputState(GameInput* input);
+void GetNextInputStateUpdate(GameState* State, GameInput* input);
 GameInput* GetInputState(uint32_t index);
 
 void EndRecordingInput(GameState* state);

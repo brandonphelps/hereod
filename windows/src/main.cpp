@@ -159,6 +159,7 @@ int CALLBACK WinMain(
 	InitializeDebugConsole();
 	InitPerformance();
 
+
 	WNDCLASSEX wcex = {};
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style          = CS_HREDRAW | CS_VREDRAW;
@@ -282,6 +283,29 @@ int CALLBACK WinMain(
 		WriteLine("Failed to init game");
 		return 1;
 	}
+
+	GameState tmp = mahState;
+	uint8_t* tmpper = 0;
+	GameState tjpf;
+	tjpf = tmp;
+
+	if(tmp != mahState)
+	{
+		*tmpper;
+	}
+
+	if(tjpf == mahState)
+	{
+	}
+	else
+	{
+		*tmpper;
+	}
+
+	Sleep(10000);
+
+
+
 	// trigger a window update
 	UpdateWindow(hWnd);
 
@@ -295,7 +319,6 @@ int CALLBACK WinMain(
 	float SecondsElapsedForFrame = 0;
 	bool RecordingStates = false;
 	bool PlaybackInput = false;
-	uint32_t replayIndex = 0;
 
 	while(Running)
 	{
@@ -335,13 +358,13 @@ int CALLBACK WinMain(
 							if(PlaybackInput)
 							{
 								PlaybackInput = false;
+								ClearPlayback(&mahState);
 							}
 							else
 							{
 								WriteLine("Begin Replay");
 								PlaybackInput = true;
 							}
-							replayIndex = 0;
 						}
 					}
 					UpdateKeyboardInputs(msg, newKeyboard);
@@ -356,19 +379,16 @@ int CALLBACK WinMain(
 			}
 		}
 
-
-		if(PlaybackInput)
-		{
-			//GetInputState(&mahState, mahInput, replayIndex);
-			mahInput = GetInputState(replayIndex);
-			replayIndex++;
-		}
-
 		mahInput->dtForFrame = SecondsElapsedForFrame;
 
 		if(RecordingStates && !PlaybackInput)
 		{
 			AppendInputState(mahInput);
+		}
+
+		if(PlaybackInput)
+		{
+			GetNextInputStateUpdate(&mahState, mahInput);
 		}
 
 		// so basically we give the module reference to teh current screen, the key inputs that the user presed on the last frame
