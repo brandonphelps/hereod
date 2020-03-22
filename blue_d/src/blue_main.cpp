@@ -144,10 +144,8 @@ extern "C" int GameInit(GameState* game_state)
 	}
 
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
-
 	toon->x_pos = 0;
 	toon->y_pos = 0;
-	
 	return 0;
 }
 
@@ -184,7 +182,6 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 			vel_x = -1 * move_speed;
 		}
 	}
-	
 
 	toon->x_pos = dt * vel_x + toon->x_pos;
 	toon->y_pos = dt * vel_y + toon->y_pos;

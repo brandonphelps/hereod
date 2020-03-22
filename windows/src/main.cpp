@@ -17,6 +17,7 @@
 #include "performance.h"
 #include "keyboard_updates.h"
 
+#include "game_recording.h"
 #include "game_module.h"
 #include "game_state.h"
 #include "game_controller.h"
@@ -265,8 +266,8 @@ int CALLBACK WinMain(
 	mahState.platform_data = new uint8_t[100];
 	mahState.platform_size = 100;
 
-	GameInput mahInput;
-	GameInputController* newKeyboard = &(mahInput.keyboard);
+	GameInput* mahInput = new GameInput();
+	GameInputController* newKeyboard = &(mahInput->keyboard);
 	GameInputControllerInit(newKeyboard);
 
 	std::string PlatformIdent = "Windows";
@@ -292,6 +293,9 @@ int CALLBACK WinMain(
 
 	LARGE_INTEGER LastCounter = Win32GetWallClock();
 	float SecondsElapsedForFrame = 0;
+	bool RecordingStates = false;
+	bool PlaybackInput = false;
+	uint32_t replayIndex = 0;
 
 	while(Running)
 	{
@@ -315,6 +319,31 @@ int CALLBACK WinMain(
 				case WM_KEYDOWN:
 				case WM_KEYUP:
 				{
+					uint32_t VKCode = (uint32_t)msg.wParam;
+					bool WasDown = ((msg.lParam & (1 << 30)) != 0);
+					bool IsDown  = ((msg.lParam & (1 << 31)) == 0);
+					if(WasDown != IsDown)
+					{
+						if(VKCode == 'L' && WasDown)
+						{
+							BeginRecordingInput(&mahState);
+							RecordingStates = true;
+							WriteLine("Begin recording");
+						}
+						if(VKCode == 'P' && WasDown)
+						{
+							if(PlaybackInput)
+							{
+								PlaybackInput = false;
+							}
+							else
+							{
+								WriteLine("Begin Replay");
+								PlaybackInput = true;
+							}
+							replayIndex = 0;
+						}
+					}
 					UpdateKeyboardInputs(msg, newKeyboard);
 				} break;
 				
@@ -327,13 +356,26 @@ int CALLBACK WinMain(
 			}
 		}
 
-		mahInput.dtForFrame = SecondsElapsedForFrame;
+
+		if(PlaybackInput)
+		{
+			//GetInputState(&mahState, mahInput, replayIndex);
+			mahInput = GetInputState(replayIndex);
+			replayIndex++;
+		}
+
+		mahInput->dtForFrame = SecondsElapsedForFrame;
+
+		if(RecordingStates && !PlaybackInput)
+		{
+			AppendInputState(mahInput);
+		}
 
 		// so basically we give the module reference to teh current screen, the key inputs that the user presed on the last frame
 		// the state also corresponds to the current screen?
 		initRest = blueFuncs.GameUpdate(&currentScreen,
 		                                &mahState,
-		                                &mahInput);
+		                                mahInput);
 
 
 		// timing information to ensure a steady framerate.
@@ -366,7 +408,6 @@ int CALLBACK WinMain(
 
 		LARGE_INTEGER EndCounter = Win32GetWallClock();
 		float MSPerFrame = 1000.0f * Win32GetSecondsElapsed(LastCounter, EndCounter);
-		WriteLine("MS Per Frame: " + std::to_string(SecondsElapsedForFrame));
 		LastCounter = EndCounter;
 	}
 	return (int) msg.wParam;

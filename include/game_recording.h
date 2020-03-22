@@ -2,16 +2,12 @@
 #define GAME_RECORDING_H
 
 #include "game_state.h"
-
-class GameRecording
-{
-public:
-	GameState initial_state;
-};
+#include "game_input.h"
 
 void BeginRecordingInput(GameState* initialState);
 
 void AppendInputState(GameInput* input);
+GameInput* GetInputState(uint32_t index);
 
 void EndRecordingInput(GameState* state);
 

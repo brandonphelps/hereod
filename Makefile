@@ -51,7 +51,9 @@ $(eval $(call CommonSrcRule,module_loading))
 $(eval $(call CommonSrcRule,video))
 $(eval $(call CommonSrcRule,game_controller))
 $(eval $(call CommonSrcRule,game_state))
+$(eval $(call CommonSrcRule,game_recording))
 $(eval $(call CommonSrcRule,grid_helpers))
+
 
 clean:
 	rm -rf bin $(TARGETS)
