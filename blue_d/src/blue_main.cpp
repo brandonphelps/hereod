@@ -47,6 +47,14 @@ const uint8_t currentmap[10 * 10] = {
                                      1, 0, 0, 0, 0,  0, 0, 1, 1, 1, };
 
 
+class Tower
+{
+public:
+	
+private:
+	
+};
+
 void DrawMap(ScreenData* screenData, uint8_t* tiles)
 {
 	// 
