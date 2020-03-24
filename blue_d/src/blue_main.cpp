@@ -146,6 +146,20 @@ void DrawToon(ScreenData* screenData, PositionComponent* toon, uint32_t color_ma
 EntityObj player;
 EntityObj leaf1;
 
+EntityObj ents[10]; // all the entities live here. 
+uint32_t entityId = 0;
+
+void add_leaf(uint32_t start_x, float start_y, float color_mask)
+{
+	EntityObj* current = ents + entityId;
+	current->id = entityId;
+	entityId++;
+	p_entities[current->id].x_pos = start_x;
+	p_entities[current->id].y_pos = start_y;
+	p_entities[current->id].color_mask = color_mask;
+	current->component_mask = 1;
+}
+
 // works fine on windows, but something about console doesn't allow writing to.
 extern "C" int GameInit(GameState* game_state)
 {
@@ -164,16 +178,23 @@ extern "C" int GameInit(GameState* game_state)
 
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
 
-	player.id = 1;
-	leaf1.id = 2;
-
+	// add_player
+	player.id = 0;
+	player.component_mask = 1;
 	p_entities[player.id].x_pos = 40;
 	p_entities[player.id].y_pos = 40;
-	
-	p_entities[leaf1.id].x_pos = 20;
-	p_entities[leaf1.id].y_pos = 20;
 
 	h_entities[player.id].amount = 10;
+	entityId++;
+
+	add_leaf(70, 0, 0x00BBFFFF);
+	// leaf1.id = 2;
+
+	
+	// p_entities[leaf1.id].x_pos = 20;
+	// p_entities[leaf1.id].y_pos = 20;
+
+
 
 	return 0;
 }
@@ -202,17 +223,36 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 
 	if(enableWind)
 	{
-		wind_movement_update(dt, &player, 1);
-		wind_movement_update(dt, &leaf1, 1);
+		EntityObj moved_objs[10];
+		uint32_t move_count = 0;
+		for(int i = 0; i < 10; i++)
+		{
+			if(ents[i].component_mask == 1)
+			{
+				// is this doing a copy by value?
+				moved_objs[move_count] = ents[i];
+				move_count++;
+			}
+		}
+		// EntityObj moved_objs[2] = {player, ents[1]};
+		// EntityObj* moved_objs[2];
+		// moved_objs[0] = &player;
+		// moved_objs[1] = &(ents[1]);
+		wind_movement_update(dt, moved_objs, move_count);
 	}
-
 
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
 
 	towerDraw(screenData);
 	DrawMap(screenData, p->tile_info);
-	DrawToon(screenData, p_entities + leaf1.id, 0xCCAA22FF);
+
+	// for(int i = 1; i < 2; i++)
+	// {
+	// 	DrawToon(screenData, p_entities + ents[i].id, (p_entities + ents[i].id)->color_mask);
+	// }
+	DrawToon(screenData, p_entities + ents[1].id, (p_entities + ents[1].id)->color_mask);
+	// DrawToon(screenData, p_entities + leaf1.id, 0xCCDD22FF);
 	DrawToon(screenData, p_entities + player.id, 0xAAAA00FF);
 	
 	return 0;

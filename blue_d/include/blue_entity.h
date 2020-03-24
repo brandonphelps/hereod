@@ -6,9 +6,8 @@
 typedef struct EntityObj
 {
 	uint32_t id;
+	uint32_t component_mask; 
 } EntityObj;
-
-
 
 class HealthComponent
 {
@@ -21,4 +20,5 @@ class PositionComponent
 public:
 	float x_pos;
 	float y_pos;
+	uint32_t color_mask; // temporary
 };
