@@ -2,6 +2,8 @@
 #include <stdint.h>
 
 #include "video.h"
+#include "blue_entity.h"
+
 #include "grid_helpers.h"
 #include "game_state.h"
 #include "game_input.h"
@@ -46,6 +48,14 @@ const uint8_t currentmap[10 * 10] = {
                                      1, 0, 0, 0, 0,  0, 0, 0, 0, 1, 
                                      1, 0, 0, 0, 0,  0, 0, 1, 1, 1, };
 
+
+class Tower
+{
+public:
+	
+private:
+	
+};
 
 void DrawMap(ScreenData* screenData, uint8_t* tiles)
 {
@@ -123,10 +133,17 @@ void towerDraw(ScreenData* screenData)
 	}
 }
 
-void DrawToon(ScreenData* screenData, Point* toon)
+extern PositionComponent p_entities[100];
+extern HealthComponent   h_entities[100];
+
+
+void DrawToon(ScreenData* screenData, PositionComponent* toon)
 {
 	DrawRectangle(screenData, static_cast<uint32_t>(toon->x_pos), static_cast<uint32_t>(toon->y_pos), 30, 30, 0xAAAA00FF);
 }
+
+
+EntityObj player;
 
 // works fine on windows, but something about console doesn't allow writing to.
 extern "C" int GameInit(GameState* game_state)
@@ -145,10 +162,21 @@ extern "C" int GameInit(GameState* game_state)
 	}
 
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
-	toon->x_pos = 0;
-	toon->y_pos = 0;
+
+	player.id = 1;
+	
+	p_entities[player.id].x_pos = 40;
+	p_entities[player.id].y_pos = 40;
+
+	h_entities[player.id].amount = 10;
+
 	return 0;
 }
+
+void wind_movement_update(float dt, EntityObj* start, uint32_t entity_size);
+void player_move_update(float dt, GameInput* game_input, EntityObj* start, uint32_t entity_size);
+
+bool enableWind = false;
 
 // some sort of buffer for video data is passed back and forth here.
 extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInput* game_input)
@@ -156,40 +184,29 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	GameInputController* controller = &(game_input->keyboard);
 	float dt = game_input->dtForFrame;
 
-	Map* p = reinterpret_cast<Map*>(game_state->module_data);
-	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
+	player_move_update(dt, game_input, &player, 1);
 
-	float vel_x;
-	float vel_y;
-	int move_speed = 30; // in pixels per second.
+
 	if(controller != NULL)
 	{
 		if(controller->MoveUp.EndedDown)
 		{
-			vel_y = -1 * move_speed;
-		}
-
-		if(controller->MoveDown.EndedDown)
-		{
-			vel_y = move_speed;
-		}
-
-		if(controller->MoveRight.EndedDown)
-		{
-			vel_x = move_speed;
-		}
-		if(controller->MoveLeft.EndedDown)
-		{
-			vel_x = -1 * move_speed;
+			enableWind = true;
 		}
 	}
 
-	toon->x_pos = dt * vel_x + toon->x_pos;
-	toon->y_pos = dt * vel_y + toon->y_pos;
+	if(enableWind)
+	{
+		wind_movement_update(dt, &player, 1);
+	}
+
+
+	Map* p = reinterpret_cast<Map*>(game_state->module_data);
+	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
 
 	towerDraw(screenData);
 	DrawMap(screenData, p->tile_info);
-	DrawToon(screenData, toon);
+	DrawToon(screenData, p_entities + player.id);
 	
 	return 0;
 }

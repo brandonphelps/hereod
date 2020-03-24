@@ -6,7 +6,7 @@
 #include "game_input.h"
 #include "game_recording.h"
 
-#define ReplayBuffSize 1000
+#define ReplayBuffSize 100000
 static GameState initial_state;
 static GameInput replay_buff[ReplayBuffSize];
 static uint32_t replayIndex;
@@ -24,7 +24,6 @@ void ClearPlayback(GameState* state)
 
 void BeginRecordingInput(GameState* initialState)
 {
-	WriteLine("Begin Recording input copy");
 	initial_state = *initialState;
 	
 	replayIndex = 0;
@@ -37,11 +36,8 @@ void GetNextInputStateUpdate(GameState* State, GameInput* input)
 	playbackIndex = playbackIndex % replaySize;
 	if(playbackIndex == 0)
 	{
-		WriteLine("Directly before copying intial state");
-		*State = initial_state;
-		WriteLine("Copying intiail stake: " + std::to_string(State->module_size));
 		// start the replay over, set state to intial state.
-
+		*State = initial_state;
 	}
 	*input = replay_buff[playbackIndex];
 	playbackIndex++;
