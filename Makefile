@@ -24,7 +24,6 @@ INCLUDE_DIRS += -Iinclude
 
 LIB_DIRS = -L/usr/local/lib
 
-
 C_FLAGS += $(INCLUDE_DIRS)
 
 all: $(TARGETS)
@@ -44,7 +43,12 @@ bin/tower_main.o: tower_d/src/tower_main.cpp
 bin/blue_main.o: blue_d/src/blue_main.cpp
 	@mkdir -p $(dir $@)
 	@echo "Building $@"
-	@$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
+	@$(CC) $(C_FLAGS) -Iblue_d/include $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
+
+bin/blue_entity.o: blue_d/src/blue_entity.cpp
+	@mkdir -p $(dir $@)
+	@echo "Building $@"
+	@$(CC) $(C_FLAGS) -Iblue_d/include $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
 
 # Common sources, i.e not module specific
 $(eval $(call CommonSrcRule,module_loading))

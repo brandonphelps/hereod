@@ -1,0 +1,24 @@
+
+#pragma once
+
+#include <stdint.h>
+
+typedef struct EntityObj
+{
+	uint32_t id;
+} EntityObj;
+
+
+
+class HealthComponent
+{
+public:
+	uint16_t amount;
+};
+
+class PositionComponent
+{
+public:
+	uint16_t x_pos;
+	uint16_t y_pos;
+};
