@@ -180,7 +180,7 @@ extern "C" int GameInit(GameState* game_state)
 
 	// add_player
 	player.id = 0;
-	player.component_mask = 1;
+	player.component_mask = 0;
 	p_entities[player.id].x_pos = 40;
 	p_entities[player.id].y_pos = 40;
 
@@ -188,14 +188,13 @@ extern "C" int GameInit(GameState* game_state)
 	entityId++;
 
 	add_leaf(70, 0, 0x00BBFFFF);
+	add_leaf(45, 24, 0x44CCFFFF);
+	add_leaf(205, 154, 0x4411FBFF);
 	// leaf1.id = 2;
 
 	
 	// p_entities[leaf1.id].x_pos = 20;
 	// p_entities[leaf1.id].y_pos = 20;
-
-
-
 	return 0;
 }
 
@@ -225,19 +224,22 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	{
 		EntityObj moved_objs[10];
 		uint32_t move_count = 0;
+		if(player.component_mask == 1)
+		{
+			moved_objs[move_count] = player;
+			move_count++;
+		}
+
 		for(int i = 0; i < 10; i++)
 		{
 			if(ents[i].component_mask == 1)
 			{
 				// is this doing a copy by value?
+				//   pretty certain.
 				moved_objs[move_count] = ents[i];
 				move_count++;
 			}
 		}
-		// EntityObj moved_objs[2] = {player, ents[1]};
-		// EntityObj* moved_objs[2];
-		// moved_objs[0] = &player;
-		// moved_objs[1] = &(ents[1]);
 		wind_movement_update(dt, moved_objs, move_count);
 	}
 
@@ -247,11 +249,12 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	towerDraw(screenData);
 	DrawMap(screenData, p->tile_info);
 
-	// for(int i = 1; i < 2; i++)
-	// {
-	// 	DrawToon(screenData, p_entities + ents[i].id, (p_entities + ents[i].id)->color_mask);
-	// }
-	DrawToon(screenData, p_entities + ents[1].id, (p_entities + ents[1].id)->color_mask);
+	// skip the player since he is first index.
+	for(int i = 1; i < entityId; i++)
+	{
+		DrawToon(screenData, p_entities + ents[i].id, (p_entities + ents[i].id)->color_mask);
+	}
+	// DrawToon(screenData, p_entities + ents[1].id, (p_entities + ents[1].id)->color_mask);
 	// DrawToon(screenData, p_entities + leaf1.id, 0xCCDD22FF);
 	DrawToon(screenData, p_entities + player.id, 0xAAAA00FF);
 	
