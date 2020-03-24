@@ -142,14 +142,22 @@ void DrawToon(ScreenData* screenData, PositionComponent* toon, uint32_t color_ma
 	DrawRectangle(screenData, static_cast<uint32_t>(toon->x_pos), static_cast<uint32_t>(toon->y_pos), 30, 30, color_mask);
 }
 
-
-EntityObj player;
-EntityObj leaf1;
-
-EntityObj ents[10]; // all the entities live here. 
+EntityObj* ents; // all the entities live here. 
 uint32_t entityId = 0;
 
-void add_leaf(uint32_t start_x, float start_y, float color_mask)
+void add_player(float start_x, float start_y, uint32_t color_mask)
+{
+	EntityObj* current = ents + entityId;
+	current->id = entityId;
+	entityId++;
+	p_entities[current->id].x_pos = start_x;
+	p_entities[current->id].y_pos = start_y;
+	p_entities[current->id].color_mask = color_mask;
+	h_entities[current->id].amount = 10;
+	current->component_mask = 0;
+}
+
+void add_leaf(float start_x, float start_y, uint32_t color_mask)
 {
 	EntityObj* current = ents + entityId;
 	current->id = entityId;
@@ -163,9 +171,10 @@ void add_leaf(uint32_t start_x, float start_y, float color_mask)
 // works fine on windows, but something about console doesn't allow writing to.
 extern "C" int GameInit(GameState* game_state)
 {
-	game_state->module_data = new uint8_t[sizeof(Map) + sizeof(Point)];
-	game_state->module_size = sizeof(Map) + sizeof(Point);
-
+	uint32_t arena_size = sizeof(Map) + sizeof(Point) + sizeof(EntityObj) * 10;
+	game_state->module_data = new uint8_t[arena_size];
+	game_state->module_size = arena_size;
+	
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);
 	if(p != NULL)
 	{
@@ -178,14 +187,10 @@ extern "C" int GameInit(GameState* game_state)
 
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
 
-	// add_player
-	player.id = 0;
-	player.component_mask = 0;
-	p_entities[player.id].x_pos = 40;
-	p_entities[player.id].y_pos = 40;
+	ents = reinterpret_cast<EntityObj*>((game_state->module_data)+sizeof(Map)+sizeof(Point));
 
-	h_entities[player.id].amount = 10;
-	entityId++;
+	// add_player
+	add_player(40, 40, 0x000000FF);
 
 	add_leaf(70, 0, 0x00BBFFFF);
 	add_leaf(45, 24, 0x44CCFFFF);
@@ -209,8 +214,8 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	GameInputController* controller = &(game_input->keyboard);
 	float dt = game_input->dtForFrame;
 
-	player_move_update(dt, game_input, &player, 1);
-
+	// first ent is the player.
+	player_move_update(dt, game_input, ents, 1);
 
 	if(controller != NULL)
 	{
@@ -224,11 +229,6 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	{
 		EntityObj moved_objs[10];
 		uint32_t move_count = 0;
-		if(player.component_mask == 1)
-		{
-			moved_objs[move_count] = player;
-			move_count++;
-		}
 
 		for(int i = 0; i < 10; i++)
 		{
@@ -256,7 +256,7 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	}
 	// DrawToon(screenData, p_entities + ents[1].id, (p_entities + ents[1].id)->color_mask);
 	// DrawToon(screenData, p_entities + leaf1.id, 0xCCDD22FF);
-	DrawToon(screenData, p_entities + player.id, 0xAAAA00FF);
+	DrawToon(screenData, p_entities + ents[0].id, 0xAAAA00FF);
 	
 	return 0;
 }
