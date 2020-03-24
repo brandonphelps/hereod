@@ -137,13 +137,14 @@ extern PositionComponent p_entities[100];
 extern HealthComponent   h_entities[100];
 
 
-void DrawToon(ScreenData* screenData, PositionComponent* toon)
+void DrawToon(ScreenData* screenData, PositionComponent* toon, uint32_t color_mask)
 {
-	DrawRectangle(screenData, static_cast<uint32_t>(toon->x_pos), static_cast<uint32_t>(toon->y_pos), 30, 30, 0xAAAA00FF);
+	DrawRectangle(screenData, static_cast<uint32_t>(toon->x_pos), static_cast<uint32_t>(toon->y_pos), 30, 30, color_mask);
 }
 
 
 EntityObj player;
+EntityObj leaf1;
 
 // works fine on windows, but something about console doesn't allow writing to.
 extern "C" int GameInit(GameState* game_state)
@@ -164,9 +165,13 @@ extern "C" int GameInit(GameState* game_state)
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
 
 	player.id = 1;
-	
+	leaf1.id = 2;
+
 	p_entities[player.id].x_pos = 40;
 	p_entities[player.id].y_pos = 40;
+	
+	p_entities[leaf1.id].x_pos = 20;
+	p_entities[leaf1.id].y_pos = 20;
 
 	h_entities[player.id].amount = 10;
 
@@ -198,6 +203,7 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	if(enableWind)
 	{
 		wind_movement_update(dt, &player, 1);
+		wind_movement_update(dt, &leaf1, 1);
 	}
 
 
@@ -206,7 +212,8 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 
 	towerDraw(screenData);
 	DrawMap(screenData, p->tile_info);
-	DrawToon(screenData, p_entities + player.id);
+	DrawToon(screenData, p_entities + leaf1.id, 0xCCAA22FF);
+	DrawToon(screenData, p_entities + player.id, 0xAAAA00FF);
 	
 	return 0;
 }
