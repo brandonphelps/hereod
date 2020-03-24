@@ -40,9 +40,12 @@ void player_move_update(float dt, GameInput* game_input, EntityObj* start, uint3
 
 void wind_movement_update(float dt, EntityObj* start, uint32_t entity_size)
 {
+	EntityObj* iter = start;
+	float vel_x = -15;
 	for(uint32_t i = 0; i < entity_size; i++)
 	{
-		p_entities[start->id].x_pos += 1;
-		p_entities[start->id].y_pos += 1;
+		p_entities[iter->id].x_pos = dt * vel_x + p_entities[iter->id].x_pos ;
+		//p_entities[start->id].y_pos += 1;
+		iter++;
 	}
 }

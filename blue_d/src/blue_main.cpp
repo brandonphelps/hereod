@@ -166,15 +166,17 @@ extern "C" int GameInit(GameState* game_state)
 	player.id = 1;
 	
 	p_entities[player.id].x_pos = 40;
-	p_entities[player.id].y_pos = 0;
+	p_entities[player.id].y_pos = 40;
 
 	h_entities[player.id].amount = 10;
 
 	return 0;
 }
 
-void wind_move_update(float dt, EntityObj* start, uint32_t entity_size);
+void wind_movement_update(float dt, EntityObj* start, uint32_t entity_size);
 void player_move_update(float dt, GameInput* game_input, EntityObj* start, uint32_t entity_size);
+
+bool enableWind = false;
 
 // some sort of buffer for video data is passed back and forth here.
 extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInput* game_input)
@@ -183,6 +185,20 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	float dt = game_input->dtForFrame;
 
 	player_move_update(dt, game_input, &player, 1);
+
+
+	if(controller != NULL)
+	{
+		if(controller->MoveUp.EndedDown)
+		{
+			enableWind = true;
+		}
+	}
+
+	if(enableWind)
+	{
+		wind_movement_update(dt, &player, 1);
+	}
 
 
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);

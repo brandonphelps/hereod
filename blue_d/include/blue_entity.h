@@ -19,6 +19,6 @@ public:
 class PositionComponent
 {
 public:
-	uint16_t x_pos;
-	uint16_t y_pos;
+	float x_pos;
+	float y_pos;
 };
