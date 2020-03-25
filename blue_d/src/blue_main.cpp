@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdint.h>
 
+#include <vector>
+
 #include "video.h"
 #include "blue_entity.h"
 
@@ -82,45 +84,6 @@ void DrawMap(ScreenData* screenData, uint8_t* tiles)
 	}
 }
 
-void draw_circle_helper(ScreenData* screenData,
-                        uint32_t center_x, uint32_t center_y,
-                        uint32_t x, uint32_t y)
-{
-	screenData->set_pixel_color(center_x + x, center_y + y, 0xFF0000FF);
-	screenData->set_pixel_color(center_x - x, center_y + y, 0xFF0000FF);
-	screenData->set_pixel_color(center_x + x, center_y - y, 0xFF0000FF);
-	screenData->set_pixel_color(center_x - x, center_y - y, 0xFF0000FF);
-
-	screenData->set_pixel_color(center_x + y, center_y + x, 0xFF0000FF);
-	screenData->set_pixel_color(center_x - y, center_y + x, 0xFF0000FF);
-	screenData->set_pixel_color(center_x + y, center_y - x, 0xFF0000FF);
-	screenData->set_pixel_color(center_x - y, center_y - x, 0xFF00FFFF);
-}
-
-void DrawCircle(ScreenData* screenData,
-                uint32_t center_x, uint32_t center_y,
-                uint32_t r)
-{
-	uint32_t x = 0;
-	uint32_t y = r;
-	uint32_t d = 3 - y * r;
-	draw_circle_helper(screenData, center_x, center_y, x, y);
-	while(y >= x)
-	{
-		x++;
-		if(d > 0)
-		{
-			y--;
-			d = d + 4 * (x - y) + 10;
-		}
-		else
-		{
-			d = d + 4 * x + 6;
-		}
-		draw_circle_helper(screenData, center_x, center_y, x, y);
-	}
-}
-
 void towerDraw(ScreenData* screenData)
 {
 	for(int y = 0; y < screenData->height; ++y)
@@ -136,6 +99,7 @@ void towerDraw(ScreenData* screenData)
 extern PositionComponent p_entities[100];
 extern HealthComponent   h_entities[100];
 
+std::vector<uint32_t> WindSystem;
 
 void DrawToon(ScreenData* screenData, PositionComponent* toon, uint32_t color_mask)
 {
@@ -155,6 +119,7 @@ void add_player(float start_x, float start_y, uint32_t color_mask)
 	p_entities[current->id].color_mask = color_mask;
 	h_entities[current->id].amount = 10;
 	current->component_mask = 0;
+	WindSystem.push_back(current->id);
 }
 
 void add_leaf(float start_x, float start_y, uint32_t color_mask)
@@ -166,6 +131,7 @@ void add_leaf(float start_x, float start_y, uint32_t color_mask)
 	p_entities[current->id].y_pos = start_y;
 	p_entities[current->id].color_mask = color_mask;
 	current->component_mask = 1;
+	WindSystem.push_back(current->id);
 }
 
 // works fine on windows, but something about console doesn't allow writing to.
@@ -196,14 +162,13 @@ extern "C" int GameInit(GameState* game_state)
 	add_leaf(45, 24, 0x44CCFFFF);
 	add_leaf(205, 154, 0x4411FBFF);
 	// leaf1.id = 2;
-
-	
 	// p_entities[leaf1.id].x_pos = 20;
 	// p_entities[leaf1.id].y_pos = 20;
 	return 0;
 }
 
-void wind_movement_update(float dt, EntityObj* start, uint32_t entity_size);
+// void wind_movement_update(float dt, EntityObj* start, uint32_t entity_size);
+void wind_movement_update(float dt, uint32_t* entityIds, uint32_t entity_size);
 void player_move_update(float dt, GameInput* game_input, EntityObj* start, uint32_t entity_size);
 
 bool enableWind = false;
@@ -227,20 +192,20 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 
 	if(enableWind)
 	{
-		EntityObj moved_objs[10];
-		uint32_t move_count = 0;
-
-		for(int i = 0; i < 10; i++)
-		{
-			if(ents[i].component_mask == 1)
-			{
-				// is this doing a copy by value?
-				//   pretty certain.
-				moved_objs[move_count] = ents[i];
-				move_count++;
-			}
-		}
-		wind_movement_update(dt, moved_objs, move_count);
+		// EntityObj moved_objs[10];
+		// uint32_t move_count = 0;
+		// for(int i = 0; i < 10; i++)
+		// {
+		// 	if(ents[i].component_mask == 1)
+		// 	{
+		// 		// is this doing a copy by value?
+		// 		//   pretty certain.
+		// 		moved_objs[move_count] = ents[i];
+		// 		move_count++;
+		// 	}
+		// }
+		// wind_movement_update(dt, moved_objs, move_count);
+		wind_movement_update(dt, WindSystem.data(), WindSystem.size());
 	}
 
 	Map* p = reinterpret_cast<Map*>(game_state->module_data);

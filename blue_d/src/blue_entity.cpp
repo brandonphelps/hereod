@@ -48,3 +48,15 @@ void wind_movement_update(float dt, EntityObj* start, uint32_t entity_size)
 		iter = iter+1;
 	}
 }
+
+void wind_movement_update(float dt, uint32_t* entityIds, uint32_t entity_size)
+{
+	float vel_x = -15;
+	uint32_t* startIt = entityIds;
+	for(uint32_t i = 0; i < entity_size; i++)
+	{
+		p_entities[*startIt].x_pos = dt * vel_x + p_entities[*startIt].x_pos ;
+		startIt = startIt + 1;
+	}
+}
+
