@@ -266,6 +266,14 @@ int CALLBACK WinMain(
 	// Main message loop:
 	GameState mahState;
 
+	init_memory_section(mahState.platform_mem, 100);
+
+	uint8_t * res = (uint8_t*)push_mem(mahState.platform_mem, 30);
+	if(res == NULL)
+	{
+		Sleep(30000);
+	}
+	
 	mahState.platform_data = new uint8_t[100];
 	mahState.platform_size = 100;
 
@@ -277,12 +285,14 @@ int CALLBACK WinMain(
 	for(int i =0; i < PlatformIdent.size(); i++)
 	{
 		mahState.platform_data[i] = PlatformIdent[i];
+		res[i] = PlatformIdent[i];
 	}
 
 	int initRest = blueFuncs.GameInit(&mahState);
 	if(initRest != 0)
 	{
-		WriteLine("Failed to init game");
+		WriteLine("Failed to init game, Exiting...");
+		Sleep(30000);
 		return 1;
 	}
 

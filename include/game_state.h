@@ -2,6 +2,7 @@
 #define CUSTOM_GAMESTATE_H
 
 #include <stdint.h>
+#include "game_memory.h"
 
 class GameState
 {
@@ -20,9 +21,12 @@ public:
 
 public:
 	uint8_t* platform_data;
-	uint32_t platform_size;
+	uint64_t platform_size;
 	uint8_t* module_data;
-	uint32_t module_size;
+	uint64_t module_size;
+
+public:
+	MemorySection platform_mem;
 };
 
 #endif

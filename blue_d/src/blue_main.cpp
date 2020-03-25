@@ -150,6 +150,14 @@ void add_tile(float start_x, float start_y, uint32_t color_mask)
 // works fine on windows, but something about console doesn't allow writing to.
 extern "C" int GameInit(GameState* game_state)
 {
+	uint8_t* platform_mem = game_state->platform_mem.base;
+	if(platform_mem[0] != 'W')
+	{
+		return 0;
+	}
+
+	
+
 	uint32_t arena_size = sizeof(Map) + sizeof(Point) + sizeof(EntityObj) * 10;
 	game_state->module_data = new uint8_t[arena_size];
 	game_state->module_size = arena_size;
