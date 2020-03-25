@@ -103,7 +103,9 @@ std::vector<uint32_t> WindSystem;
 
 void DrawToon(ScreenData* screenData, PositionComponent* toon, uint32_t color_mask)
 {
-	DrawRectangle(screenData, static_cast<uint32_t>(toon->x_pos), static_cast<uint32_t>(toon->y_pos), 30, 30, color_mask);
+	DrawRectangle(screenData,
+	              static_cast<uint32_t>(toon->x_pos), static_cast<uint32_t>(toon->y_pos),
+	              30, 30, color_mask);
 }
 
 EntityObj* ents; // all the entities live here. 
@@ -132,6 +134,17 @@ void add_leaf(float start_x, float start_y, uint32_t color_mask)
 	p_entities[current->id].color_mask = color_mask;
 	current->component_mask = 1;
 	WindSystem.push_back(current->id);
+}
+
+void add_tile(float start_x, float start_y, uint32_t color_mask)
+{
+	EntityObj* current = ents + entityId;
+	current->id = entityId;
+	entityId++;
+	p_entities[current->id].x_pos = start_x;
+	p_entities[current->id].y_pos = start_y;
+	p_entities[current->id].color_mask = color_mask;
+	current->component_mask = 1;
 }
 
 // works fine on windows, but something about console doesn't allow writing to.
