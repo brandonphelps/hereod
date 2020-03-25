@@ -9,6 +9,7 @@ class GameState
 public:
 	GameState(); 
 	GameState(const GameState& other);
+	~GameState();
 
 	GameState& operator=(const GameState& other);
 	bool operator!=(const GameState& other) const;

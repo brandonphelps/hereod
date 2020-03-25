@@ -17,6 +17,7 @@
 #include "performance.h"
 #include "keyboard_updates.h"
 
+#include "game_memory.h"
 #include "game_recording.h"
 #include "game_module.h"
 #include "game_state.h"
@@ -264,6 +265,7 @@ int CALLBACK WinMain(
 	// load custom game module 
 	// Main message loop:
 	GameState mahState;
+
 	mahState.platform_data = new uint8_t[100];
 	mahState.platform_size = 100;
 

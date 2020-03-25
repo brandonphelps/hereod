@@ -10,7 +10,6 @@ GameState::GameState()
 
 	module_data = NULL;
 	module_size = 0;	
-
 }
 
 GameState::GameState(const GameState& other)
@@ -24,6 +23,11 @@ GameState::GameState(const GameState& other)
 	module_size = other.module_size;
 	module_data = new uint8_t[module_size];
 	std::memcpy(module_data, other.module_data, module_size);
+}
+
+GameState::~GameState()
+{
+	clear();
 }
 
 GameState& GameState::operator=(const GameState& other)
@@ -74,7 +78,6 @@ bool GameState::operator==(const GameState& other) const
 	}
 	return true;
 }
-
 
 void GameState::clear()
 {
