@@ -27,6 +27,27 @@
 #include "console_another.h"
 #include "video.h"
 
+static char valueConvertTable[16] =
+	{
+	 48,
+	 49,
+	 50,
+	 51,
+	 52,
+	 53,
+	 54,
+	 55,
+	 56,
+	 57,
+	 65,
+	 66,
+	 67,
+	 68,
+	 69,
+	 70
+	};
+
+
 template <typename T>
 std::string toHex(T value)
 {
@@ -42,7 +63,9 @@ std::string toHex(uint8_t* start, size_t length)
 	stream << "0x" << std::hex;
 	for(int i = 0; i < length; i++)
 	{
-		stream << start[i];
+		uint8_t highNibble = 0xF0 & start[i];
+		uint8_t lowNibble = 0x0F & start[i];
+		stream << valueConvertTable[highNibble] << valueConvertTable[lowNibble] << " ";
 	}
 	std::string msg = stream.str();
 	return msg;
@@ -158,6 +181,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 void* StartMemPrint = 0;
 bool DrawMemory = false;
 
+
 LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	LRESULT Result = 0;
@@ -176,6 +200,13 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				uint8_t* platname = reinterpret_cast<uint8_t*>(StartMemPrint);
 				std::string valueStr = toHex(platname, 25);
 				TextOut(hdc, 40, 40, valueStr.c_str(), valueStr.size());
+				// std::string temp = 1;
+				char temp = valueConvertTable[0];
+				char temp2 = valueConvertTable[9];
+				char temp3 = valueConvertTable[10];
+				TextOut(hdc, 40, 60, &temp, 1);
+				TextOut(hdc, 40, 75, &temp2, 1);
+				TextOut(hdc, 40, 90, &temp3, 1);
 			}
 
 			TextOut(hdc,
@@ -355,13 +386,11 @@ int CALLBACK WinMain(
 	GameInputControllerInit(newKeyboard);
 
 	std::string PlatformIdent = "Windows";
-	for(int i =0; i < PlatformIdent.size(); i++)
+	for(int i = 0; i < PlatformIdent.size(); i++)
 	{
 		mahState.platform_data[i] = PlatformIdent[i];
 		res[i] = PlatformIdent[i];
 	}
-
-	StartMemPrint = reinterpret_cast<void*>(mahState.platform_data);
 
 	int initRest = blueFuncs.GameInit(&mahState);
 	if(initRest != 0)
@@ -370,6 +399,18 @@ int CALLBACK WinMain(
 		Sleep(30000);
 		return 1;
 	}
+	if(mahState.module_mem.base != NULL)
+	{
+		StartMemPrint = reinterpret_cast<void*>(mahState.module_mem.base);		
+	}
+	else
+	{
+		WriteLine("Failed to get module mem base, Exiting...");
+		Sleep(20000);
+		return 1;
+	}
+
+
 
 	// trigger a window update
 	UpdateWindow(hWnd);
