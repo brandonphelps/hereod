@@ -72,7 +72,6 @@ std::string toHex(uint8_t* start, size_t length)
 }
 
 static bool Running = true;
-
 HINSTANCE hInst;
 
 // todo(brandon): this could be a platform indepdenant function?
@@ -178,7 +177,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return Result;
 }
 
-void* StartMemPrint = 0;
+uint8_t* StartMemPrint = 0;
 bool DrawMemory = false;
 
 
@@ -197,7 +196,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			if(DrawMemory)
 			{
-				uint8_t* platname = reinterpret_cast<uint8_t*>(StartMemPrint);
+				uint8_t* platname = StartMemPrint;
 				std::string valueStr = toHex(platname, 25);
 				TextOut(hdc, 40, 40, valueStr.c_str(), valueStr.size());
 				// std::string temp = 1;
@@ -401,7 +400,7 @@ int CALLBACK WinMain(
 	}
 	if(mahState.module_mem.base != NULL)
 	{
-		StartMemPrint = reinterpret_cast<void*>(mahState.module_mem.base);		
+		StartMemPrint = mahState.module_mem.base;		
 	}
 	else
 	{
@@ -458,7 +457,14 @@ int CALLBACK WinMain(
 						if(VKCode == 'M' && WasDown)
 						{
 							DrawMemory = true;
-							WriteLine("Draw Dat Memory");
+						}
+						if(DrawMemory && VKCode == 'V' && WasDown)
+						{
+							StartMemPrint += 8;
+						}
+						else if(DrawMemory && VKCode == 'B' && WasDown)
+						{
+							StartMemPrint -= 8;							
 						}
 						if(VKCode == 'L' && WasDown)
 						{
