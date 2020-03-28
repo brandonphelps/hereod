@@ -45,7 +45,7 @@ bin/blue_main.o: blue_d/src/blue_main.cpp
 	@echo "Building $@"
 	@$(CC) $(C_FLAGS) -Iblue_d/include $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
 
-bin/blue_entity.o: blue_d/src/blue_entity.cpp
+bin/blue_entity.o: blue_d/src/blue_entity.cpp blue_d/include/blue_entity.h
 	@mkdir -p $(dir $@)
 	@echo "Building $@"
 	@$(CC) $(C_FLAGS) -Iblue_d/include $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@

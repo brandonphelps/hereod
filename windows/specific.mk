@@ -1,14 +1,19 @@
 
 
 
-specific_cpps = main keyboard_updates console_another performance app_window_helper
+specific_cpps = keyboard_updates console_another performance app_window_helper
 
 define SPECIFIC_BUILDER
-bin/$(1).o: windows/src/$(1).cpp
+bin/$(1).o: windows/src/$(1).cpp windows/include/$(1).h
 	mkdir -p $$(dir $$@)
 	$$(CC) $$(C_FLAGS) -c $$< $$(C_OUTPUT_SPECIFIER)$$@
 SPECIFIC_OBJS += bin/$(1).o
 endef
+
+bin/main.o: windows/src/main.cpp
+	mkdir -p $(dir $@)
+	$(CC) $(C_FLAGS) -c $< $(C_OUTPUT_SPECIFIER)$@
+SPECIFIC_OBJS += bin/main.o
 
 $(foreach mod,$(specific_cpps),$(eval $(call SPECIFIC_BUILDER,$(mod))))
 
