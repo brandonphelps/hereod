@@ -1,7 +1,7 @@
 
 
 
-specific_cpps = main keyboard_updates console_another performance
+specific_cpps = main keyboard_updates console_another performance app_window_helper
 
 define SPECIFIC_BUILDER
 bin/$(1).o: windows/src/$(1).cpp

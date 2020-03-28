@@ -1,13 +1,14 @@
 #include <windows.h>
 #include <wingdi.h>
 #include <timeapi.h>
-#include <stdlib.h>
+#include <conio.h>
 
+#include <stdlib.h>
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
-#include <conio.h>
+
 #include <string>
 #include <tchar.h>
 #include <sstream>
@@ -16,6 +17,7 @@
 
 #include "performance.h"
 #include "keyboard_updates.h"
+#include "app_window_helper.h"
 
 #include "game_memory.h"
 #include "game_recording.h"
@@ -35,12 +37,6 @@ std::string toHex(T value)
 }
 
 
-// Global variables
-// The main window class name.
-static TCHAR szWindowClass[] = _T("My cool dude");
-
-// The string that appears in the application's title bar.
-static TCHAR szTitle[] = _T("My cool title");
 
 static bool Running = true;
 
@@ -193,14 +189,15 @@ int CALLBACK WinMain(
 	InitPerformance();
 
 
-	WNDCLASSEX wcex = {};
-	wcex.cbSize = sizeof(WNDCLASSEX);
-	wcex.style          = CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc    = WndProc;
-	wcex.hInstance      = hInstance;
-	wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);
-	wcex.lpszClassName  = szWindowClass;
-	wcex.lpszMenuName   = NULL;
+	WNDCLASSEX wcex = CreateWindowEXHelperT(CS_HREDRAW | CS_VREDRAW, WndProc,
+	                                       hInstance, "My Cool Dude", "My Cool Title");
+	// wcex.cbSize = sizeof(WNDCLASSEX);
+	// wcex.style          = CS_HREDRAW | CS_VREDRAW;
+	// wcex.lpfnWndProc    = WndProc;
+	// wcex.hInstance      = hInstance;
+	// wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);
+	// wcex.lpszClassName  = szWindowClass;
+	// wcex.lpszMenuName   = NULL;
 	if (!RegisterClassEx(&wcex))
 	{
 		MessageBox(NULL,
