@@ -162,6 +162,10 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			        5, 5,
 			        "Hello World", _tcslen("hello World"));
 
+			TextOut(hdc,
+			        5, 25,
+			        "Hello World Two", _tcslen("hello World Two"));
+
 			EndPaint(hWnd, &ps);
 		} break;
 		case WM_DESTROY:
@@ -191,13 +195,8 @@ int CALLBACK WinMain(
 
 	WNDCLASSEX wcex = CreateWindowEXHelperT(CS_HREDRAW | CS_VREDRAW, WndProc,
 	                                       hInstance, "My Cool Dude", "My Cool Title");
-	// wcex.cbSize = sizeof(WNDCLASSEX);
-	// wcex.style          = CS_HREDRAW | CS_VREDRAW;
-	// wcex.lpfnWndProc    = WndProc;
-	// wcex.hInstance      = hInstance;
-	// wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);
-	// wcex.lpszClassName  = szWindowClass;
-	// wcex.lpszMenuName   = NULL;
+	WNDCLASSEX wcexWind = CreateWindowEXHelperT(CS_HREDRAW | CS_VREDRAW, WndProc2,
+	                                            hInstance, "Memory Dude", "Memory Window");
 	if (!RegisterClassEx(&wcex))
 	{
 		MessageBox(NULL,
@@ -208,28 +207,14 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
-	WNDCLASSEX wcexWind = {};
-	wcexWind.cbSize = sizeof(WNDCLASSEX);
-	wcexWind.style          = CS_HREDRAW | CS_VREDRAW;
-	wcexWind.lpfnWndProc    = WndProc2;
-	wcexWind.hInstance      = hInstance;
-	wcexWind.hCursor        = LoadCursor(NULL, IDC_ARROW);
-	wcexWind.lpszClassName  = "MemClass";
-	// wcex.hIcon          = LoadIcon(hInstance, IDI_APPLICATION);
-	wcexWind.lpszMenuName   = NULL;
-
-	ATOM retValue = RegisterClassEx(&wcexWind);
-
-	if(!retValue)
+	if(!RegisterClassEx(&wcexWind))
 	{
 		MessageBox(NULL,
 		           _T("Call to registerclassex failed on mem with error " + GetLastError()),
-		           _T("Windows deljfkl: " + retValue),
+		           _T("Windows deljfkl: "),
 		           NULL);
 		return 1;
 	}
-
-	WriteLine("Mem ret: "  + std::to_string(retValue));
 	
 	// Store instance handle in our global variable
 	hInst = hInstance;
@@ -245,8 +230,8 @@ int CALLBACK WinMain(
 	// hInstance: the first parameter from WinMain
 	// NULL: not used in this application
 	HWND hWnd = CreateWindow(
-	                         szWindowClass,
-	                         szTitle,
+	                         "My Cool Dude",
+	                         "My Cool Title",
 	                         WS_OVERLAPPEDWINDOW,
 	                         CW_USEDEFAULT, CW_USEDEFAULT,
 	                         960, 540,
@@ -257,7 +242,7 @@ int CALLBACK WinMain(
 	                         );
 
 	HWND memH = CreateWindow(
-	                         "MemClass",
+	                         "Memory Dude",
 	                         "Memory Window",
 	                         WS_OVERLAPPEDWINDOW,
 	                         CW_USEDEFAULT, CW_USEDEFAULT,
