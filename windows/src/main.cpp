@@ -36,7 +36,17 @@ std::string toHex(T value)
 	return msg;
 }
 
-
+std::string toHex(uint8_t* start, size_t length)
+{
+	std::stringstream stream;
+	stream << "0x" << std::hex;
+	for(int i = 0; i < length; i++)
+	{
+		stream << start[i];
+	}
+	std::string msg = stream.str();
+	return msg;
+}
 
 static bool Running = true;
 
@@ -145,6 +155,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return Result;
 }
 
+void* StartMemPrint = 0;
+bool DrawMemory = false;
+
 LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	LRESULT Result = 0;
@@ -157,6 +170,13 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			PAINTSTRUCT ps;
 			hdc = BeginPaint(hWnd, &ps);
 			WindowDimension window_dim = GetWindowDimension(hWnd);
+
+			if(DrawMemory)
+			{
+				uint8_t* platname = reinterpret_cast<uint8_t*>(StartMemPrint);
+				std::string valueStr = toHex(platname, 25);
+				TextOut(hdc, 40, 40, valueStr.c_str(), valueStr.size());
+			}
 
 			TextOut(hdc,
 			        5, 5,
@@ -341,6 +361,8 @@ int CALLBACK WinMain(
 		res[i] = PlatformIdent[i];
 	}
 
+	StartMemPrint = reinterpret_cast<void*>(mahState.platform_data);
+
 	int initRest = blueFuncs.GameInit(&mahState);
 	if(initRest != 0)
 	{
@@ -371,7 +393,8 @@ int CALLBACK WinMain(
 		// using this we can also limite the amount of theings that need to be redrawn,
 		// as well on when we need to perform a redraw.
 		InvalidateRect(hWnd, &new_rec, true);
-
+		InvalidateRect(memH, &new_rec, true);
+		
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
 			switch(msg.message)
@@ -391,6 +414,11 @@ int CALLBACK WinMain(
 					bool IsDown  = ((msg.lParam & (1 << 31)) == 0);
 					if(WasDown != IsDown)
 					{
+						if(VKCode == 'M' && WasDown)
+						{
+							DrawMemory = true;
+							WriteLine("Draw Dat Memory");
+						}
 						if(VKCode == 'L' && WasDown)
 						{
 							BeginRecordingInput(&mahState);
