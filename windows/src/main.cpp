@@ -1,13 +1,14 @@
 #include <windows.h>
 #include <wingdi.h>
 #include <timeapi.h>
-#include <stdlib.h>
+#include <conio.h>
 
+#include <stdlib.h>
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
-#include <conio.h>
+
 #include <string>
 #include <tchar.h>
 #include <sstream>
@@ -16,13 +17,36 @@
 
 #include "performance.h"
 #include "keyboard_updates.h"
+#include "app_window_helper.h"
 
+#include "game_memory.h"
 #include "game_recording.h"
 #include "game_module.h"
 #include "game_state.h"
 #include "game_controller.h"
 #include "console_another.h"
 #include "video.h"
+
+static char valueConvertTable[16] =
+	{
+	 48,
+	 49,
+	 50,
+	 51,
+	 52,
+	 53,
+	 54,
+	 55,
+	 56,
+	 57,
+	 65,
+	 66,
+	 67,
+	 68,
+	 69,
+	 70
+	};
+
 
 template <typename T>
 std::string toHex(T value)
@@ -33,16 +57,21 @@ std::string toHex(T value)
 	return msg;
 }
 
-
-// Global variables
-// The main window class name.
-static TCHAR szWindowClass[] = _T("My cool dude");
-
-// The string that appears in the application's title bar.
-static TCHAR szTitle[] = _T("My cool title");
+std::string toHex(uint8_t* start, size_t length)
+{
+	std::stringstream stream;
+	stream << "0x" << std::hex;
+	for(int i = 0; i < length; i++)
+	{
+		uint8_t highNibble = 0xF0 & start[i];
+		uint8_t lowNibble = 0x0F & start[i];
+		stream << valueConvertTable[highNibble] << valueConvertTable[lowNibble] << " ";
+	}
+	std::string msg = stream.str();
+	return msg;
+}
 
 static bool Running = true;
-
 HINSTANCE hInst;
 
 // todo(brandon): this could be a platform indepdenant function?
@@ -148,6 +177,61 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return Result;
 }
 
+uint8_t* StartMemPrint = 0;
+uint64_t StartAddress = 0;
+bool DrawMemory = false;
+
+LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	LRESULT Result = 0;
+
+	HDC hdc;
+	switch (message)
+	{
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			hdc = BeginPaint(hWnd, &ps);
+			WindowDimension window_dim = GetWindowDimension(hWnd);
+
+			if(DrawMemory)
+			{
+				StartAddress = reinterpret_cast<uintptr_t>(StartMemPrint);
+				std::string Address = toHex(StartAddress);
+				TextOut(hdc, 40, 40, Address.c_str(), Address.size());
+				static uint8_t mem_print_width = 10;
+				for(int i = 0; i < 10; i++)
+				{
+					uint8_t* platname = StartMemPrint + (i * mem_print_width);
+					std::string valueStr = toHex(platname, mem_print_width);
+					TextOut(hdc, 40, 65 + (15 * i), valueStr.c_str(), valueStr.size());
+				}
+				// std::string temp = 1;
+			}
+
+			TextOut(hdc,
+			        5, 5,
+			        "Hello World", _tcslen("hello World"));
+
+			TextOut(hdc,
+			        5, 25,
+			        "Hello World Two", _tcslen("hello World Two"));
+
+			EndPaint(hWnd, &ps);
+		} break;
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+		} break;
+		default:
+		{
+			Result = DefWindowProcA(hWnd, message, wParam, lParam);
+		} break;
+	}
+
+	return Result;
+}
+
 
 int CALLBACK WinMain(
                      HINSTANCE hInstance,
@@ -160,19 +244,10 @@ int CALLBACK WinMain(
 	InitPerformance();
 
 
-	WNDCLASSEX wcex = {};
-	wcex.cbSize = sizeof(WNDCLASSEX);
-	wcex.style          = CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc    = WndProc;
-	wcex.hInstance      = hInstance;
-	wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);
-	wcex.lpszClassName  = szWindowClass;
-	// wcex.hIcon          = LoadIcon(hInstance, IDI_APPLICATION);
-
-	// wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName   = NULL;
-	// wcex.hIconSm        = LoadIcon(wcex.hInstance, IDI_APPLICATION);
-
+	WNDCLASSEX wcex = CreateWindowEXHelperT(CS_HREDRAW | CS_VREDRAW, WndProc,
+	                                       hInstance, "My Cool Dude", "My Cool Title");
+	WNDCLASSEX wcexWind = CreateWindowEXHelperT(CS_HREDRAW | CS_VREDRAW, WndProc2,
+	                                            hInstance, "Memory Dude", "Memory Window");
 	if (!RegisterClassEx(&wcex))
 	{
 		MessageBox(NULL,
@@ -183,6 +258,15 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
+	if(!RegisterClassEx(&wcexWind))
+	{
+		MessageBox(NULL,
+		           _T("Call to registerclassex failed on mem with error " + GetLastError()),
+		           _T("Windows deljfkl: "),
+		           NULL);
+		return 1;
+	}
+	
 	// Store instance handle in our global variable
 	hInst = hInstance;
 
@@ -197,8 +281,8 @@ int CALLBACK WinMain(
 	// hInstance: the first parameter from WinMain
 	// NULL: not used in this application
 	HWND hWnd = CreateWindow(
-	                         szWindowClass,
-	                         szTitle,
+	                         "My Cool Dude",
+	                         "My Cool Title",
 	                         WS_OVERLAPPEDWINDOW,
 	                         CW_USEDEFAULT, CW_USEDEFAULT,
 	                         960, 540,
@@ -207,6 +291,17 @@ int CALLBACK WinMain(
 	                         hInstance,
 	                         NULL
 	                         );
+
+	HWND memH = CreateWindow(
+	                         "Memory Dude",
+	                         "Memory Window",
+	                         WS_OVERLAPPEDWINDOW,
+	                         CW_USEDEFAULT, CW_USEDEFAULT,
+	                         960, 540,
+	                         NULL,
+	                         NULL,
+	                         hInstance,
+	                         NULL);
 
 	if (!hWnd)
 	{
@@ -218,6 +313,15 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
+	if(!memH)
+	{
+		MessageBox(NULL,
+		           _T("Failed to make memory window"),
+		           _T("Hello world"),
+		           NULL);
+		return 1;
+	}
+	
 	uint32_t desired_scheduler_ms = 1;
 	bool is_sleep_granular = (timeBeginPeriod(desired_scheduler_ms) == TIMERR_NOERROR);
 
@@ -256,6 +360,7 @@ int CALLBACK WinMain(
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd, nCmdShow);
+	ShowWindow(memH, nCmdShow);
 
 	WriteOut("Starting Running while loop\n\r");
 
@@ -264,6 +369,15 @@ int CALLBACK WinMain(
 	// load custom game module 
 	// Main message loop:
 	GameState mahState;
+
+	init_memory_section(mahState.platform_mem, 100);
+
+	uint8_t * res = (uint8_t*)push_mem(mahState.platform_mem, 30);
+	if(res == NULL)
+	{
+		Sleep(30000);
+	}
+	
 	mahState.platform_data = new uint8_t[100];
 	mahState.platform_size = 100;
 
@@ -272,21 +386,37 @@ int CALLBACK WinMain(
 	GameInputControllerInit(newKeyboard);
 
 	std::string PlatformIdent = "Windows";
-	for(int i =0; i < PlatformIdent.size(); i++)
+	for(int i = 0; i < PlatformIdent.size(); i++)
 	{
 		mahState.platform_data[i] = PlatformIdent[i];
+		res[i] = PlatformIdent[i];
 	}
 
 	int initRest = blueFuncs.GameInit(&mahState);
 	if(initRest != 0)
 	{
-		WriteLine("Failed to init game");
+		WriteLine("Failed to init game, Exiting...");
+		Sleep(30000);
+		return 1;
+	}
+	if(mahState.module_mem.base != NULL)
+	{
+		StartMemPrint = mahState.module_mem.base;		
+		// StartAddress = reinterpret_cast<uintptr_t>(mahState.module_mem.base);
+	}
+	else
+	{
+		WriteLine("Failed to get module mem base, Exiting...");
+		Sleep(20000);
 		return 1;
 	}
 
+
+
 	// trigger a window update
 	UpdateWindow(hWnd);
-
+	UpdateWindow(memH);
+	
 	RECT new_rec;
 	new_rec.left = 0;
 	new_rec.top = 0;
@@ -305,7 +435,8 @@ int CALLBACK WinMain(
 		// using this we can also limite the amount of theings that need to be redrawn,
 		// as well on when we need to perform a redraw.
 		InvalidateRect(hWnd, &new_rec, true);
-
+		InvalidateRect(memH, &new_rec, true);
+		
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
 			switch(msg.message)
@@ -325,6 +456,18 @@ int CALLBACK WinMain(
 					bool IsDown  = ((msg.lParam & (1 << 31)) == 0);
 					if(WasDown != IsDown)
 					{
+						if(VKCode == 'M' && WasDown)
+						{
+							DrawMemory = true;
+						}
+						if(DrawMemory && VKCode == 'V' && WasDown)
+						{
+							StartMemPrint += 8;
+						}
+						else if(DrawMemory && VKCode == 'B' && WasDown)
+						{
+							StartMemPrint -= 8;							
+						}
 						if(VKCode == 'L' && WasDown)
 						{
 							BeginRecordingInput(&mahState);

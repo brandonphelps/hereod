@@ -54,6 +54,7 @@ bin/blue_entity.o: blue_d/src/blue_entity.cpp
 $(eval $(call CommonSrcRule,module_loading))
 $(eval $(call CommonSrcRule,video))
 $(eval $(call CommonSrcRule,game_controller))
+$(eval $(call CommonSrcRule,game_memory))
 $(eval $(call CommonSrcRule,game_state))
 $(eval $(call CommonSrcRule,game_recording))
 $(eval $(call CommonSrcRule,grid_helpers))

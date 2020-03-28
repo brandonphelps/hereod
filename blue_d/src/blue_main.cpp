@@ -10,6 +10,7 @@
 #include "game_state.h"
 #include "game_input.h"
 #include "game_controller.h"
+#include "game_memory.h"
 
 #ifdef _WIN32
 #include "console_another.h"
@@ -96,8 +97,9 @@ void towerDraw(ScreenData* screenData)
 	}
 }
 
-extern PositionComponent p_entities[100];
-extern HealthComponent   h_entities[100];
+
+PositionComponent p_entities[100];
+HealthComponent   h_entities[100];
 
 std::vector<uint32_t> WindSystem;
 
@@ -150,11 +152,21 @@ void add_tile(float start_x, float start_y, uint32_t color_mask)
 // works fine on windows, but something about console doesn't allow writing to.
 extern "C" int GameInit(GameState* game_state)
 {
+	uint8_t* platform_mem = game_state->platform_mem.base;
+	if(platform_mem[0] != 'W')
+	{
+		return 0;
+	}
+
+	init_memory_section(game_state->module_mem, 10000);
+
+	Map* p = AllocObj(game_state->module_mem, Map);
+	// AllocObj(game_state->module_mem, PositionComponent);
+	
 	uint32_t arena_size = sizeof(Map) + sizeof(Point) + sizeof(EntityObj) * 10;
 	game_state->module_data = new uint8_t[arena_size];
 	game_state->module_size = arena_size;
-	
-	Map* p = reinterpret_cast<Map*>(game_state->module_data);
+
 	if(p != NULL)
 	{
 		p->width = 10;
@@ -221,7 +233,7 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 		wind_movement_update(dt, WindSystem.data(), WindSystem.size());
 	}
 
-	Map* p = reinterpret_cast<Map*>(game_state->module_data);
+	Map* p = reinterpret_cast<Map*>(game_state->module_mem.base);
 	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
 
 	towerDraw(screenData);

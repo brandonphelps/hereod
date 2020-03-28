@@ -3,8 +3,8 @@
 
 #include "game_input.h"
 
-PositionComponent p_entities[100]; 
-HealthComponent   h_entities[100]; 	
+extern PositionComponent p_entities[100]; 
+extern HealthComponent   h_entities[100]; 	
 
 void player_move_update(float dt, GameInput* game_input, EntityObj* start, uint32_t entity_size)
 {
