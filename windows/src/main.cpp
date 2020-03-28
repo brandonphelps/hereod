@@ -60,12 +60,19 @@ std::string toHex(T value)
 std::string toHex(uint8_t* start, size_t length)
 {
 	std::stringstream stream;
-	stream << "0x" << std::hex;
 	for(int i = 0; i < length; i++)
 	{
-		uint8_t highNibble = 0xF0 & start[i];
-		uint8_t lowNibble = 0x0F & start[i];
-		stream << valueConvertTable[highNibble] << valueConvertTable[lowNibble] << " ";
+		uint8_t highNibble = 0x0F & (start[i] >> 8);
+		uint8_t lowNibble  = 0x0F & start[i];
+		if(highNibble > 16 || lowNibble > 16)
+		{
+			WriteLine("Value: " + std::to_string(highNibble));
+		}
+		else
+		{
+			stream << valueConvertTable[highNibble] << valueConvertTable[lowNibble] << " ";
+		}
+
 	}
 	std::string msg = stream.str();
 	return msg;
@@ -196,16 +203,27 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			if(DrawMemory)
 			{
-				StartAddress = reinterpret_cast<uintptr_t>(StartMemPrint);
-				std::string Address = toHex(StartAddress);
-				TextOut(hdc, 40, 40, Address.c_str(), Address.size());
-				static uint8_t mem_print_width = 10;
-				for(int i = 0; i < 13; i++)
+
+				HFONT hFont, hOldFont;
+				hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT);
+				if(hOldFont = (HFONT)SelectObject(hdc, hFont))
 				{
-					uint8_t* platname = StartMemPrint + (i * mem_print_width);
-					std::string valueStr = toHex(platname, mem_print_width);
-					TextOut(hdc, 40, 65 + (15 * i), valueStr.c_str(), valueStr.size());
+
+					StartAddress = reinterpret_cast<uintptr_t>(StartMemPrint);
+					std::string Address = toHex(StartAddress);
+					TextOut(hdc, 40, 40, Address.c_str(), Address.size());
+					static uint8_t mem_print_width = 10;
+					for(int i = 0; i < 13; i++)
+					{
+						uint8_t* platname = StartMemPrint + (i * mem_print_width);
+						std::string valueStr = toHex(platname, mem_print_width);
+						TextOut(hdc, 40, 65 + (15 * i), valueStr.c_str(), valueStr.size());
+					}
+				
+					SelectObject(hdc, hOldFont);
+	
 				}
+				
 			}
 			EndPaint(hWnd, &ps);
 		} break;
