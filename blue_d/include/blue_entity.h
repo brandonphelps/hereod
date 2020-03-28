@@ -1,5 +1,6 @@
 
-#pragma once
+#ifndef BLUE_ENTITY_CUS
+#define BLUE_ENTITY_CUS
 
 #include <stdint.h>
 
@@ -22,3 +23,5 @@ public:
 	float y_pos;
 	uint32_t color_mask; // temporary
 };
+
+#endif

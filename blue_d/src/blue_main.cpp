@@ -98,7 +98,7 @@ void towerDraw(ScreenData* screenData)
 }
 
 
-PositionComponent p_entities[100];
+PositionComponent* p_entities;
 HealthComponent   h_entities[100];
 
 std::vector<uint32_t> WindSystem;
@@ -161,7 +161,7 @@ extern "C" int GameInit(GameState* game_state)
 	init_memory_section(game_state->module_mem, 10000);
 
 	Map* p = AllocObj(game_state->module_mem, Map);
-	// AllocObj(game_state->module_mem, PositionComponent);
+	p_entities = AllocArray(game_state->module_mem, PositionComponent, 100);
 	
 	uint32_t arena_size = sizeof(Map) + sizeof(Point) + sizeof(EntityObj) * 10;
 	game_state->module_data = new uint8_t[arena_size];
@@ -176,7 +176,7 @@ extern "C" int GameInit(GameState* game_state)
 		std::memcpy(p->tile_info, currentmap, 100);
 	}
 
-	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
+	std::memset(p_entities, 0, 100);
 
 	ents = reinterpret_cast<EntityObj*>((game_state->module_data)+sizeof(Map)+sizeof(Point));
 
@@ -234,7 +234,6 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	}
 
 	Map* p = reinterpret_cast<Map*>(game_state->module_mem.base);
-	Point* toon = reinterpret_cast<Point*>((game_state->module_data)+sizeof(Map));
 
 	towerDraw(screenData);
 	DrawMap(screenData, p->tile_info);

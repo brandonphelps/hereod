@@ -200,23 +200,13 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				std::string Address = toHex(StartAddress);
 				TextOut(hdc, 40, 40, Address.c_str(), Address.size());
 				static uint8_t mem_print_width = 10;
-				for(int i = 0; i < 10; i++)
+				for(int i = 0; i < 13; i++)
 				{
 					uint8_t* platname = StartMemPrint + (i * mem_print_width);
 					std::string valueStr = toHex(platname, mem_print_width);
 					TextOut(hdc, 40, 65 + (15 * i), valueStr.c_str(), valueStr.size());
 				}
-				// std::string temp = 1;
 			}
-
-			TextOut(hdc,
-			        5, 5,
-			        "Hello World", _tcslen("hello World"));
-
-			TextOut(hdc,
-			        5, 25,
-			        "Hello World Two", _tcslen("hello World Two"));
-
 			EndPaint(hWnd, &ps);
 		} break;
 		case WM_DESTROY:
@@ -242,7 +232,6 @@ int CALLBACK WinMain(
 {
 	InitializeDebugConsole();
 	InitPerformance();
-
 
 	WNDCLASSEX wcex = CreateWindowEXHelperT(CS_HREDRAW | CS_VREDRAW, WndProc,
 	                                       hInstance, "My Cool Dude", "My Cool Title");
@@ -435,7 +424,10 @@ int CALLBACK WinMain(
 		// using this we can also limite the amount of theings that need to be redrawn,
 		// as well on when we need to perform a redraw.
 		InvalidateRect(hWnd, &new_rec, true);
-		InvalidateRect(memH, &new_rec, true);
+		if(DrawMemory)
+		{
+			InvalidateRect(memH, &new_rec, true);
+		}
 		
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{

@@ -19,6 +19,7 @@ private:
 };
 
 #define AllocObj(MemSec, obj_type) reinterpret_cast<obj_type*>(push_mem(MemSec, sizeof(obj_type)))
+#define AllocArray(MemSec, obj_type, count) reinterpret_cast<obj_type*>(push_mem(MemSec, sizeof(obj_type)*count))
 
 void init_memory_section(MemorySection& mem, size_t size);
 // amount in bytes.
