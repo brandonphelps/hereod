@@ -199,9 +199,13 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				StartAddress = reinterpret_cast<uintptr_t>(StartMemPrint);
 				std::string Address = toHex(StartAddress);
 				TextOut(hdc, 40, 40, Address.c_str(), Address.size());
-				uint8_t* platname = StartMemPrint;
-				std::string valueStr = toHex(platname, 8 * 10);
-				TextOut(hdc, 40, 65, valueStr.c_str(), valueStr.size());
+				static uint8_t mem_print_width = 10;
+				for(int i = 0; i < 10; i++)
+				{
+					uint8_t* platname = StartMemPrint + (i * mem_print_width);
+					std::string valueStr = toHex(platname, mem_print_width);
+					TextOut(hdc, 40, 65 + (15 * i), valueStr.c_str(), valueStr.size());
+				}
 				// std::string temp = 1;
 			}
 
