@@ -12,7 +12,7 @@ public:
 private:
 };
 
-#define AllocObj(MemSec, obj_type) (obj_type*)push_mem(MemSec, sizeof(obj_type))
+#define AllocObj(MemSec, obj_type) reinterpret_cast<obj_type*>(push_mem(MemSec, sizeof(obj_type)))
 
 void init_memory_section(MemorySection& mem, size_t size);
 // amount in bytes.

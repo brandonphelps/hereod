@@ -27,6 +27,7 @@ public:
 
 public:
 	MemorySection platform_mem;
+	MemorySection module_mem;
 };
 
 #endif
