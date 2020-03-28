@@ -178,8 +178,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 uint8_t* StartMemPrint = 0;
+uint64_t StartAddress = 0;
 bool DrawMemory = false;
-
 
 LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -196,16 +196,13 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			if(DrawMemory)
 			{
+				StartAddress = reinterpret_cast<uintptr_t>(StartMemPrint);
+				std::string Address = toHex(StartAddress);
+				TextOut(hdc, 40, 40, Address.c_str(), Address.size());
 				uint8_t* platname = StartMemPrint;
-				std::string valueStr = toHex(platname, 25);
-				TextOut(hdc, 40, 40, valueStr.c_str(), valueStr.size());
+				std::string valueStr = toHex(platname, 8 * 10);
+				TextOut(hdc, 40, 65, valueStr.c_str(), valueStr.size());
 				// std::string temp = 1;
-				char temp = valueConvertTable[0];
-				char temp2 = valueConvertTable[9];
-				char temp3 = valueConvertTable[10];
-				TextOut(hdc, 40, 60, &temp, 1);
-				TextOut(hdc, 40, 75, &temp2, 1);
-				TextOut(hdc, 40, 90, &temp3, 1);
 			}
 
 			TextOut(hdc,
@@ -401,6 +398,7 @@ int CALLBACK WinMain(
 	if(mahState.module_mem.base != NULL)
 	{
 		StartMemPrint = mahState.module_mem.base;		
+		// StartAddress = reinterpret_cast<uintptr_t>(mahState.module_mem.base);
 	}
 	else
 	{
