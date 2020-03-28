@@ -149,6 +149,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return Result;
 }
 
+LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	LRESULT Result = 0;
+
+	HDC hdc;
+	switch (message)
+	{
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			hdc = BeginPaint(hWnd, &ps);
+			WindowDimension window_dim = GetWindowDimension(hWnd);
+
+			TextOut(hdc,
+			        5, 5,
+			        "Hello World", _tcslen("hello World"));
+
+			EndPaint(hWnd, &ps);
+		} break;
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+		} break;
+		default:
+		{
+			Result = DefWindowProcA(hWnd, message, wParam, lParam);
+		} break;
+	}
+
+	return Result;
+}
+
 
 int CALLBACK WinMain(
                      HINSTANCE hInstance,
@@ -168,12 +200,7 @@ int CALLBACK WinMain(
 	wcex.hInstance      = hInstance;
 	wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);
 	wcex.lpszClassName  = szWindowClass;
-	// wcex.hIcon          = LoadIcon(hInstance, IDI_APPLICATION);
-
-	// wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName   = NULL;
-	// wcex.hIconSm        = LoadIcon(wcex.hInstance, IDI_APPLICATION);
-
 	if (!RegisterClassEx(&wcex))
 	{
 		MessageBox(NULL,
@@ -184,6 +211,29 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
+	WNDCLASSEX wcexWind = {};
+	wcexWind.cbSize = sizeof(WNDCLASSEX);
+	wcexWind.style          = CS_HREDRAW | CS_VREDRAW;
+	wcexWind.lpfnWndProc    = WndProc2;
+	wcexWind.hInstance      = hInstance;
+	wcexWind.hCursor        = LoadCursor(NULL, IDC_ARROW);
+	wcexWind.lpszClassName  = "MemClass";
+	// wcex.hIcon          = LoadIcon(hInstance, IDI_APPLICATION);
+	wcexWind.lpszMenuName   = NULL;
+
+	ATOM retValue = RegisterClassEx(&wcexWind);
+
+	if(!retValue)
+	{
+		MessageBox(NULL,
+		           _T("Call to registerclassex failed on mem with error " + GetLastError()),
+		           _T("Windows deljfkl: " + retValue),
+		           NULL);
+		return 1;
+	}
+
+	WriteLine("Mem ret: "  + std::to_string(retValue));
+	
 	// Store instance handle in our global variable
 	hInst = hInstance;
 
@@ -209,6 +259,17 @@ int CALLBACK WinMain(
 	                         NULL
 	                         );
 
+	HWND memH = CreateWindow(
+	                         "MemClass",
+	                         "Memory Window",
+	                         WS_OVERLAPPEDWINDOW,
+	                         CW_USEDEFAULT, CW_USEDEFAULT,
+	                         960, 540,
+	                         NULL,
+	                         NULL,
+	                         hInstance,
+	                         NULL);
+
 	if (!hWnd)
 	{
 		MessageBox(NULL,
@@ -219,6 +280,15 @@ int CALLBACK WinMain(
 		return 1;
 	}
 
+	if(!memH)
+	{
+		MessageBox(NULL,
+		           _T("Failed to make memory window"),
+		           _T("Hello world"),
+		           NULL);
+		return 1;
+	}
+	
 	uint32_t desired_scheduler_ms = 1;
 	bool is_sleep_granular = (timeBeginPeriod(desired_scheduler_ms) == TIMERR_NOERROR);
 
@@ -257,6 +327,7 @@ int CALLBACK WinMain(
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd, nCmdShow);
+	ShowWindow(memH, nCmdShow);
 
 	WriteOut("Starting Running while loop\n\r");
 
@@ -298,7 +369,8 @@ int CALLBACK WinMain(
 
 	// trigger a window update
 	UpdateWindow(hWnd);
-
+	UpdateWindow(memH);
+	
 	RECT new_rec;
 	new_rec.left = 0;
 	new_rec.top = 0;
