@@ -97,6 +97,7 @@ void towerDraw(ScreenData* screenData)
 	}
 }
 
+
 PositionComponent p_entities[100];
 HealthComponent   h_entities[100];
 
@@ -160,7 +161,8 @@ extern "C" int GameInit(GameState* game_state)
 	init_memory_section(game_state->module_mem, 10000);
 
 	Map* p = AllocObj(game_state->module_mem, Map);
-
+	// AllocObj(game_state->module_mem, PositionComponent);
+	
 	uint32_t arena_size = sizeof(Map) + sizeof(Point) + sizeof(EntityObj) * 10;
 	game_state->module_data = new uint8_t[arena_size];
 	game_state->module_size = arena_size;

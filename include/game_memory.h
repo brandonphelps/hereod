@@ -6,6 +6,12 @@
 class MemorySection
 {
 public:
+	MemorySection()
+	{
+		base = NULL;
+		used = 0;
+		size = 0;
+	}
 	uint8_t* base; // start of the area.
 	size_t used;
 	size_t size;
