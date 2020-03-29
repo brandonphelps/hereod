@@ -16,12 +16,12 @@
 #include "console_another.h"
 #endif
 
-const uint8_t TileWidthGraphic = 30;
-const uint8_t TileHeightGraphic = 30;
-const uint16_t MapXOffset = 10;
-const uint16_t MapYOffset = 10;
+const uint8_t TileWidthGraphic = 3;
+const uint8_t TileHeightGraphic = 3;
+const uint16_t MapXOffset = 1; // in Pixels
+const uint16_t MapYOffset = 1; // in Pixels
 
-const uint8_t MetersToPixel = 10; // 10 pixel per meter
+const uint8_t MetersToPixel = 30; // 10 pixel per meter
 const uint8_t TileWidthMeter = 30;
 const uint8_t TileHeightMeter = 30;
 
@@ -60,25 +60,24 @@ private:
 
 void DrawMap(ScreenData* screenData, uint8_t* tiles)
 {
-	// 
-	//drawBuf(buffer, buf_width, buf_height, 1);
+	uint32_t color_mask;
 	for(int row = 0; row < 10; row++)
 	{
 		for(int col = 0; col < 10; col++)
 		{
 			if(tiles[col + (row * 10)] == 1)
 			{
-				DrawRectangle(screenData,
-				              MapXOffset + (col * TileWidthGraphic), MapXOffset + (row * TileHeightGraphic),
-				              TileWidthGraphic, TileHeightGraphic, 0xFF00FFFF);
+				color_mask = 0xFF00FFFF;
 			}
 			else
 			{
-				DrawRectangle(screenData,
-				              MapXOffset + (col * TileWidthGraphic),
-				              MapYOffset + (row * TileHeightGraphic),
-				              TileWidthGraphic, TileHeightGraphic, 0xFFFF00FF);
+				color_mask = 0xFFFF00FF;
 			}
+
+			DrawRectangle(screenData,
+			              MapXOffset + col * TileWidthGraphic * MetersToPixel,
+			              MapXOffset + row * TileHeightGraphic * MetersToPixel,
+			              TileWidthGraphic * MetersToPixel, TileHeightGraphic * MetersToPixel, color_mask);
 		}
 	}
 }
@@ -108,10 +107,9 @@ void DrawToon(ScreenData* screenData, PositionComponent* toon, uint32_t color_ma
 EntityObj* ents; // all the entities live here. 
 uint32_t entityId = 0;
 PositionComponent* p_entities;
-HealthComponent   h_entities[100];
+HealthComponent* h_entities;
 bool enableWind = false;
 std::vector<uint32_t> WindSystem;
-
 
 void add_player(float start_x, float start_y, uint32_t color_mask)
 {
@@ -170,9 +168,9 @@ extern "C" int GameInit(GameState* game_state)
 		std::memcpy(p->tile_info, currentmap, 100);
 	}
 
-	ents = AllocArray(game_state->module_mem, EntityObj, 10);
+	ents = AllocArray(game_state->module_mem, EntityObj, 100);
 	p_entities = AllocArray(game_state->module_mem, PositionComponent, 100);
-
+	h_entities = AllocArray(game_state->module_mem, HealthComponent, 100);
 
 	std::memset(p_entities, 0, 100);
 
@@ -207,10 +205,10 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	// first ent is the player.
 	player_move_update(dt, game_input, ents, 1);
 
-	if(enableWind)
-	{
-		wind_movement_update(dt, WindSystem.data(), WindSystem.size());
-	}
+	// if(enableWind)
+	// {
+	// 	wind_movement_update(dt, WindSystem.data(), WindSystem.size());
+	// }
 
 	towerDraw(screenData);
 
