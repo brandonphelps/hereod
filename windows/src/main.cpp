@@ -409,7 +409,6 @@ int CALLBACK WinMain(
 	if(mahState.module_mem.base != NULL)
 	{
 		StartMemPrint = mahState.module_mem.base;		
-		// StartAddress = reinterpret_cast<uintptr_t>(mahState.module_mem.base);
 	}
 	else
 	{
@@ -417,9 +416,6 @@ int CALLBACK WinMain(
 		Sleep(20000);
 		return 1;
 	}
-
-
-
 	// trigger a window update
 	UpdateWindow(hWnd);
 	UpdateWindow(memH);
@@ -469,6 +465,10 @@ int CALLBACK WinMain(
 						if(VKCode == 'M' && WasDown)
 						{
 							DrawMemory = true;
+						}
+						else if(VKCode == 'N' && WasDown)
+						{
+							DrawMemory = false;
 						}
 						if(DrawMemory && VKCode == 'V' && WasDown)
 						{
