@@ -62,17 +62,9 @@ std::string toHex(uint8_t* start, size_t length)
 	std::stringstream stream;
 	for(int i = 0; i < length; i++)
 	{
-		uint8_t highNibble = 0x0F & (start[i] >> 8);
+		uint8_t highNibble = 0x0F & (start[i] >> 4);
 		uint8_t lowNibble  = 0x0F & start[i];
-		if(highNibble > 16 || lowNibble > 16)
-		{
-			WriteLine("Value: " + std::to_string(highNibble));
-		}
-		else
-		{
-			stream << valueConvertTable[highNibble] << valueConvertTable[lowNibble] << " ";
-		}
-
+		stream << valueConvertTable[highNibble] << valueConvertTable[lowNibble] << " ";
 	}
 	std::string msg = stream.str();
 	return msg;
@@ -163,11 +155,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			              CurrentBuffer.video_buf->width, CurrentBuffer.video_buf->height,
 			              CurrentBuffer.video_buf->buffer,
 			              &CurrentBuffer.map_info, DIB_RGB_COLORS, SRCCOPY);
-
-			// TextOut(hdc,
-			//         5, 5,
-			//         "Hello World", _tcslen("hello World"));
-
 			EndPaint(hWnd, &ps);
 		} break;
 		case WM_DESTROY:
@@ -203,7 +190,6 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			if(DrawMemory)
 			{
-
 				HFONT hFont, hOldFont;
 				hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT);
 				if(hOldFont = (HFONT)SelectObject(hdc, hFont))
@@ -221,9 +207,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					}
 				
 					SelectObject(hdc, hOldFont);
-	
 				}
-				
 			}
 			EndPaint(hWnd, &ps);
 		} break;
@@ -369,10 +353,7 @@ int CALLBACK WinMain(
 	ShowWindow(hWnd, nCmdShow);
 	ShowWindow(memH, nCmdShow);
 
-	WriteOut("Starting Running while loop\n\r");
-
 	MSG msg;
-
 	// load custom game module 
 	// Main message loop:
 	GameState mahState;
@@ -395,7 +376,6 @@ int CALLBACK WinMain(
 	std::string PlatformIdent = "Windows";
 	for(int i = 0; i < PlatformIdent.size(); i++)
 	{
-		mahState.platform_data[i] = PlatformIdent[i];
 		res[i] = PlatformIdent[i];
 	}
 

@@ -7,7 +7,11 @@
 
 void init_memory_section(MemorySection& mem, size_t size)
 {
+#if _WIN32
+	mem.base = (uint8_t*)VirtualAlloc(0, size, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+#else
 	mem.base = (uint8_t*)malloc(size);
+#endif
 	mem.size = size; // in bytes.
 	mem.used = 0;
 }

@@ -113,6 +113,8 @@ void DrawToon(ScreenData* screenData, PositionComponent* toon, uint32_t color_ma
 EntityObj* ents; // all the entities live here. 
 uint32_t entityId = 0;
 
+bool enableWind = false;
+
 void add_player(float start_x, float start_y, uint32_t color_mask)
 {
 	EntityObj* current = ents + entityId;
@@ -161,11 +163,8 @@ extern "C" int GameInit(GameState* game_state)
 	init_memory_section(game_state->module_mem, 10000);
 
 	Map* p = AllocObj(game_state->module_mem, Map);
+	ents = AllocArray(game_state->module_mem, EntityObj, 10);
 	p_entities = AllocArray(game_state->module_mem, PositionComponent, 100);
-	
-	uint32_t arena_size = sizeof(Map) + sizeof(Point) + sizeof(EntityObj) * 10;
-	game_state->module_data = new uint8_t[arena_size];
-	game_state->module_size = arena_size;
 
 	if(p != NULL)
 	{
@@ -178,25 +177,16 @@ extern "C" int GameInit(GameState* game_state)
 
 	std::memset(p_entities, 0, 100);
 
-	ents = reinterpret_cast<EntityObj*>((game_state->module_data)+sizeof(Map)+sizeof(Point));
-
 	// add_player
 	add_player(40, 40, 0x000000FF);
 
 	add_leaf(70, 0, 0x00BBFFFF);
 	add_leaf(45, 24, 0x44CCFFFF);
 	add_leaf(205, 154, 0x4411FBFF);
-	// leaf1.id = 2;
-	// p_entities[leaf1.id].x_pos = 20;
-	// p_entities[leaf1.id].y_pos = 20;
+
 	return 0;
 }
 
-// void wind_movement_update(float dt, EntityObj* start, uint32_t entity_size);
-void wind_movement_update(float dt, uint32_t* entityIds, uint32_t entity_size);
-void player_move_update(float dt, GameInput* game_input, EntityObj* start, uint32_t entity_size);
-
-bool enableWind = false;
 
 // some sort of buffer for video data is passed back and forth here.
 extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInput* game_input)
@@ -217,25 +207,13 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 
 	if(enableWind)
 	{
-		// EntityObj moved_objs[10];
-		// uint32_t move_count = 0;
-		// for(int i = 0; i < 10; i++)
-		// {
-		// 	if(ents[i].component_mask == 1)
-		// 	{
-		// 		// is this doing a copy by value?
-		// 		//   pretty certain.
-		// 		moved_objs[move_count] = ents[i];
-		// 		move_count++;
-		// 	}
-		// }
-		// wind_movement_update(dt, moved_objs, move_count);
 		wind_movement_update(dt, WindSystem.data(), WindSystem.size());
 	}
 
 	Map* p = reinterpret_cast<Map*>(game_state->module_mem.base);
 
 	towerDraw(screenData);
+
 	DrawMap(screenData, p->tile_info);
 
 	// skip the player since he is first index.
@@ -243,8 +221,7 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	{
 		DrawToon(screenData, p_entities + ents[i].id, (p_entities + ents[i].id)->color_mask);
 	}
-	// DrawToon(screenData, p_entities + ents[1].id, (p_entities + ents[1].id)->color_mask);
-	// DrawToon(screenData, p_entities + leaf1.id, 0xCCDD22FF);
+
 	DrawToon(screenData, p_entities + ents[0].id, 0xAAAA00FF);
 	
 	return 0;

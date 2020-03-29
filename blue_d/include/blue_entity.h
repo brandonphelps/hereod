@@ -3,6 +3,7 @@
 #define BLUE_ENTITY_CUS
 
 #include <stdint.h>
+#include "game_input.h"
 
 typedef struct EntityObj
 {
@@ -23,5 +24,10 @@ public:
 	float y_pos;
 	uint32_t color_mask; // temporary
 };
+
+// void wind_movement_update(float dt, EntityObj* start, uint32_t entity_size);
+void wind_movement_update(float dt, uint32_t* entityIds, uint32_t entity_size);
+void player_move_update(float dt, GameInput* game_input, EntityObj* start, uint32_t entity_size);
+
 
 #endif
