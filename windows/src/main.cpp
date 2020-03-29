@@ -365,9 +365,6 @@ int CALLBACK WinMain(
 	{
 		Sleep(30000);
 	}
-	
-	mahState.platform_data = new uint8_t[100];
-	mahState.platform_size = 100;
 
 	GameInput* mahInput = new GameInput();
 	GameInputController* newKeyboard = &(mahInput->keyboard);

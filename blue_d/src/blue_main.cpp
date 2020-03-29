@@ -16,18 +16,14 @@
 #include "console_another.h"
 #endif
 
-const uint8_t TileWidth = 30;
-const uint8_t TileHeight = 30;
-uint8_t pos = 3;
+const uint8_t TileWidthGraphic = 30;
+const uint8_t TileHeightGraphic = 30;
 const uint16_t MapXOffset = 10;
 const uint16_t MapYOffset = 10;
 
-class Point
-{
-public:
-	uint16_t x_pos;
-	uint16_t y_pos;
-};
+const uint8_t MetersToPixel = 10; // 10 pixel per meter
+const uint8_t TileWidthMeter = 30;
+const uint8_t TileHeightMeter = 30;
 
 class Map
 {
@@ -38,8 +34,7 @@ public:
 	uint8_t height;
 };
 
-const uint8_t currentmap[10 * 10] = {
-                                     1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 
+const uint8_t currentmap[10 * 10] = {1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 
                                      1, 0, 0, 0, 0,  0, 0, 1, 1, 1, 
                                      1, 0, 1, 0, 0,  0, 0, 0, 0, 1, 
                                      1, 0, 1, 0, 0,  0, 0, 1, 1, 1, 
@@ -49,7 +44,7 @@ const uint8_t currentmap[10 * 10] = {
                                      1, 0, 1, 1, 1,  0, 0, 0, 0, 1, 
                                      1, 0, 1, 0, 0,  0, 0, 1, 1, 1, 
                                      1, 0, 0, 0, 0,  0, 0, 0, 0, 1, 
-                                     1, 0, 0, 0, 0,  0, 0, 1, 1, 1, };
+                                     1, 0, 0, 0, 0,  0, 0, 1, 1, 1};
 
 
 class Tower
@@ -59,6 +54,9 @@ public:
 private:
 	
 };
+
+
+
 
 void DrawMap(ScreenData* screenData, uint8_t* tiles)
 {
@@ -71,15 +69,15 @@ void DrawMap(ScreenData* screenData, uint8_t* tiles)
 			if(tiles[col + (row * 10)] == 1)
 			{
 				DrawRectangle(screenData,
-				              MapXOffset + (col * TileWidth), MapXOffset + (row * TileHeight),
-				              TileWidth, TileHeight, 0xFF00FFFF);
+				              MapXOffset + (col * TileWidthGraphic), MapXOffset + (row * TileHeightGraphic),
+				              TileWidthGraphic, TileHeightGraphic, 0xFF00FFFF);
 			}
 			else
 			{
 				DrawRectangle(screenData,
-				              MapXOffset + (col * TileWidth),
-				              MapYOffset + (row * TileHeight),
-				              TileWidth, TileHeight, 0xFFFF00FF);
+				              MapXOffset + (col * TileWidthGraphic),
+				              MapYOffset + (row * TileHeightGraphic),
+				              TileWidthGraphic, TileHeightGraphic, 0xFFFF00FF);
 			}
 		}
 	}
@@ -97,23 +95,23 @@ void towerDraw(ScreenData* screenData)
 	}
 }
 
-
-PositionComponent* p_entities;
-HealthComponent   h_entities[100];
-
-std::vector<uint32_t> WindSystem;
-
 void DrawToon(ScreenData* screenData, PositionComponent* toon, uint32_t color_mask)
 {
 	DrawRectangle(screenData,
-	              static_cast<uint32_t>(toon->x_pos), static_cast<uint32_t>(toon->y_pos),
+	              MapXOffset + static_cast<uint32_t>(toon->x_pos*MetersToPixel),
+	              MapYOffset + static_cast<uint32_t>(toon->y_pos*MetersToPixel),
 	              30, 30, color_mask);
 }
 
+
+
 EntityObj* ents; // all the entities live here. 
 uint32_t entityId = 0;
-
+PositionComponent* p_entities;
+HealthComponent   h_entities[100];
 bool enableWind = false;
+std::vector<uint32_t> WindSystem;
+
 
 void add_player(float start_x, float start_y, uint32_t color_mask)
 {
@@ -163,9 +161,6 @@ extern "C" int GameInit(GameState* game_state)
 	init_memory_section(game_state->module_mem, 10000);
 
 	Map* p = AllocObj(game_state->module_mem, Map);
-	ents = AllocArray(game_state->module_mem, EntityObj, 10);
-	p_entities = AllocArray(game_state->module_mem, PositionComponent, 100);
-
 	if(p != NULL)
 	{
 		p->width = 10;
@@ -175,10 +170,14 @@ extern "C" int GameInit(GameState* game_state)
 		std::memcpy(p->tile_info, currentmap, 100);
 	}
 
+	ents = AllocArray(game_state->module_mem, EntityObj, 10);
+	p_entities = AllocArray(game_state->module_mem, PositionComponent, 100);
+
+
 	std::memset(p_entities, 0, 100);
 
 	// add_player
-	add_player(40, 40, 0x000000FF);
+	add_player(0, 0, 0x000000FF);
 
 	add_leaf(70, 0, 0x00BBFFFF);
 	add_leaf(45, 24, 0x44CCFFFF);
@@ -194,8 +193,8 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	GameInputController* controller = &(game_input->keyboard);
 	float dt = game_input->dtForFrame;
 
-	// first ent is the player.
-	player_move_update(dt, game_input, ents, 1);
+	Map* p = reinterpret_cast<Map*>(game_state->module_mem.base);
+
 
 	if(controller != NULL)
 	{
@@ -205,12 +204,13 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 		}
 	}
 
+	// first ent is the player.
+	player_move_update(dt, game_input, ents, 1);
+
 	if(enableWind)
 	{
 		wind_movement_update(dt, WindSystem.data(), WindSystem.size());
 	}
-
-	Map* p = reinterpret_cast<Map*>(game_state->module_mem.base);
 
 	towerDraw(screenData);
 

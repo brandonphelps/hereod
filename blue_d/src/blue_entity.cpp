@@ -9,7 +9,7 @@ extern HealthComponent   h_entities[100];
 void player_move_update(float dt, GameInput* game_input, EntityObj* start, uint32_t entity_size)
 {
 	GameInputController* controller = &(game_input->keyboard);
-	int move_speed = 30;
+	float move_speed = 3; // meters per second.
 
 	PositionComponent* cur_pos = p_entities + start->id;
 	float vel_x = 0, vel_y = 0;
@@ -38,20 +38,9 @@ void player_move_update(float dt, GameInput* game_input, EntityObj* start, uint3
 	cur_pos->y_pos = dt * vel_y + cur_pos->y_pos;
 }
 
-void wind_movement_update(float dt, EntityObj* start, uint32_t entity_size)
-{
-	EntityObj* iter = start;
-	float vel_x = -15;
-	for(uint32_t i = 0; i < entity_size; i++)
-	{
-		p_entities[iter->id].x_pos = dt * vel_x + p_entities[iter->id].x_pos ;
-		iter = iter+1;
-	}
-}
-
 void wind_movement_update(float dt, uint32_t* entityIds, uint32_t entity_size)
 {
-	float vel_x = -15;
+	float vel_x = -2;
 	uint32_t* startIt = entityIds;
 	for(uint32_t i = 0; i < entity_size; i++)
 	{

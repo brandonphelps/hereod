@@ -20,8 +20,8 @@ public:
 class PositionComponent
 {
 public:
-	float x_pos;
-	float y_pos;
+	float x_pos; // make this in Meters
+	float y_pos; // make this in meters
 	uint32_t color_mask; // temporary
 };
 
