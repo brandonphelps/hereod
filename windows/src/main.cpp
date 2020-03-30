@@ -351,7 +351,7 @@ int CALLBACK WinMain(
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd, nCmdShow);
-	ShowWindow(memH, nCmdShow);
+	// ShowWindow(memH, nCmdShow);
 
 	MSG msg;
 	// load custom game module 

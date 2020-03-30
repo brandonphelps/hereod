@@ -5,6 +5,7 @@
 
 #include "video.h"
 #include "blue_entity.h"
+#include "blue_map.h"
 
 #include "grid_helpers.h"
 #include "game_state.h"
@@ -18,21 +19,12 @@
 
 const uint8_t TileWidthGraphic = 3;
 const uint8_t TileHeightGraphic = 3;
-const uint16_t MapXOffset = 1; // in Pixels
-const uint16_t MapYOffset = 1; // in Pixels
+const uint16_t MapXOffset = 0; // in Pixels
+const uint16_t MapYOffset = 0; // in Pixels
 
-const uint8_t MetersToPixel = 30; // 10 pixel per meter
+const uint8_t MetersToPixel = 10; // 10 pixel per meter
 const uint8_t TileWidthMeter = 30;
 const uint8_t TileHeightMeter = 30;
-
-class Map
-{
-public:
-	// 10 by 10 grid
-	uint8_t tile_info[100];
-	uint8_t width;
-	uint8_t height;
-};
 
 const uint8_t currentmap[10 * 10] = {1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 
                                      1, 0, 0, 0, 0,  0, 0, 1, 1, 1, 
@@ -46,7 +38,6 @@ const uint8_t currentmap[10 * 10] = {1, 1, 1, 1, 1,  1, 1, 1, 1, 1,
                                      1, 0, 0, 0, 0,  0, 0, 0, 0, 1, 
                                      1, 0, 0, 0, 0,  0, 0, 1, 1, 1};
 
-
 class Tower
 {
 public:
@@ -54,9 +45,6 @@ public:
 private:
 	
 };
-
-
-
 
 void DrawMap(ScreenData* screenData, uint8_t* tiles)
 {
@@ -102,14 +90,15 @@ void DrawToon(ScreenData* screenData, PositionComponent* toon, uint32_t color_ma
 	              30, 30, color_mask);
 }
 
-
-
 EntityObj* ents; // all the entities live here. 
 uint32_t entityId = 0;
 PositionComponent* p_entities;
 HealthComponent* h_entities;
+uint8_t* w_entities;
+
 bool enableWind = false;
 std::vector<uint32_t> WindSystem;
+std::vector<uint32_t> PathFindSystem;
 
 void add_player(float start_x, float start_y, uint32_t color_mask)
 {
@@ -120,8 +109,20 @@ void add_player(float start_x, float start_y, uint32_t color_mask)
 	p_entities[current->id].y_pos = start_y;
 	p_entities[current->id].color_mask = color_mask;
 	h_entities[current->id].amount = 10;
-	current->component_mask = 0;
 	WindSystem.push_back(current->id);
+}
+
+void add_enemy(float start_x, float start_y, uint32_t color_mask)
+{
+	EntityObj* current = ents + entityId;
+	current->id = entityId;
+	entityId++;
+	p_entities[current->id].x_pos = start_x;
+	p_entities[current->id].y_pos = start_y;
+	p_entities[current->id].color_mask = color_mask;
+	h_entities[current->id].amount = 10;
+	w_entities[current->id] = 0;
+	PathFindSystem.push_back(current->id);
 }
 
 void add_leaf(float start_x, float start_y, uint32_t color_mask)
@@ -132,7 +133,6 @@ void add_leaf(float start_x, float start_y, uint32_t color_mask)
 	p_entities[current->id].x_pos = start_x;
 	p_entities[current->id].y_pos = start_y;
 	p_entities[current->id].color_mask = color_mask;
-	current->component_mask = 1;
 	WindSystem.push_back(current->id);
 }
 
@@ -144,7 +144,6 @@ void add_tile(float start_x, float start_y, uint32_t color_mask)
 	p_entities[current->id].x_pos = start_x;
 	p_entities[current->id].y_pos = start_y;
 	p_entities[current->id].color_mask = color_mask;
-	current->component_mask = 1;
 }
 
 // works fine on windows, but something about console doesn't allow writing to.
@@ -158,32 +157,51 @@ extern "C" int GameInit(GameState* game_state)
 
 	init_memory_section(game_state->module_mem, 10000);
 
+	std::memset(game_state->module_mem.base, 0, 10000);
+
 	Map* p = AllocObj(game_state->module_mem, Map);
 	if(p != NULL)
 	{
 		p->width = 10;
-		p->height = 10;
-
+		p->height = 0;
+		p->way_points = AllocArray(game_state->module_mem, Point, 10);
+		p->way_point_count = 0;
+		std::memset(p->way_points, 0, 10);
 		std::memset(p->tile_info, 0, 100);
 		std::memcpy(p->tile_info, currentmap, 100);
 	}
 
+	p->way_points[0].x = 100;
+	p->way_points[0].y = 100;
+	p->way_point_count++;
+
+	p->way_points[1].x = 40;
+	p->way_points[1].y = 30;
+	p->way_point_count++;	
+
+	p->way_points[2].x = 90;
+	p->way_points[2].y = 30;
+	p->way_point_count++;	
+
 	ents = AllocArray(game_state->module_mem, EntityObj, 100);
 	p_entities = AllocArray(game_state->module_mem, PositionComponent, 100);
 	h_entities = AllocArray(game_state->module_mem, HealthComponent, 100);
+	w_entities = AllocArray(game_state->module_mem, uint8_t, 100);
 
 	std::memset(p_entities, 0, 100);
 
+	
 	// add_player
 	add_player(0, 0, 0x000000FF);
 
-	add_leaf(70, 0, 0x00BBFFFF);
-	add_leaf(45, 24, 0x44CCFFFF);
-	add_leaf(205, 154, 0x4411FBFF);
+	add_leaf(20, 0, 0x00BBFFFF);
+	add_leaf(35, 24, 0x44CCFFFF);
+	add_leaf(45, 54, 0x4411FBFF);
 
+	add_enemy(20, 20, 0x11AA77FF);
+	
 	return 0;
 }
-
 
 // some sort of buffer for video data is passed back and forth here.
 extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInput* game_input)
@@ -209,6 +227,8 @@ extern "C" int GameUpdate(ScreenData* screenData, GameState* game_state, GameInp
 	// {
 	// 	wind_movement_update(dt, WindSystem.data(), WindSystem.size());
 	// }
+
+	enemey_path_finding_update(dt, p, PathFindSystem.data(), PathFindSystem.size());
 
 	towerDraw(screenData);
 
