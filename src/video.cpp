@@ -144,3 +144,10 @@ void DrawRectangle(uint8_t* buffer,
 		row += buf_width * 4;
 	}
 }
+
+
+
+void DrawText(ScreenData* screenData, uint32_t x, uint32_t y, const std::string& data)
+{
+	
+}

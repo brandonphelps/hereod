@@ -20,7 +20,7 @@ endif
 endif
 
 
-INCLUDE_DIRS += -Iinclude
+INCLUDE_DIRS += -Iinclude -Ilua/include
 
 LIB_DIRS = -L/usr/local/lib
 
@@ -58,6 +58,18 @@ $(eval $(call CommonSrcRule,game_memory))
 $(eval $(call CommonSrcRule,game_state))
 $(eval $(call CommonSrcRule,game_recording))
 $(eval $(call CommonSrcRule,grid_helpers))
+
+
+define LuaCommonRule
+bin/$(1).o: src/$(1).cpp
+	@mkdir -p bin
+	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
+TARGET_OBJS += bin/$(1).o
+
+endef
+
+
+
 
 
 clean:

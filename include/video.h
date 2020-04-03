@@ -3,7 +3,7 @@
 #define VIDEO_H
 
 #include <stdint.h>
-
+#include <string>
 
 class ScreenData
 {
@@ -32,4 +32,8 @@ void DrawRectangle(ScreenData* screenData,
                    uint32_t x, uint32_t y,
                    uint32_t width, uint32_t height,
                    uint32_t color_mask);
+
+void DrawText(ScreenData* screenData, uint32_t x, uint32_t y, const std::string& data);
+	
+
 #endif
