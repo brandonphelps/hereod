@@ -3,8 +3,9 @@
 #ifndef lstate_h
 #define lstate_h
 
-#include "lua.h"
 #include "lobject.h"
+
+#include "luatypedefs.h"
 
 
 // chars used as small naturals
@@ -20,6 +21,8 @@ struct lua_State
 	int hookcount;
 };
 
+
+typedef int (*lua_CFunction) (lua_State *L);
 
 struct global_State
 {
