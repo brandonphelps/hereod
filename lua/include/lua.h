@@ -23,9 +23,6 @@
 
 
 
-
-
-
 void (lua_pushcclosure) (lua_State *L, lua_CFunction fn, int n);
 
 #define lua_pushcfunction(L, f) lua_pushcclosure(L, (f), 0)
