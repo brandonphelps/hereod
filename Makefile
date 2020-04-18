@@ -20,7 +20,7 @@ endif
 endif
 
 
-INCLUDE_DIRS += -Iinclude -Ilua/include
+INCLUDE_DIRS += -Iinclude -Ilua/include -Iclanger/include
 
 LIB_DIRS = -L/usr/local/lib
 
@@ -68,8 +68,22 @@ TARGET_OBJS += bin/lua/$(1).o
 endef
 
 
-$(eval $(call LuaCommonRule,lstate))
-$(eval $(call LuaCommonRule,lapi))
+# $(eval $(call LuaCommonRule,lstate))
+# $(eval $(call LuaCommonRule,lapi))
+
+
+define ClangerCommonRule
+bin/clanger/$(1).o: clanger/src/$(1).cpp
+	@mkdir -p bin/clanger
+	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
+TARGET_OBJS += bin/clanger/$(1).o
+endef
+
+
+# $(eval $(call LuaCommonRule,lstate))
+# $(eval $(call LuaCommonRule,lapi))
+
+$(eval $(call ClangerCommonRule,clanger))
 
 
 clean:

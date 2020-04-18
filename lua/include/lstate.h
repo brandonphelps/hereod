@@ -3,13 +3,9 @@
 #ifndef lstate_h
 #define lstate_h
 
-#include "lobject.h"
-
+#include "lgcobjects.h"
+#include "lvalue.h"
 #include "luatypedefs.h"
-
-
-// chars used as small naturals
-typedef unsigned char lu_byte;
 
 struct lua_State
 {
@@ -19,10 +15,10 @@ struct lua_State
 
 	int stacksize;
 	int hookcount;
+	StkId top;
 };
 
 
-typedef int (*lua_CFunction) (lua_State *L);
 
 struct global_State
 {

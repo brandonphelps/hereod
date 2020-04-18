@@ -27,9 +27,13 @@
 #include "console_another.h"
 #include "video.h"
 
-#include "lua.h"
-#include "lstate.h"
 
+#include "clanger.h"
+
+void my_clanger_printer(const std::string& msg)
+{
+	WriteLine(msg);
+}
 
 static char valueConvertTable[16] =
 	{
@@ -298,14 +302,12 @@ int CALLBACK WinMain(
 	                         hInstance,
 	                         NULL);
 
-	WriteLine("Lua version: ");
-	WriteLine(LUA_VERSION_MAJOR);
+	clanger_State rootState;
+	rootState.next = NULL;
+	
+	clanger_set_print(my_clanger_printer);
 
-	lua_State* temp_global_lua_state;
-
-	// temp_global_lua_state = luaL_newstate();
-
-
+	clanger_main();
 
 
 	if (!hWnd)
