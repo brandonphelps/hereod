@@ -27,6 +27,10 @@
 #include "console_another.h"
 #include "video.h"
 
+#include "lua.h"
+#include "lstate.h"
+
+
 static char valueConvertTable[16] =
 	{
 	 48,
@@ -293,6 +297,16 @@ int CALLBACK WinMain(
 	                         NULL,
 	                         hInstance,
 	                         NULL);
+
+	WriteLine("Lua version: ");
+	WriteLine(LUA_VERSION_MAJOR);
+
+	lua_State* temp_global_lua_state;
+
+	// temp_global_lua_state = luaL_newstate();
+
+
+
 
 	if (!hWnd)
 	{

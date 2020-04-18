@@ -61,15 +61,15 @@ $(eval $(call CommonSrcRule,grid_helpers))
 
 
 define LuaCommonRule
-bin/$(1).o: src/$(1).cpp
-	@mkdir -p bin
+bin/lua/$(1).o: lua/src/$(1).cpp
+	@mkdir -p bin/lua
 	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
-TARGET_OBJS += bin/$(1).o
-
+TARGET_OBJS += bin/lua/$(1).o
 endef
 
 
-
+$(eval $(call LuaCommonRule,lstate))
+$(eval $(call LuaCommonRule,lapi))
 
 
 clean:

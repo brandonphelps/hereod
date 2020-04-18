@@ -5,6 +5,7 @@
 #define lua_h
 
 #include "luaconf.h"
+#include "lstate.h"
 
 #define LUA_VERSION_MAJOR "5"
 #define LUA_VERSION_MINOR "3"
@@ -16,8 +17,19 @@
 
 #define LUA_MULTRET     (-1)
 
+// basic types
+#define LUA_TTHREAD		8
+
 
 typedef LUA_NUMBER lua_Number;
+
+typedef int (*lua_CFunction) (lua_State *L);
+
+typedef void* (*lua_Alloc) (void *ud, void *ptr, size_t osize, size_t nsize);
+
+void (lua_pushcclosure) (lua_State *L, lua_CFunction fn, int n);
+
+#define lua_pushcfunction(L, f) lua_pushcclosure(L, (f), 0)
 
 
 typedef void* (*lua_Alloc)(void *ud, void* ptr, size_t osize, size_t nsize);
