@@ -84,7 +84,7 @@ endef
 # $(eval $(call LuaCommonRule,lapi))
 
 $(eval $(call ClangerCommonRule,clanger))
-
+$(eval $(call ClangerCommonRule,windows_exec))
 
 clean:
 	rm -rf bin $(TARGETS)

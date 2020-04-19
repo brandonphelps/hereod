@@ -35,6 +35,9 @@ void my_clanger_printer(const std::string& msg)
 	WriteLine(msg);
 }
 
+void temp_main();
+
+
 static char valueConvertTable[16] =
 	{
 	 48,
@@ -308,6 +311,8 @@ int CALLBACK WinMain(
 	clanger_set_print(my_clanger_printer);
 
 	clanger_main();
+
+	temp_main();
 
 
 	if (!hWnd)

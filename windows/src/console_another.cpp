@@ -25,6 +25,7 @@ void WriteOut(const std::string& tmp)
 	}
 }
 
+
 void WriteLine(const std::string& tmp)
 {
 	WriteOut(tmp + "\n\r");

@@ -32,7 +32,11 @@ struct clanger_State
 
 void clanger_set_print(clanger_print p);
 
+
+
 void clanger_main(void);
+
+
 
 
 #endif
