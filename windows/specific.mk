@@ -28,3 +28,12 @@ cool.exe: $(SPECIFIC_OBJS) $(TARGET_OBJS) bin/tower_d.dll bin/blue_d.dll
 
 
 
+windows_child.exe: clanger/src/windows_child.cpp
+	$(CC) clanger/src/windows_child.cpp
+
+windows_parent.exe: clanger/src/windows_parent.cpp
+	$(CC) clanger/src/windows_parent.cpp $(LIBS)
+
+TARGETS += windows_child.exe
+TARGETS += windows_parent.exe
+

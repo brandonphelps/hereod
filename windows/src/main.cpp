@@ -29,6 +29,7 @@
 
 
 #include "clanger.h"
+#include "subprocess.hpp"
 
 void my_clanger_printer(const std::string& msg)
 {
@@ -36,6 +37,8 @@ void my_clanger_printer(const std::string& msg)
 }
 
 void temp_main();
+
+std::string ReadInput(const std::string& prompt);
 
 
 static char valueConvertTable[16] =
@@ -305,15 +308,21 @@ int CALLBACK WinMain(
 	                         hInstance,
 	                         NULL);
 
-	clanger_State rootState;
-	rootState.next = NULL;
+	// clanger_State rootState;
+	// rootState.next = NULL;
 	
-	clanger_set_print(my_clanger_printer);
+	// clanger_set_print(my_clanger_printer);
 
-	clanger_main();
+	// clanger_main();
+
+
+	// 	ReadInput("Hello: ");
+
+
+	// auto ret = subprocess::call({"dir"});
+	// WriteLine("Ret: value: " + std::to_string(ret));
 
 	temp_main();
-
 
 	if (!hWnd)
 	{
