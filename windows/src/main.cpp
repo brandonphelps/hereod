@@ -502,6 +502,10 @@ int CALLBACK WinMain(
 
 	bool console_active = false;
 
+
+	HBitmap tempBitmap;
+	LoadBitmap("resources/fonts/cool_font.bmp", tempBitmap);
+
 	
 	RECT new_rec;
 	new_rec.left = 0;
