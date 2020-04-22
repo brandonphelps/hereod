@@ -84,6 +84,23 @@ void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t 
 	printme = 0;
 }
 
+void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x, uint32_t dest_pixel_y)
+{
+	uint8_t* row = dest.buffer + dest_pixel_x*4 + dest_pixel_y*dest.width*4;
+	for(uint32_t y = 0; y < source.height; ++y)
+	{
+		uint32_t* pixel = (uint32_t*)row;
+		for(uint32_t x = 0; x < source.width; ++x)
+		{
+			*pixel = *(uint32_t*)(source.buffer + x*4 + y*source.width * 4);;
+			pixel++;
+		}
+		row += dest.width * 4;
+	}
+	
+}
+
+
 void DrawRectangle(ScreenData* data,
                    uint32_t s_x, uint32_t s_y,
                    uint32_t width, uint32_t height,

@@ -14,6 +14,7 @@
 #include <sstream>
 
 #include <stdint.h>
+#include <set>
 
 #include "performance.h"
 #include "keyboard_updates.h"
@@ -84,6 +85,69 @@ std::string toHex(uint8_t* start, size_t length)
 	return msg;
 }
 
+const static std::set<uint32_t> console_display_keys = {'M', 'N'};
+
+
+class Console
+{
+public:
+	// render_dest is the location of where the console should be rendered onto. 
+	void render(ScreenData& render_dest);
+
+	// note this does not allow for multiple  key pressed at the same time.
+	// update to comput a keybord or game controller input. 
+	void update(uint32_t keyCode);
+	// contains all messages that have been typed into the console,
+	// does not include the currently active typing message.
+	std::vector<std::string> buffer_history;
+	std::string current_message;
+	ScreenData screen_data;
+
+	uint32_t x_position;
+	uint32_t y_position;
+};
+
+void Console::update(uint32_t keycode)
+{
+	// if keycode is a normal key value A-Z0-9, add to current active string
+	// if keycode is a enter key add string to buffer_history.
+	if(console_display_keys.find(keycode) != console_display_keys.end())
+	{
+		current_message += static_cast<char>(keycode);
+	}
+	else
+	{
+		// current_message
+	}
+}
+
+
+void Console::render(ScreenData& render_dest)
+{
+	BlitScreenData(screen_data, render_dest, 0, 0);
+}
+
+
+// // base class for Widget / gui like objects that can be interactived with
+// class Widget
+// {
+// public:
+// 	virtual Update() = 0;
+// private:
+	
+// };
+
+// class VisibleWidget : public Widget
+// {
+// public:
+// 	Update()
+// 	{
+// 		std::cout << "I'm a visible widet" << std::endl;
+// 	}
+	
+// 	ScreenData* screen_data;
+// };
+
 static bool Running = true;
 HINSTANCE hInst;
 
@@ -105,6 +169,7 @@ void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_heig
 
 	WriteOut("Allocating " + std::to_string(screendata.pitch) + " * " + std::to_string(screendata.height) + "\n\r");
 	screendata.buffer = new uint8_t[screendata.pitch * screendata.height];
+	std::memset(screendata.buffer, 0, screendata.pitch * screendata.height);
 }
 
 struct win32_pixel_buffer
@@ -322,7 +387,7 @@ int CALLBACK WinMain(
 	// auto ret = subprocess::call({"dir"});
 	// WriteLine("Ret: value: " + std::to_string(ret));
 
-	temp_main();
+	// temp_main();
 
 	if (!hWnd)
 	{
@@ -357,6 +422,12 @@ int CALLBACK WinMain(
 	{
 		MonitorRefreshHz = Win32RefreshRate;
 	}
+
+	Console main_console;
+	main_console.screen_data.bytesPerPixel = 4;
+	main_console.screen_data.buffer = NULL;
+	resize_buffer(main_console.screen_data, 960 / 4, 540 / 4);
+
 	float GameUpdateHz = (MonitorRefreshHz / 2);
 	float TargetSecondsPerFrame = 1.0f / (float)GameUpdateHz;
 	ScreenData currentScreen;
@@ -426,6 +497,9 @@ int CALLBACK WinMain(
 	// trigger a window update
 	UpdateWindow(hWnd);
 	UpdateWindow(memH);
+
+	bool console_active = false;
+
 	
 	RECT new_rec;
 	new_rec.left = 0;
@@ -469,39 +543,47 @@ int CALLBACK WinMain(
 					bool IsDown  = ((msg.lParam & (1 << 31)) == 0);
 					if(WasDown != IsDown)
 					{
-						if(VKCode == 'M' && WasDown)
+						if(VKCode == '1' && WasDown)
 						{
-							DrawMemory = true;
+							WriteLine("Activating console");
+							console_active = !console_active;
 						}
-						else if(VKCode == 'N' && WasDown)
+						if(!console_active)
 						{
-							DrawMemory = false;
-						}
-						if(DrawMemory && VKCode == 'V' && WasDown)
-						{
-							StartMemPrint += 8;
-						}
-						else if(DrawMemory && VKCode == 'B' && WasDown)
-						{
-							StartMemPrint -= 8;							
-						}
-						if(VKCode == 'L' && WasDown)
-						{
-							BeginRecordingInput(&mahState);
-							RecordingStates = true;
-							WriteLine("Begin recording");
-						}
-						if(VKCode == 'P' && WasDown)
-						{
-							if(PlaybackInput)
+							if(VKCode == 'M' && WasDown)
 							{
-								PlaybackInput = false;
-								ClearPlayback(&mahState);
+								DrawMemory = true;
 							}
-							else
+							else if(VKCode == 'N' && WasDown)
 							{
-								WriteLine("Begin Replay");
-								PlaybackInput = true;
+								DrawMemory = false;
+							}
+							if(DrawMemory && VKCode == 'V' && WasDown)
+							{
+								StartMemPrint += 8;
+							}
+							else if(DrawMemory && VKCode == 'B' && WasDown)
+							{
+								StartMemPrint -= 8;							
+							}
+							if(VKCode == 'L' && WasDown)
+							{
+								BeginRecordingInput(&mahState);
+								RecordingStates = true;
+								WriteLine("Begin recording");
+							}
+							if(VKCode == 'P' && WasDown)
+							{
+								if(PlaybackInput)
+								{
+									PlaybackInput = false;
+									ClearPlayback(&mahState);
+								}
+								else
+								{
+									WriteLine("Begin Replay");
+									PlaybackInput = true;
+								}
 							}
 						}
 					}
@@ -534,6 +616,12 @@ int CALLBACK WinMain(
 		initRest = blueFuncs.GameUpdate(&currentScreen,
 		                                &mahState,
 		                                mahInput);
+
+
+		if(console_active)
+		{
+			main_console.render(currentScreen);
+		}
 
 
 		// timing information to ensure a steady framerate.
