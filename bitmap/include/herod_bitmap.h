@@ -18,26 +18,64 @@ public:
 	uint32_t file_size; 
 	uint32_t data_offset;
 
-	uint8_t info_header[39];
-	
+	uint8_t info_header[40];
+
+	uint32_t info_header_size; // should be 40.
+	uint32_t width; // width of bitmap in pixels
+	uint32_t height;  // width of bitmap in pixels
+	uint16_t planes;
+	uint16_t bits_per_pixel;
+	uint32_t image_size;
+	uint32_t compression;
+
 private:
 };
 
-// appears bitmaps are little endian. 
-uint32_t from_byte_array(uint8_t* pointer)
+
+// appears bitmaps are little endian.
+uint32_t from_byte_array32(uint8_t* pointer)
 {
 	uint32_t result = 0;
 	result = ((uint64_t)pointer[0]) | ((uint64_t)pointer[1]) << 8 | ((uint64_t)pointer[2]) << 16 | ((uint64_t)pointer[3]) << 24;
-	// result = 0xFF(pointer[3] << 24) | ((uint32_t)pointer[2] << 16) | ((uint32_t)pointer[1]) << 8 | pointer[0];
 	return result;
 }
+
+uint16_t from_byte_array16(uint8_t* pointer)
+{
+	uint16_t result = 0;
+	result = ((uint16_t)pointer[0]) | ((uint16_t)pointer[1]) << 8;
+	return result;
+}
+
+static char valueConvertTableF[16] =
+	{
+	 48,
+	 49,
+	 50,
+	 51,
+	 52,
+	 53,
+	 54,
+	 55,
+	 56,
+	 57,
+	 65,
+	 66,
+	 67,
+	 68,
+	 69,
+	 70
+	};
+
 
 void print_byte_array(uint8_t* pointer, uint32_t size)
 {
 	std::stringstream stream; 
 	for(int i = 0; i < size; i++)
 	{
-		stream << std::hex << pointer[i] << std::dec;
+		uint8_t highNibble = 0x0F & (pointer[i] >> 4);
+		uint8_t lowNibble  = 0x0F & pointer[i];
+		stream << valueConvertTableF[highNibble] << valueConvertTableF[lowNibble];
 	}
 	WriteLine(stream.str());
 }
@@ -52,7 +90,7 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 	if(file_handle)
 	{
 		// header
-		for(int i = 0; i < 13; i++)
+		for(int i = 0; i < 14; i++)
 		{
 			temp_buffer[i] = std::fgetc(file_handle);
 		}
@@ -65,9 +103,9 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 
 		// replace with cool deserialization lib. 
 		uint8_t* buf = reinterpret_cast<uint8_t*>(temp_buffer + 2);
-		bitmap.file_size = from_byte_array(buf);
+		bitmap.file_size = from_byte_array32(buf);
 		buf = reinterpret_cast<uint8_t*>(temp_buffer + 2 + 4+ 6);
-		bitmap.data_offset = from_byte_array(buf);
+		bitmap.data_offset = from_byte_array32(buf);
 		std::memcpy(bitmap.header, temp_buffer, 13);
 		std::memset(temp_buffer, 0, 13);
 		for(int i = 0; i < 0x35 - 0x0E; i++)
@@ -75,6 +113,39 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 			temp_buffer[i] = std::fgetc(file_handle);
 		}
 
+		uint32_t offset = 0;
+
+		buf = reinterpret_cast<uint8_t*>(temp_buffer);
+		bitmap.info_header_size = from_byte_array32(buf);
+		offset += 4;
+
+		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		bitmap.width = from_byte_array32(buf);
+		offset += 4;
+
+		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		bitmap.height = from_byte_array32(buf);
+		offset += 4;
+
+		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		bitmap.planes = from_byte_array16(buf);
+		offset += 2;
+
+		WriteLine("Offset for bits per pixel: " + std::to_string(offset+14));
+		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		print_byte_array(buf, 2);
+		bitmap.bits_per_pixel = from_byte_array16(buf);
+		offset += 2;
+
+		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		bitmap.compression = from_byte_array32(buf);
+		offset += 4;
+
+		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		bitmap.image_size = from_byte_array32(buf);
+		offset += 4;
+
+		
 		
 	}
 	else
@@ -85,6 +156,9 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 	WriteLine("BITMAP loaded");
 	WriteLine("File size: " + std::to_string(bitmap.file_size));
 	WriteLine("Data Offset: " + std::to_string(bitmap.data_offset));
+	WriteLine("Width: " + std::to_string(bitmap.width));
+	WriteLine("Height: " + std::to_string(bitmap.height));
+	WriteLine("Bits per pixel: " + std::to_string(bitmap.bits_per_pixel));
 }
 
 #endif
