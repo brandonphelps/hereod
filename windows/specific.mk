@@ -27,7 +27,6 @@ cool.exe: $(SPECIFIC_OBJS) $(TARGET_OBJS) bin/tower_d.dll bin/blue_d.dll
 	$(LD) /OUT:$@ $(LIBS) $(filter %.o,$^) 
 
 
-
 windows_child.exe: clanger/src/windows_child.cpp
 	$(CC) clanger/src/windows_child.cpp
 

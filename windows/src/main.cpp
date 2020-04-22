@@ -16,6 +16,8 @@
 #include <stdint.h>
 #include <set>
 
+#include "herod_bitmap.h"
+
 #include "performance.h"
 #include "keyboard_updates.h"
 #include "app_window_helper.h"
