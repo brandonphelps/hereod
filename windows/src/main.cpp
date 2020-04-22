@@ -168,7 +168,7 @@ void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_heig
 	screendata.height = new_height;
 	screendata.pitch = screendata.width * screendata.bytesPerPixel;
 
-	WriteOut("Allocating " + std::to_string(screendata.pitch) + " * " + std::to_string(screendata.height) + "\n\r");
+	WriteOut("Allocating (" + std::to_string(screendata.width) + "*" + std::to_string(screendata.bytesPerPixel) + ")"  + std::to_string(screendata.pitch) + " * " + std::to_string(screendata.height) +" == " + std::to_string(screendata.pitch * screendata.height) + "\n\r");
 	screendata.buffer = new uint8_t[screendata.pitch * screendata.height];
 	std::memset(screendata.buffer, 0, screendata.pitch * screendata.height);
 }
@@ -506,10 +506,12 @@ int CALLBACK WinMain(
 	try
 	{
 		LoadBitmap("resources/fonts/cool_font.bmp", tempBitmap);
-
+		WriteLine("Bitmap temp screen data");
 		ScreenData temp_info;
+		temp_info.buffer = NULL;
+		temp_info.bytesPerPixel = 4;
 		resize_buffer(temp_info, tempBitmap.width, tempBitmap.height);
-		std::memcpy(temp_info.buffer, tempBitmap.pixel_buffer, tempBitmap.width * tempBitmap.height * 4);
+		std::memcpy(temp_info.buffer, tempBitmap.pixel_buffer, (tempBitmap.bits_per_pixel / 8) * tempBitmap.width * tempBitmap.height);
 
 		BlitScreenData(temp_info, main_console.screen_data, 0, 0);
 	}

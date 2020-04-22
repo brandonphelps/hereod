@@ -170,10 +170,10 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 
 		// end of info header.
 
-		if(bitmap.colors_used < 8)
+		if(bitmap.bits_per_pixel < 8)
 		{
 			// load color table. 
-			throw std::runtime_error("currently not supported for loading color used data");
+			throw std::runtime_error("currently not supported for loading color used data: " + std::to_string(bitmap.colors_used));
 		}
 
 		// load pixel data.
