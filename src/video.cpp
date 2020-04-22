@@ -97,7 +97,6 @@ void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x,
 		}
 		row += dest.width * 4;
 	}
-	
 }
 
 

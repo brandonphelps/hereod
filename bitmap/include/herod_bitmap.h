@@ -25,8 +25,14 @@ public:
 	uint32_t height;  // width of bitmap in pixels
 	uint16_t planes;
 	uint16_t bits_per_pixel;
-	uint32_t image_size;
 	uint32_t compression;
+	uint32_t image_size;
+	uint32_t xpixels_per_meter;
+	uint32_t ypixels_per_meter;
+	uint32_t colors_used;
+	uint32_t important_colors;
+
+	uint8_t* pixel_buffer;
 
 private:
 };
@@ -81,6 +87,7 @@ void print_byte_array(uint8_t* pointer, uint32_t size)
 }
 
 // reads file and loads files contents into bitmap
+// new resources are allocated, in pixel_buffer, ensure they are cleaned up.
 void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 {
 	std::FILE* file_handle = fopen(filepath.c_str(), "rb");
@@ -108,7 +115,7 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 		bitmap.data_offset = from_byte_array32(buf);
 		std::memcpy(bitmap.header, temp_buffer, 13);
 		std::memset(temp_buffer, 0, 13);
-		for(int i = 0; i < 0x35 - 0x0E; i++)
+		for(int i = 0; i < 40; i++)
 		{
 			temp_buffer[i] = std::fgetc(file_handle);
 		}
@@ -145,8 +152,46 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 		bitmap.image_size = from_byte_array32(buf);
 		offset += 4;
 
+		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		bitmap.xpixels_per_meter = from_byte_array32(buf);
+		offset += 4;
+
+		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		bitmap.ypixels_per_meter = from_byte_array32(buf);
+		offset += 4;
 		
-		
+		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		bitmap.colors_used = from_byte_array32(buf);
+		offset += 4;
+
+		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		bitmap.important_colors = from_byte_array32(buf);
+		offset += 4;
+
+		// end of info header.
+
+		if(bitmap.colors_used < 8)
+		{
+			// load color table. 
+			throw std::runtime_error("currently not supported for loading color used data");
+		}
+
+		// load pixel data.
+		// pitch is the number of bytes in a row.
+		if(bitmap.bits_per_pixel == 1 || bitmap.bits_per_pixel == 4)
+		{
+			throw std::runtime_error("Unsported bitmap bits per pixel");
+		}
+
+		uint8_t bytes_per_pixel = bitmap.bits_per_pixel / 8;
+
+		uint32_t pitch = bitmap.width * bytes_per_pixel;
+
+		bitmap.pixel_buffer = new uint8_t[pitch * bitmap.height];
+		for(int i = 0; i < pitch * bitmap.height; ++i)
+		{
+			bitmap.pixel_buffer[i] = static_cast<uint8_t>(std::fgetc(file_handle));
+		}
 	}
 	else
 	{

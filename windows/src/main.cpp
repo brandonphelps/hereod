@@ -123,7 +123,6 @@ void Console::update(uint32_t keycode)
 	}
 }
 
-
 void Console::render(ScreenData& render_dest)
 {
 	BlitScreenData(screen_data, render_dest, 0, 0);
@@ -504,7 +503,22 @@ int CALLBACK WinMain(
 
 
 	HBitmap tempBitmap;
-	LoadBitmap("resources/fonts/cool_font.bmp", tempBitmap);
+	try
+	{
+		LoadBitmap("resources/fonts/cool_font.bmp", tempBitmap);
+
+		ScreenData temp_info;
+		resize_buffer(temp_info, tempBitmap.width, tempBitmap.height);
+		std::memcpy(temp_info.buffer, tempBitmap.pixel_buffer, tempBitmap.width * tempBitmap.height * 4);
+
+		BlitScreenData(temp_info, main_console.screen_data, 0, 0);
+	}
+	catch(const std::runtime_error& e)
+	{
+		std::stringstream blah;
+		blah << "@@@@Unable to load bitmap data@@: " << e.what();
+		WriteLine(blah.str());
+	}
 
 	
 	RECT new_rec;
