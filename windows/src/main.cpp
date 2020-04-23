@@ -58,10 +58,23 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 		uint8_t* pixel = destination.buffer;
 
 		WriteLine("Filling out Screend ata: " + std::to_string(bytes_per_pixel * source.width * source.height));
+		WriteLine("destination width height: " + std::to_string(destination.width) + ", " + std::to_string(destination.height));
 
-		for(uint32_t i = 0; i < bytes_per_pixel * source.width * source.height; i += 4)
+		int x = 0;
+		int y = 0;
+		for(uint32_t i = 0; i < bytes_per_pixel * source.width * source.height; i += bytes_per_pixel)
 		{
-			// blue
+			// windows.
+			// uint32_t color_mask = ((uint32_t)source.pixel_buffer[i]) << 24 | ((uint32_t)source.pixel_buffer[i+1]) << 16 | ((uint32_t)source.pixel_buffer[i+2]) << 8 | 0xFF;
+
+			//destination.set_pixel_color(x, y, color_mask);
+			//x++;
+			// if(x == 20)
+			// {
+			// 	x = 0;
+			// 	y++;
+			// }
+			// // blue
 			*pixel = source.pixel_buffer[i];
 			++pixel;
 
@@ -166,7 +179,7 @@ void Console::update(uint32_t keycode)
 
 void Console::render(ScreenData& render_dest)
 {
-	BlitScreenData(screen_data, render_dest, 0, 0);
+	BlitScreenData(screen_data, render_dest, 200, 200);
 }
 
 
@@ -274,6 +287,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 uint8_t* StartMemPrint = 0;
+uint32_t StartMemPrintWidth = 0;
+uint32_t StartMemPrintHeight = 0;
 uint64_t StartAddress = 0;
 bool DrawMemory = false;
 
@@ -300,7 +315,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					StartAddress = reinterpret_cast<uintptr_t>(StartMemPrint);
 					std::string Address = toHex(StartAddress);
 					TextOut(hdc, 40, 40, Address.c_str(), Address.size());
-					static uint8_t mem_print_width = 10;
+					static uint8_t mem_print_width = 50;
 					for(int i = 0; i < 13; i++)
 					{
 						uint8_t* platname = StartMemPrint + (i * mem_print_width);
@@ -481,7 +496,7 @@ int CALLBACK WinMain(
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd, nCmdShow);
-	// ShowWindow(memH, nCmdShow);
+	ShowWindow(memH, nCmdShow);
 
 	MSG msg;
 	// load custom game module 
@@ -595,6 +610,7 @@ int CALLBACK WinMain(
 						{
 							WriteLine("Activating console");
 							console_active = !console_active;
+							StartMemPrint = main_console.screen_data.buffer;
 						}
 						if(!console_active)
 						{
@@ -666,7 +682,6 @@ int CALLBACK WinMain(
 		                                mahInput);
 
 		BlitScreenData(testingScreenData, currentScreen, 10, 10);
-
 
 		if(console_active)
 		{

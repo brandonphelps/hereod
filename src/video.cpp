@@ -10,10 +10,9 @@
 #include <cstring>
 
 
-
 void ScreenData::set_pixel_color(uint32_t x, uint32_t y, uint32_t color_mask)
 {
-	if(x > width || y > height)
+	if(x >= width || y >= height)
 	{
 		return;
 	}
@@ -122,16 +121,6 @@ void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x,
 		row += dest.width * 4;
 		copy_row += source.width * 4;
 	}
-	// for(uint32_t y = 0; y < source.height; ++y)
-	// {
-	// 	uint32_t* pixel = (uint32_t*)row;
-	// 	for(uint32_t x = 0; x < source.width; ++x)
-	// 	{
-	// 		*pixel = *(uint32_t*)(source.buffer + x*4 + y*source.width * 4);;
-	// 		pixel++;
-	// 	}
-	// 	row += dest.width * 4;
-	// }
 }
 
 
