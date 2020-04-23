@@ -34,7 +34,18 @@ public:
 
 	uint8_t* pixel_buffer;
 
+	void get_rgba_pixel(uint32_t pixel_x, uint32_t pixel_y,
+	                    uint8_t& r, uint8_t& b, uint8_t& g, uint8_t a)
+	{
+		
+	}
+	
 private:
+};
+
+class PixelColor
+{
+	
 };
 
 
@@ -175,22 +186,51 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 			// load color table. 
 			throw std::runtime_error("currently not supported for loading color used data: " + std::to_string(bitmap.colors_used));
 		}
-
+		
 		// load pixel data.
 		// pitch is the number of bytes in a row.
-		if(bitmap.bits_per_pixel == 1 || bitmap.bits_per_pixel == 4)
+		if(bitmap.bits_per_pixel == 1 || bitmap.bits_per_pixel == 4 || bitmap.bits_per_pixel || 8 || bitmap.bits_per_pixel == 16)
 		{
-			throw std::runtime_error("Unsported bitmap bits per pixel");
+			throw std::runtime_error("Unsported bitmap bits per pixel " + std::to_string(bitmap.bits_per_pixel));
+		}
+		
+		uint8_t bytes_per_pixel = bitmap.bits_per_pixel / 8;
+		
+		uint32_t pitch = bitmap.width * bytes_per_pixel;
+		bitmap.pixel_buffer = new uint8_t[pitch * bitmap.height];
+
+		// each row is padded to be 4 byte align, calculate padding count that occurs
+		// at the end of each row. 
+		int row_byte_padding_count = 0;
+		if(bitmap.width % 4 == 0)
+		{
+			row_byte_padding_count = 4 - (bitmap.width % 4);
 		}
 
-		uint8_t bytes_per_pixel = bitmap.bits_per_pixel / 8;
+		// todo: move the current file pointer to be aligned with data offet
+		
 
-		uint32_t pitch = bitmap.width * bytes_per_pixel;
-
-		bitmap.pixel_buffer = new uint8_t[pitch * bitmap.height];
-		for(int i = 0; i < pitch * bitmap.height; ++i)
+		uint32_t dest_byte_index = 0;
+		for(int i = 0; i < bitmap.height; ++i)
 		{
-			bitmap.pixel_buffer[i] = static_cast<uint8_t>(std::fgetc(file_handle));
+			// for each row in the source, obtain each pixel and map it into a uint8_t byte array.
+			for(int column = 0; column < bitmap.width; column++)
+			{
+				// for 24 bit pixels perform direct copy.
+				// color is in order of (blue, green, red).
+				bitmap.pixel_buffer[dest_byte_index++] = static_cast<uint8_t>(std::fgetc(file_handle));
+			}
+
+			// read out the padding bytes to get to 4 byte allignment. 
+			for(int column = 0; column < row_byte_padding_count; column++)
+			{
+				std::fgetc(file_handle);
+			}
+
+			if((dest_byte_index - 1 + row_byte_padding_count) % 4 != 0)
+			{
+				throw std::runtime_error("Failed to parse scanline with correct padding");
+			}
 		}
 	}
 	else

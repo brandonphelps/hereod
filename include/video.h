@@ -38,5 +38,7 @@ void DrawRectangle(ScreenData* screenData,
 
 void DrawText(ScreenData* screenData, uint32_t x, uint32_t y, const std::string& data);
 	
+void resize_buffer(ScreenData& screenData, uint32_t width, uint32_t height);
+
 
 #endif

@@ -44,6 +44,42 @@ void temp_main();
 std::string ReadInput(const std::string& prompt);
 
 
+// used for copying bitmap data into a screen data.
+void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
+{
+	uint8_t bytes_per_pixel = source.bits_per_pixel / 8;
+	destination.bytesPerPixel = 4;
+	resize_buffer(destination, source.width, source.height);
+
+	if(bytes_per_pixel == 3)
+	{
+		uint32_t dest_i = 0; 
+		// bitmaps are blue, green, red for 3 bytes per pixel
+		// source pointer
+		uint8_t* pixel = destination.buffer;
+
+		for(uint32_t i = 0; i < bytes_per_pixel * source.width * source.height; i += 4)
+		{
+			// blue
+			*pixel = source.pixel_buffer[i];
+			++pixel;
+
+			// green
+			*pixel = source.pixel_buffer[i+1];
+			++pixel;
+
+			// red
+			*pixel = source.pixel_buffer[i+2];
+			++pixel;
+
+			// alpha
+			*pixel = 0xFF;
+			++pixel;
+		}
+	}
+}
+
+
 static char valueConvertTable[16] =
 	{
 	 48,
@@ -153,25 +189,6 @@ static bool Running = true;
 HINSTANCE hInst;
 
 // todo(brandon): this could be a platform indepdenant function?
-void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_height)
-{
-	if(screendata.buffer != NULL)
-	{
-		WriteOut("Clearning out previously allocated buffer\n\r");
-		delete screendata.buffer;
-		screendata.buffer = NULL;
-	}
-
-	WriteOut("Resizing buffer\n\r");
-
-	screendata.width = new_width;
-	screendata.height = new_height;
-	screendata.pitch = screendata.width * screendata.bytesPerPixel;
-
-	WriteOut("Allocating (" + std::to_string(screendata.width) + "*" + std::to_string(screendata.bytesPerPixel) + ")"  + std::to_string(screendata.pitch) + " * " + std::to_string(screendata.height) +" == " + std::to_string(screendata.pitch * screendata.height) + "\n\r");
-	screendata.buffer = new uint8_t[screendata.pitch * screendata.height];
-	std::memset(screendata.buffer, 0, screendata.pitch * screendata.height);
-}
 
 struct win32_pixel_buffer
 {
@@ -511,8 +528,8 @@ int CALLBACK WinMain(
 		temp_info.buffer = NULL;
 		temp_info.bytesPerPixel = 4;
 		resize_buffer(temp_info, tempBitmap.width, tempBitmap.height);
-		std::memcpy(temp_info.buffer, tempBitmap.pixel_buffer, (tempBitmap.bits_per_pixel / 8) * tempBitmap.width * tempBitmap.height);
 
+		FillScreenDataWithBitmap(tempBitmap, temp_info);
 		BlitScreenData(temp_info, main_console.screen_data, 0, 0);
 	}
 	catch(const std::runtime_error& e)
@@ -521,7 +538,6 @@ int CALLBACK WinMain(
 		blah << "@@@@Unable to load bitmap data@@: " << e.what();
 		WriteLine(blah.str());
 	}
-
 	
 	RECT new_rec;
 	new_rec.left = 0;
