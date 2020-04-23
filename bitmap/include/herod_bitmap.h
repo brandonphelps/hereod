@@ -186,10 +186,12 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 			// load color table. 
 			throw std::runtime_error("currently not supported for loading color used data: " + std::to_string(bitmap.colors_used));
 		}
-		
+
+
+		WriteLine("Bits per pixel: " + std::to_string(bitmap.bits_per_pixel));
 		// load pixel data.
 		// pitch is the number of bytes in a row.
-		if(bitmap.bits_per_pixel == 1 || bitmap.bits_per_pixel == 4 || bitmap.bits_per_pixel || 8 || bitmap.bits_per_pixel == 16)
+		if(bitmap.bits_per_pixel == 1 || bitmap.bits_per_pixel == 4 || bitmap.bits_per_pixel == 8 || bitmap.bits_per_pixel == 16)
 		{
 			throw std::runtime_error("Unsported bitmap bits per pixel " + std::to_string(bitmap.bits_per_pixel));
 		}
@@ -227,9 +229,10 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 				std::fgetc(file_handle);
 			}
 
-			if((dest_byte_index - 1 + row_byte_padding_count) % 4 != 0)
+			if((dest_byte_index + row_byte_padding_count) % 4 != 0)
 			{
-				throw std::runtime_error("Failed to parse scanline with correct padding");
+				delete bitmap.pixel_buffer;
+				throw std::runtime_error("Failed to parse scanline with correct padding: " + std::to_string(dest_byte_index) + " " + std::to_string(row_byte_padding_count));
 			}
 		}
 	}

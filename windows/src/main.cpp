@@ -50,13 +50,14 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 	uint8_t bytes_per_pixel = source.bits_per_pixel / 8;
 	destination.bytesPerPixel = 4;
 	resize_buffer(destination, source.width, source.height);
-
 	if(bytes_per_pixel == 3)
 	{
 		uint32_t dest_i = 0; 
 		// bitmaps are blue, green, red for 3 bytes per pixel
 		// source pointer
 		uint8_t* pixel = destination.buffer;
+
+		WriteLine("Filling out Screend ata: " + std::to_string(bytes_per_pixel * source.width * source.height));
 
 		for(uint32_t i = 0; i < bytes_per_pixel * source.width * source.height; i += 4)
 		{
@@ -76,6 +77,10 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 			*pixel = 0xFF;
 			++pixel;
 		}
+	}
+	else
+	{
+		throw std::runtime_error("Invalid bytes per pixel count");
 	}
 }
 
@@ -527,7 +532,6 @@ int CALLBACK WinMain(
 		ScreenData temp_info;
 		temp_info.buffer = NULL;
 		temp_info.bytesPerPixel = 4;
-		resize_buffer(temp_info, tempBitmap.width, tempBitmap.height);
 
 		FillScreenDataWithBitmap(tempBitmap, temp_info);
 		BlitScreenData(temp_info, main_console.screen_data, 0, 0);
