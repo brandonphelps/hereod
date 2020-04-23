@@ -446,6 +446,12 @@ int CALLBACK WinMain(
 		MonitorRefreshHz = Win32RefreshRate;
 	}
 
+	ScreenData testingScreenData;
+	testingScreenData.bytesPerPixel = 4;
+	testingScreenData.buffer = NULL;
+	resize_buffer(testingScreenData, 50, 50);
+	DrawRectangle(testingScreenData.buffer, 50, 50, 0, 0, 40, 40, 0xFF, 0, 0);
+
 	Console main_console;
 	main_console.screen_data.bytesPerPixel = 4;
 	main_console.screen_data.buffer = NULL;
@@ -658,6 +664,8 @@ int CALLBACK WinMain(
 		initRest = blueFuncs.GameUpdate(&currentScreen,
 		                                &mahState,
 		                                mahInput);
+
+		BlitScreenData(testingScreenData, currentScreen, 10, 10);
 
 
 		if(console_active)
