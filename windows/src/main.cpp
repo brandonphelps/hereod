@@ -61,11 +61,8 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 
 		int x = 0;
 		int y = 0;
-		for(uint32_t i = 0; i < bytes_per_pixel * source.width * source.height; i += bytes_per_pixel)
+		for(uint32_t i = 0; i < (bytes_per_pixel * source.width * source.height); i += bytes_per_pixel)
 		{
-			// windows.
-			// uint32_t color_mask = ((uint32_t)source.pixel_buffer[i]) << 24 | ((uint32_t)source.pixel_buffer[i+1]) << 16 | ((uint32_t)source.pixel_buffer[i+2]) << 8 | 0xFF;
-
 			//destination.set_pixel_color(x, y, color_mask);
 			//x++;
 			// if(x == 20)
@@ -75,12 +72,6 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 			// }
 			// // blue
 			uint8_t pixel_value_index = 0;
-
-			if(bytes_per_pixel == 4)
-			{
-				*pixel = source.pixel_buffer[i+pixel_value_index++];
-				++pixel;
-			}
 
 			*pixel = source.pixel_buffer[i+pixel_value_index++];
 			++pixel;
@@ -99,17 +90,22 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 				*pixel = 0xFF;
 				++pixel;
 			}
+
+			if(bytes_per_pixel == 4)
+			{
+				*pixel = source.pixel_buffer[i+pixel_value_index++];
+				++pixel;
+			}
+
+			// windows.
+			// uint32_t color_mask = ((uint32_t)source.pixel_buffer[i]) << 24 | ((uint32_t)source.pixel_buffer[i+1]) << 16 | ((uint32_t)source.pixel_buffer[i+2]) << 8 | 0xFF;
 		}
 	}
 	else
 	{
 		throw std::runtime_error("Invalid bytes per pixel count");
 	}
-
-	destination.width = 40;
-	destination.height = 20;
 }
-
 
 static char valueConvertTable[16] =
 	{
@@ -560,16 +556,17 @@ int CALLBACK WinMain(
 
 
 	HBitmap tempBitmap;
+	ScreenData font_image;
+	font_image.buffer = NULL;
+	font_image.bytesPerPixel = 4;
+
 	try
 	{
 		LoadBitmap("resources/fonts/cool_font_32.bmp", tempBitmap);
 		WriteLine("Bitmap temp screen data");
-		ScreenData temp_info;
-		temp_info.buffer = NULL;
-		temp_info.bytesPerPixel = 4;
 
-		FillScreenDataWithBitmap(tempBitmap, temp_info);
-		BlitScreenData(temp_info, main_console.screen_data, 0, 0);
+		FillScreenDataWithBitmap(tempBitmap, font_image);
+		BlitScreenData(font_image, main_console.screen_data, 0, 0);
 	}
 	catch(const std::runtime_error& e)
 	{
@@ -697,7 +694,8 @@ int CALLBACK WinMain(
 		                                &mahState,
 		                                mahInput);
 
-		BlitScreenData(testingScreenData, currentScreen, 10, 10);
+		BlitScreenData(font_image, currentScreen, 0, 0);
+		// BlitScreenData(testingScreenData, currentScreen, 10, 10);
 
 		if(console_active)
 		{
