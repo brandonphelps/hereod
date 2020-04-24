@@ -15,6 +15,7 @@ class HBitmap
 {
 public:
 	uint8_t header[13];
+	uint8_t magic_number[2];
 	uint32_t file_size; 
 	uint32_t data_offset;
 
@@ -107,6 +108,9 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 
 	if(file_handle)
 	{
+
+		uint32_t offset = 0;
+
 		// header
 		for(int i = 0; i < 14; i++)
 		{
@@ -118,21 +122,27 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 		{
 			throw std::runtime_error("Invalid signature");
 		}
+		bitmap.magic_number[0] = temp_buffer[0];
+		bitmap.magic_number[1] = temp_buffer[1];
+		offset += 2;
 
 		// replace with cool deserialization lib. 
-		uint8_t* buf = reinterpret_cast<uint8_t*>(temp_buffer + 2);
+		uint8_t* buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
 		bitmap.file_size = from_byte_array32(buf);
-		buf = reinterpret_cast<uint8_t*>(temp_buffer + 2 + 4+ 6);
+
+		offset = 0x0A;
+		buf = reinterpret_cast<uint8_t*>(temp_buffer + offset);
 		bitmap.data_offset = from_byte_array32(buf);
+
 		std::memcpy(bitmap.header, temp_buffer, 13);
 		std::memset(temp_buffer, 0, 13);
+
 		for(int i = 0; i < 40; i++)
 		{
 			temp_buffer[i] = std::fgetc(file_handle);
 		}
 
-		uint32_t offset = 0;
-
+		offset = 0;
 		buf = reinterpret_cast<uint8_t*>(temp_buffer);
 		bitmap.info_header_size = from_byte_array32(buf);
 		offset += 4;
@@ -149,7 +159,6 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 		bitmap.planes = from_byte_array16(buf);
 		offset += 2;
 
-		WriteLine("Offset for bits per pixel: " + std::to_string(offset+14));
 		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
 		print_byte_array(buf, 2);
 		bitmap.bits_per_pixel = from_byte_array16(buf);
@@ -210,8 +219,9 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 		}
 
 		// todo: move the current file pointer to be aligned with data offet
-		
+		std::fseek(file_handle, bitmap.data_offset, 0);
 
+		
 		uint32_t dest_byte_index = 0;
 		for(int i = 0; i < bitmap.height; ++i)
 		{

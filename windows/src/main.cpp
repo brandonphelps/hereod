@@ -43,21 +43,20 @@ void temp_main();
 
 std::string ReadInput(const std::string& prompt);
 
-
 // used for copying bitmap data into a screen data.
 void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 {
 	uint8_t bytes_per_pixel = source.bits_per_pixel / 8;
+	WriteLine("Bytes per pixel: " + std::to_string(bytes_per_pixel));
 	destination.bytesPerPixel = 4;
 	resize_buffer(destination, source.width, source.height);
-	if(bytes_per_pixel == 3)
+	if(bytes_per_pixel == 3 || bytes_per_pixel == 4)
 	{
-		uint32_t dest_i = 0; 
 		// bitmaps are blue, green, red for 3 bytes per pixel
 		// source pointer
 		uint8_t* pixel = destination.buffer;
 
-		WriteLine("Filling out Screend ata: " + std::to_string(bytes_per_pixel * source.width * source.height));
+		WriteLine("Filling out Screen data: " + std::to_string(bytes_per_pixel * source.width * source.height));
 		WriteLine("destination width height: " + std::to_string(destination.width) + ", " + std::to_string(destination.height));
 
 		int x = 0;
@@ -75,26 +74,40 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 			// 	y++;
 			// }
 			// // blue
-			*pixel = source.pixel_buffer[i];
+			uint8_t pixel_value_index = 0;
+
+			if(bytes_per_pixel == 4)
+			{
+				*pixel = source.pixel_buffer[i+pixel_value_index++];
+				++pixel;
+			}
+
+			*pixel = source.pixel_buffer[i+pixel_value_index++];
 			++pixel;
 
 			// green
-			*pixel = source.pixel_buffer[i+1];
+			*pixel = source.pixel_buffer[i+pixel_value_index++];
 			++pixel;
 
 			// red
-			*pixel = source.pixel_buffer[i+2];
+			*pixel = source.pixel_buffer[i+pixel_value_index++];
 			++pixel;
 
-			// alpha
-			*pixel = 0xFF;
-			++pixel;
+			if(bytes_per_pixel == 3)
+			{
+				// alpha
+				*pixel = 0xFF;
+				++pixel;
+			}
 		}
 	}
 	else
 	{
 		throw std::runtime_error("Invalid bytes per pixel count");
 	}
+
+	destination.width = 40;
+	destination.height = 20;
 }
 
 
@@ -464,8 +477,9 @@ int CALLBACK WinMain(
 	ScreenData testingScreenData;
 	testingScreenData.bytesPerPixel = 4;
 	testingScreenData.buffer = NULL;
-	resize_buffer(testingScreenData, 50, 50);
-	DrawRectangle(testingScreenData.buffer, 50, 50, 0, 0, 40, 40, 0xFF, 0, 0);
+	resize_buffer(testingScreenData, 50, 80);
+	DrawRectangle(testingScreenData.buffer, 50, 80, 0, 0, 20, 40, 0xFF, 0, 0);
+	DrawRectangle(testingScreenData.buffer, 50, 80, 20, 0, 40, 20, 0xFF, 0xFF, 0);
 
 	Console main_console;
 	main_console.screen_data.bytesPerPixel = 4;
@@ -548,7 +562,7 @@ int CALLBACK WinMain(
 	HBitmap tempBitmap;
 	try
 	{
-		LoadBitmap("resources/fonts/cool_font.bmp", tempBitmap);
+		LoadBitmap("resources/fonts/cool_font_32.bmp", tempBitmap);
 		WriteLine("Bitmap temp screen data");
 		ScreenData temp_info;
 		temp_info.buffer = NULL;
@@ -610,7 +624,9 @@ int CALLBACK WinMain(
 						{
 							WriteLine("Activating console");
 							console_active = !console_active;
-							StartMemPrint = main_console.screen_data.buffer;
+							// StartMemPrint = main_console.screen_data.buffer;
+							// StartMemPrint = tempBitmap.pixel_buffer;
+							StartMemPrint = currentScreen.get_buffer_at(200, 200);
 						}
 						if(!console_active)
 						{

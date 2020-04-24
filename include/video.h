@@ -12,6 +12,8 @@ public:
 	void set_pixel_color(uint32_t x, uint32_t y,
 	                     uint32_t color_mask);
 
+	uint8_t* get_buffer_at(uint32_t x, uint32_t y);
+
 public:
   uint32_t width;
   uint32_t height;

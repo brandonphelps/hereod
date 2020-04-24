@@ -9,6 +9,10 @@
 #include <stdint.h>
 #include <cstring>
 
+uint8_t* ScreenData::get_buffer_at(uint32_t x, uint32_t y)
+{
+	return buffer + (x * bytesPerPixel) + (y * bytesPerPixel * width);
+}
 
 void ScreenData::set_pixel_color(uint32_t x, uint32_t y, uint32_t color_mask)
 {
@@ -17,7 +21,6 @@ void ScreenData::set_pixel_color(uint32_t x, uint32_t y, uint32_t color_mask)
 		return;
 	}
 
-	uint32_t offset = 0;
 	uint32_t* pixel = (uint32_t*)(buffer + x * bytesPerPixel + y * bytesPerPixel * width);
 	*pixel = color_mask;
 }
