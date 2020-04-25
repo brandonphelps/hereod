@@ -337,36 +337,48 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 		// each row is padded to be 4 byte align, calculate padding count that occurs
 		// at the end of each row. 
 		int row_byte_padding_count = 0;
-		if(bitmap.width % 4 == 0)
+		if(bitmap.width % 4 != 0)
 		{
 			row_byte_padding_count = 4 - (bitmap.width % 4);
 		}
 
+		uint32_t pixel_byte_read_count = 0;
+
 		// todo: move the current file pointer to be aligned with data offet
 		std::fseek(file_handle, bitmap.data_offset, 0);
+
+		WriteLine("Padding byte count: " + std::to_string(row_byte_padding_count));
 		
 		uint32_t dest_byte_index = 0;
 		for(int i = 0; i < bitmap.height; ++i)
 		{
 			// for each row in the source, obtain each pixel and map it into a uint8_t byte array.
-			for(int column = 0; column < bitmap.width; column++)
+			for(int column = 0; column < pitch; column++)
 			{
 				// for 24 bit pixels perform direct copy.
 				// color is in order of (blue, green, red).
 				bitmap.pixel_buffer[dest_byte_index++] = static_cast<uint8_t>(std::fgetc(file_handle));
+				pixel_byte_read_count++;
 			}
 
 			// read out the padding bytes to get to 4 byte allignment. 
 			for(int column = 0; column < row_byte_padding_count; column++)
 			{
 				std::fgetc(file_handle);
+				pixel_byte_read_count++;
 			}
 
 			if((dest_byte_index + row_byte_padding_count) % 4 != 0)
 			{
 				delete bitmap.pixel_buffer;
-				throw std::runtime_error("Failed to parse scanline with correct padding: " + std::to_string(dest_byte_index) + " " + std::to_string(row_byte_padding_count));
+				throw std::runtime_error("Failed to parse scanline with correct padding: " + std::to_string(dest_byte_index) +
+				                         " " + std::to_string(row_byte_padding_count));
 			}
+		}
+
+		if(pixel_byte_read_count != pitch * bitmap.height)
+		{
+			throw std::runtime_error("Failed to load bitmap blame the developer: " + std::to_string(pixel_byte_read_count) + ", " + std::to_string(pitch * bitmap.height));
 		}
 	}
 	else

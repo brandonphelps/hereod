@@ -67,6 +67,8 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 
 		int pixels_translated = 0;
 		int x = 0;
+		FILE* log_file = fopen("log_file.txt", "w");
+		
 		while(! pixel_iter.end_iteration())
 		{
 			if(pixels_translated > destination.width * destination.height)
@@ -85,9 +87,10 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 			pixel++;
 
 			// WriteLine("Checking for pixel value: " + std::to_string(x));
-			// std::stringstream oss;
-			// oss << pixel_iter.next() << std::endl;
-			// WriteLine(oss.str());
+			std::stringstream oss;
+			oss << p << std::endl;
+			//WriteLine(oss.str());
+			fputs(oss.str().c_str(), log_file);
 		}
 		x = 0;
 
@@ -555,7 +558,7 @@ int CALLBACK WinMain(
 
 	try
 	{
-		LoadBitmap("resources/fonts/cool_font_32.bmp", tempBitmap);
+		LoadBitmap("resources/fonts/Untitled.bmp", tempBitmap);
 		WriteLine("Bitmap temp screen data");
 
 		FillScreenDataWithBitmap(tempBitmap, font_image);
