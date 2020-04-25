@@ -2,8 +2,6 @@
 #include "console_another.h"
 #endif
 
-
-
 #include "video.h"
 
 #include <stdint.h>
@@ -95,7 +93,9 @@ void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t 
 
 void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x, uint32_t dest_pixel_y)
 {
+	
 	uint8_t* row = dest.buffer + dest_pixel_x*4 + dest_pixel_y*dest.width*4;
+	uint8_t* copy_row = source.buffer + 0*4 + 0*source.width*4;
 
 	uint32_t MaxX = dest_pixel_x + source.width;
 	uint32_t MaxY = dest_pixel_y + source.height;
@@ -110,7 +110,6 @@ void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x,
 		MaxY = dest.height;
 	}
 
-	uint8_t* copy_row = source.buffer + 0*4 + 0*source.width*4;
 	for(int y = dest_pixel_y; y < MaxY; ++y)
 	{
 		uint32_t* pixel = (uint32_t*)row;
@@ -197,7 +196,9 @@ void DrawText(ScreenData* screenData, uint32_t x, uint32_t y, const std::string&
 
 
 
-void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_height)
+void resize_buffer(ScreenData& screendata,
+                   uint32_t new_width,
+                   uint32_t new_height)
 {
 	if(screendata.buffer != NULL)
 	{
@@ -218,7 +219,9 @@ void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_heig
 	screendata.pitch = screendata.width * screendata.bytesPerPixel;
 
 #if _WIN32
-	WriteOut("Allocating (" + std::to_string(screendata.width) + "*" + std::to_string(screendata.bytesPerPixel) + ")"  + std::to_string(screendata.pitch) + " * " + std::to_string(screendata.height) +" == " + std::to_string(screendata.pitch * screendata.height) + "\n\r");
+	WriteOut("Allocating (" + std::to_string(screendata.width) + "*" +
+	         std::to_string(screendata.bytesPerPixel) + ")"  + std::to_string(screendata.pitch) + " * " +
+	         std::to_string(screendata.height) +" == " + std::to_string(screendata.pitch * screendata.height) + "\n\r");
 #endif
 	screendata.buffer = new uint8_t[screendata.pitch * screendata.height];
 	std::memset(screendata.buffer, 0, screendata.pitch * screendata.height);

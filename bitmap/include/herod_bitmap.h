@@ -3,6 +3,7 @@
 #define H_CUST_BITMAP_H
 
 #include <iostream>
+#include <iomanip>
 // #include <fstream> // can't pass a c string into std::ifstream constructor
 // must be using wrong compiler flags or something.
 #include <cstdio>
@@ -10,6 +11,135 @@
 #ifdef _WIN32
 #include "console_another.h"
 #endif
+
+class PixelColor
+{
+public:
+	uint8_t blue;
+	uint8_t green;
+	uint8_t red;
+	uint8_t alpha;
+};
+
+std::ostream& operator<<(std::ostream& out, const PixelColor& p)
+{
+	out << "Pixel: " << std::hex << std::setfill('0');
+	out << std::setw(2) << static_cast<int>(p.blue);
+	out << std::setw(2) << static_cast<int>(p.green);
+	out << std::setw(2) << static_cast<int>(p.red);
+	out << std::setw(2) << static_cast<int>(p.alpha);
+	return out;
+}
+
+struct MonoColor
+{
+};
+
+
+struct FourtyTwoColor
+{
+};
+
+struct ThirtyTwoColor
+{
+};
+
+template <typename T>
+class BitMapPixelIter
+{
+public:
+	// length is number of pixels
+	BitMapPixelIter(uint8_t* start_buffer, uint32_t length)
+	{
+		_pixel_buffer = start_buffer;
+		_pixel_cursor = start_buffer;
+		_length = length;
+		_current_index = 0;
+		_end_reached = false;
+	}
+	
+	// return the current pixel color and move the pointer forward. 
+	PixelColor next();
+	bool end_iteration() const;
+
+private:
+	uint8_t* _pixel_buffer;
+	uint8_t* _pixel_cursor;
+	uint32_t _length;
+	uint32_t _current_index;
+	bool _end_reached;
+};
+
+template <typename T>
+bool BitMapPixelIter<T>::end_iteration() const
+{
+	return _end_reached;
+}
+
+template <typename T>
+PixelColor BitMapPixelIter<T>::next()
+{
+	// 
+}
+
+template <>
+PixelColor BitMapPixelIter<FourtyTwoColor>::next()
+{
+	PixelColor result;
+
+	if(_end_reached)
+	{
+		result.blue = 0xFF;
+		result.green = 0xFF;
+		result.red = 0xFF;
+		result.alpha = 0xFF;
+	}
+	else
+	{
+		result.blue = static_cast<uint8_t>(_pixel_cursor[0]);
+		result.green = static_cast<uint8_t>(_pixel_cursor[1]);
+		result.red = static_cast<uint8_t>(_pixel_cursor[2]);
+		result.alpha = 0xFF;
+
+		_pixel_cursor += 3;
+		_current_index += 1;
+		if(_current_index == _length)
+		{
+			_end_reached = true;
+		}
+	}
+	return result;
+}
+
+template <>
+PixelColor BitMapPixelIter<ThirtyTwoColor>::next()
+{
+	PixelColor result;
+	if(_end_reached)
+	{
+		result.blue = 0xFF;
+		result.green = 0xFF;
+		result.red = 0xFF;
+		result.alpha = 0xFF;
+	}
+	else
+	{
+		result.blue = static_cast<uint8_t>(_pixel_cursor[0]);
+		result.green = static_cast<uint8_t>(_pixel_cursor[1]);
+		result.red = static_cast<uint8_t>(_pixel_cursor[2]);
+		result.alpha = static_cast<uint8_t>(_pixel_cursor[3]);
+
+		_pixel_cursor += 4;
+		_current_index += 1;
+		if(_current_index == _length)
+		{
+			_end_reached = true;
+		}
+	}
+	
+	return result;
+}
+
 
 class HBitmap
 {
@@ -43,12 +173,6 @@ public:
 	
 private:
 };
-
-class PixelColor
-{
-	
-};
-
 
 // appears bitmaps are little endian.
 uint32_t from_byte_array32(uint8_t* pointer)
@@ -220,7 +344,6 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 
 		// todo: move the current file pointer to be aligned with data offet
 		std::fseek(file_handle, bitmap.data_offset, 0);
-
 		
 		uint32_t dest_byte_index = 0;
 		for(int i = 0; i < bitmap.height; ++i)
@@ -257,6 +380,8 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 	WriteLine("Width: " + std::to_string(bitmap.width));
 	WriteLine("Height: " + std::to_string(bitmap.height));
 	WriteLine("Bits per pixel: " + std::to_string(bitmap.bits_per_pixel));
+	WriteLine("x pixels per meter: " + std::to_string(bitmap.xpixels_per_meter));
+	WriteLine("y pixels per meter: " + std::to_string(bitmap.ypixels_per_meter));
 }
 
 #endif

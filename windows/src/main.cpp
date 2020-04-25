@@ -46,60 +46,53 @@ std::string ReadInput(const std::string& prompt);
 // used for copying bitmap data into a screen data.
 void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 {
-	uint8_t bytes_per_pixel = source.bits_per_pixel / 8;
-	WriteLine("Bytes per pixel: " + std::to_string(bytes_per_pixel));
 	destination.bytesPerPixel = 4;
 	resize_buffer(destination, source.width, source.height);
-	if(bytes_per_pixel == 3 || bytes_per_pixel == 4)
+
+	if(source.bits_per_pixel == 24 || source.bits_per_pixel == 32)
 	{
+		uint8_t bytes_per_pixel = source.bits_per_pixel / 8;
+		WriteLine("Bytes per pixel: " + std::to_string(bytes_per_pixel));
+
 		// bitmaps are blue, green, red for 3 bytes per pixel
 		// source pointer
 		uint8_t* pixel = destination.buffer;
+		int p_count = 0;
 
 		WriteLine("Filling out Screen data: " + std::to_string(bytes_per_pixel * source.width * source.height));
 		WriteLine("destination width height: " + std::to_string(destination.width) + ", " + std::to_string(destination.height));
 
+
+		BitMapPixelIter<ThirtyTwoColor> pixel_iter(source.pixel_buffer, source.width * source.height);
+
+		int pixels_translated = 0;
 		int x = 0;
-		int y = 0;
-		for(uint32_t i = 0; i < (bytes_per_pixel * source.width * source.height); i += bytes_per_pixel)
+		while(! pixel_iter.end_iteration())
 		{
-			//destination.set_pixel_color(x, y, color_mask);
-			//x++;
-			// if(x == 20)
-			// {
-			// 	x = 0;
-			// 	y++;
-			// }
-			// // blue
-			uint8_t pixel_value_index = 0;
-
-			*pixel = source.pixel_buffer[i+pixel_value_index++];
-			++pixel;
-
-			// green
-			*pixel = source.pixel_buffer[i+pixel_value_index++];
-			++pixel;
-
-			// red
-			*pixel = source.pixel_buffer[i+pixel_value_index++];
-			++pixel;
-
-			if(bytes_per_pixel == 3)
+			if(pixels_translated > destination.width * destination.height)
 			{
-				// alpha
-				*pixel = 0xFF;
-				++pixel;
+				break;
 			}
+			pixels_translated++;
+			PixelColor p = pixel_iter.next();
+			*pixel = p.blue;
+			pixel++;
+			*pixel = p.green;
+			pixel++;
+			*pixel = p.red;
+			pixel++;
+			*pixel = p.alpha;
+			pixel++;
 
-			if(bytes_per_pixel == 4)
-			{
-				*pixel = source.pixel_buffer[i+pixel_value_index++];
-				++pixel;
-			}
-
-			// windows.
-			// uint32_t color_mask = ((uint32_t)source.pixel_buffer[i]) << 24 | ((uint32_t)source.pixel_buffer[i+1]) << 16 | ((uint32_t)source.pixel_buffer[i+2]) << 8 | 0xFF;
+			// WriteLine("Checking for pixel value: " + std::to_string(x));
+			// std::stringstream oss;
+			// oss << pixel_iter.next() << std::endl;
+			// WriteLine(oss.str());
 		}
+		x = 0;
+
+		WriteLine("Pixels translated: " + std::to_string(pixels_translated));
+
 	}
 	else
 	{
@@ -694,7 +687,7 @@ int CALLBACK WinMain(
 		                                &mahState,
 		                                mahInput);
 
-		BlitScreenData(font_image, currentScreen, 0, 0);
+		BlitScreenData(font_image, currentScreen, 230, 160);
 		// BlitScreenData(testingScreenData, currentScreen, 10, 10);
 
 		if(console_active)
