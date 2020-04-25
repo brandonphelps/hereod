@@ -6,6 +6,7 @@
 
 #include "video.h"
 
+#include "console_another.h"
 
 class SpriteSheet
 {
@@ -43,6 +44,8 @@ void ChunkUpSprites(ScreenData& image_data,
 
 	p.sprites.clear();
 
+	WriteLine("Chunking up sprite sheet");
+
 	for(int row = 0;
 	    row < p.sprite_count_y; row++)
 	{
@@ -51,6 +54,7 @@ void ChunkUpSprites(ScreenData& image_data,
 		new_sprite.buffer = NULL;
 		resize_buffer(new_sprite, p.sprite_width, p.sprite_height);
 		BlitScreenData(image_data, new_sprite, 0, 0, row * p.sprite_width, 0);
+		WriteLine("Push sprite into vector");
 		p.sprites.push_back(new_sprite);
 	}
 }

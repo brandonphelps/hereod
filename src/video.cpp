@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <cstring>
 
+uint32_t ScreenData::screenDataID = 0;
+
 uint8_t* ScreenData::get_buffer_at(uint32_t x, uint32_t y)
 {
 	return buffer + (x * bytesPerPixel) + (y * bytesPerPixel * width);

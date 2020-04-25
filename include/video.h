@@ -5,9 +5,53 @@
 #include <stdint.h>
 #include <string>
 
+#ifdef _WIN32
+#include "console_another.h"
+#endif
+
+
 class ScreenData
 {
 public:
+	static uint32_t screenDataID;
+	ScreenData()
+	{
+		bytesPerPixel = 4;
+		buffer = new uint8_t[10];
+		my_id = screenDataID++;
+		pitch = 0;
+		width = 0;
+		height = 0;
+		#ifdef _WIN32
+		WriteLine("Screen data Constructor: " + std::to_string(my_id));
+		#endif
+	}
+
+	ScreenData(const ScreenData& other)
+	{
+		bytesPerPixel = other.bytesPerPixel;
+		buffer = new uint8_t[other.pitch * other.height];
+		pitch = other.pitch;
+		width = other.width;
+		height = other.height;
+		std::memcpy(buffer, other.buffer, other.pitch * other.height);
+
+		my_id = screenDataID++;
+	}
+
+	~ScreenData()
+	{
+		if(buffer != NULL)
+		{
+			delete[] buffer;
+			buffer = NULL;
+		}
+
+		#ifdef _WIN32
+		WriteLine("Screen data destructor: " + std::to_string(my_id));
+		#endif
+	}
+	
 	// set the pixel at pos x, y 
 	void set_pixel_color(uint32_t x, uint32_t y,
 	                     uint32_t color_mask);
@@ -15,14 +59,14 @@ public:
 	uint8_t* get_buffer_at(uint32_t x, uint32_t y);
 
 	// todo add constructor. deconstructor.
-
-
 public:
   uint32_t width;
   uint32_t height;
   uint32_t pitch;
   uint8_t bytesPerPixel;
   uint8_t *buffer;
+private:
+	uint32_t my_id;
 };
 
 void drawBuf(uint8_t*, uint32_t, uint32_t);
