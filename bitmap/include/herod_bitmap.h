@@ -31,59 +31,72 @@ std::ostream& operator<<(std::ostream& out, const PixelColor& p)
 	return out;
 }
 
-struct MonoColor
+enum class BitMapPixelLayout
 {
+ BGR,
+ BGRA
 };
 
-
-struct FourtyTwoColor
-{
-};
-
-struct ThirtyTwoColor
-{
-};
-
-template <typename T>
 class BitMapPixelIter
 {
 public:
 	// length is number of pixels
-	BitMapPixelIter(uint8_t* start_buffer, uint32_t length)
+	// bitmappixel iter will not consume ownership of start_buffer.
+	// should already be allocated. 
+	BitMapPixelIter(uint8_t* start_buffer, uint32_t length, BitMapPixelLayout layout)
 	{
 		_pixel_buffer = start_buffer;
 		_pixel_cursor = start_buffer;
+		_pixel_layout = layout;
 		_length = length;
 		_current_index = 0;
 		_end_reached = false;
 	}
+
+	// copy construct is able to be created by compiler.
+	// performs membor wise copy
+	// https://en.cppreference.com/w/cpp/language/copy_constructor
+	// todo write tests to confirm this. 
 	
 	// return the current pixel color and move the pointer forward. 
 	PixelColor next();
+
 	bool end_iteration() const;
 
 private:
+	PixelColor nextBGR();
+	PixelColor nextBGRA();
+
 	uint8_t* _pixel_buffer;
 	uint8_t* _pixel_cursor;
+	BitMapPixelLayout _pixel_layout;
 	uint32_t _length;
 	uint32_t _current_index;
 	bool _end_reached;
+
 };
 
-template <typename T>
-bool BitMapPixelIter<T>::end_iteration() const
+bool BitMapPixelIter::end_iteration() const
 {
 	return _end_reached;
 }
 
-template <typename T>
-PixelColor BitMapPixelIter<T>::next()
+PixelColor BitMapPixelIter::next()
 {
-	// 
+	PixelColor result;
+	switch(_pixel_layout)
+	{
+	case BitMapPixelLayout::BGR:
+		result = nextBGR();
+		break;
+	case BitMapPixelLayout::BGRA:
+		result = nextBGRA();
+		break;
+	}
+	return result;
 }
 
-template <>
-PixelColor BitMapPixelIter<FourtyTwoColor>::next()
+PixelColor BitMapPixelIter::nextBGR()
 {
 	PixelColor result;
 
@@ -111,8 +124,7 @@ PixelColor BitMapPixelIter<FourtyTwoColor>::next()
 	return result;
 }
 
-template <>
-PixelColor BitMapPixelIter<ThirtyTwoColor>::next()
+PixelColor BitMapPixelIter::nextBGRA()
 {
 	PixelColor result;
 	if(_end_reached)
@@ -140,7 +152,6 @@ PixelColor BitMapPixelIter<ThirtyTwoColor>::next()
 	return result;
 }
 
-
 class HBitmap
 {
 public:
@@ -154,6 +165,8 @@ public:
 	uint32_t info_header_size; // should be 40.
 	uint32_t width; // width of bitmap in pixels
 	uint32_t height;  // width of bitmap in pixels
+	bool y_flipped; // indicates that the height was negative.
+	bool x_flipped; // indicates that the width was negative.
 	uint16_t planes;
 	uint16_t bits_per_pixel;
 	uint32_t compression;
@@ -162,18 +175,25 @@ public:
 	uint32_t ypixels_per_meter;
 	uint32_t colors_used;
 	uint32_t important_colors;
-
+	// consider bundling the pixel_buffer array with a color arrangment. layout
+	// this could allow for a pixel color iter where T is the requested pixel color format.
 	uint8_t* pixel_buffer;
+	BitMapPixelLayout layout;
 
-	void get_rgba_pixel(uint32_t pixel_x, uint32_t pixel_y,
-	                    uint8_t& r, uint8_t& b, uint8_t& g, uint8_t a)
-	{
-		
-	}
-	
+	// todo add in end method.
+	BitMapPixelIter begin();
+
 private:
 };
 
+BitMapPixelIter HBitmap::begin()
+{
+	BitMapPixelIter tmp(pixel_buffer, width * height, layout);
+	return tmp;
+}
+
+
+// todo: move these into a serialization module. 
 // appears bitmaps are little endian.
 uint32_t from_byte_array32(uint8_t* pointer)
 {
@@ -209,19 +229,6 @@ static char valueConvertTableF[16] =
 	 70
 	};
 
-
-void print_byte_array(uint8_t* pointer, uint32_t size)
-{
-	std::stringstream stream; 
-	for(int i = 0; i < size; i++)
-	{
-		uint8_t highNibble = 0x0F & (pointer[i] >> 4);
-		uint8_t lowNibble  = 0x0F & pointer[i];
-		stream << valueConvertTableF[highNibble] << valueConvertTableF[lowNibble];
-	}
-	WriteLine(stream.str());
-}
-
 // reads file and loads files contents into bitmap
 // new resources are allocated, in pixel_buffer, ensure they are cleaned up.
 void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
@@ -229,7 +236,6 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 	std::FILE* file_handle = fopen(filepath.c_str(), "rb");
 	char temp_buffer[2000];
 	std::memset(temp_buffer, 0, 2000);
-
 	if(file_handle)
 	{
 
@@ -242,6 +248,7 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 		}
 
 		// check header
+		// todo(brandon): other options are available.
 		if(!(temp_buffer[0] == 'B' && temp_buffer[1] == 'M'))
 		{
 			throw std::runtime_error("Invalid signature");
@@ -272,19 +279,22 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 		offset += 4;
 
 		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		// todo determine if loaded width is negative, if so then
+		// set x_flipped to true.
 		bitmap.width = from_byte_array32(buf);
 		offset += 4;
+		bitmap.x_flipped = false;
 
 		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
 		bitmap.height = from_byte_array32(buf);
 		offset += 4;
+		bitmap.y_flipped = false;
 
 		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
 		bitmap.planes = from_byte_array16(buf);
 		offset += 2;
 
 		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
-		print_byte_array(buf, 2);
 		bitmap.bits_per_pixel = from_byte_array16(buf);
 		offset += 2;
 
@@ -320,17 +330,23 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 			throw std::runtime_error("currently not supported for loading color used data: " + std::to_string(bitmap.colors_used));
 		}
 
-
-		WriteLine("Bits per pixel: " + std::to_string(bitmap.bits_per_pixel));
-		// load pixel data.
-		// pitch is the number of bytes in a row.
 		if(bitmap.bits_per_pixel == 1 || bitmap.bits_per_pixel == 4 || bitmap.bits_per_pixel == 8 || bitmap.bits_per_pixel == 16)
 		{
 			throw std::runtime_error("Unsported bitmap bits per pixel " + std::to_string(bitmap.bits_per_pixel));
 		}
+
+		if(bitmap.bits_per_pixel == 24)
+		{
+			bitmap.layout = BitMapPixelLayout::BGR;
+		}
+		else if(bitmap.bits_per_pixel == 32)
+		{
+			bitmap.layout = BitMapPixelLayout::BGRA;
+		}
+
 		
 		uint8_t bytes_per_pixel = bitmap.bits_per_pixel / 8;
-		
+		// pitch is the number of bytes in a row.
 		uint32_t pitch = bitmap.width * bytes_per_pixel;
 		bitmap.pixel_buffer = new uint8_t[pitch * bitmap.height];
 
@@ -344,10 +360,8 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 
 		uint32_t pixel_byte_read_count = 0;
 
-		// todo: move the current file pointer to be aligned with data offet
+		// move file_handle cursor to start of image data.
 		std::fseek(file_handle, bitmap.data_offset, 0);
-
-		WriteLine("Padding byte count: " + std::to_string(row_byte_padding_count));
 		
 		uint32_t dest_byte_index = 0;
 		for(int i = 0; i < bitmap.height; ++i)
@@ -370,7 +384,7 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 
 			if((dest_byte_index + row_byte_padding_count) % 4 != 0)
 			{
-				delete bitmap.pixel_buffer;
+				delete[] bitmap.pixel_buffer;
 				throw std::runtime_error("Failed to parse scanline with correct padding: " + std::to_string(dest_byte_index) +
 				                         " " + std::to_string(row_byte_padding_count));
 			}
@@ -378,22 +392,14 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 
 		if(pixel_byte_read_count != pitch * bitmap.height)
 		{
-			throw std::runtime_error("Failed to load bitmap blame the developer: " + std::to_string(pixel_byte_read_count) + ", " + std::to_string(pitch * bitmap.height));
+			throw std::runtime_error("Failed to load bitmap blame the developer: " +
+			                         std::to_string(pixel_byte_read_count) + ", " + std::to_string(pitch * bitmap.height));
 		}
 	}
 	else
 	{
 		throw std::runtime_error("Failed to open file: " + filepath);
 	}
-
-	WriteLine("BITMAP loaded");
-	WriteLine("File size: " + std::to_string(bitmap.file_size));
-	WriteLine("Data Offset: " + std::to_string(bitmap.data_offset));
-	WriteLine("Width: " + std::to_string(bitmap.width));
-	WriteLine("Height: " + std::to_string(bitmap.height));
-	WriteLine("Bits per pixel: " + std::to_string(bitmap.bits_per_pixel));
-	WriteLine("x pixels per meter: " + std::to_string(bitmap.xpixels_per_meter));
-	WriteLine("y pixels per meter: " + std::to_string(bitmap.ypixels_per_meter));
 }
 
 #endif
