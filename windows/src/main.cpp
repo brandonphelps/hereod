@@ -65,13 +65,35 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 		// oss << p << std::endl;
 		// //WriteLine(oss.str());
 		// fputs(oss.str().c_str(), log_file);
-		uint8_t* pixel = destination.buffer;
+
+		// consider creating an iterator over the pixels of th eScreenData that
+		// can handle items like reverse direction etc. 
+		int x = 0;
+		int y = 0;
+		if(source.y_flipped)
+		{
+			y = 0;
+		}
+		else
+		{
+			y = destination.height-1;
+		}
+		if(source.x_flipped)
+		{
+			x = destination.width - 1;
+		}
+		else
+		{
+			x = 0;
+		}
+		uint8_t* pixel = destination.buffer + x * 4 + y * destination.width * 4;
 		while(! pixel_iter.end_iteration())
 		{
 			if(pixels_translated > destination.width * destination.height)
 			{
 				break;
 			}
+
 			pixels_translated++;
 			PixelColor p = pixel_iter.next();
 			*pixel = p.blue;
@@ -82,6 +104,36 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 			pixel++;
 			*pixel = p.alpha;
 			pixel++;
+			if(source.x_flipped)
+			{
+				x -= 1;
+			}
+			else
+			{
+				x += 1;
+			}
+
+			if(x == destination.width || x == -1)
+			{
+				if(source.y_flipped)
+				{
+					y += 1;
+				}
+				else
+				{
+					y -= 1;
+				}
+
+				if(source.x_flipped)
+				{
+					x = destination.width - 1;
+				}
+				else
+				{
+					x = 0;
+				}
+			}
+			pixel = destination.buffer + x * 4 + y * destination.width * 4;
 		}
 	}
 	else

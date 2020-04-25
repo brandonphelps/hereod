@@ -288,7 +288,7 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
 		bitmap.height = from_byte_array32(buf);
 		offset += 4;
-		bitmap.y_flipped = true;
+		bitmap.y_flipped = false;
 
 		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
 		bitmap.planes = from_byte_array16(buf);
