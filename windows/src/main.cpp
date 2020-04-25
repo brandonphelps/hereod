@@ -29,6 +29,7 @@
 #include "game_controller.h"
 #include "console_another.h"
 #include "video.h"
+#include "sprite_sheet.h"
 
 
 #include "clanger.h"
@@ -454,6 +455,17 @@ int CALLBACK WinMain(
 	                         hInstance,
 	                         NULL);
 
+
+	WriteLine("Info: \n\n\n");
+
+	// WriteLine("Is ScreenData CopyInsertable: " + std::to_string(
+
+
+	WriteLine("END INFO\n\n\n");
+		
+
+
+
 	// clanger_State rootState;
 	// rootState.next = NULL;
 	
@@ -587,12 +599,25 @@ int CALLBACK WinMain(
 	font_image.buffer = NULL;
 	font_image.bytesPerPixel = 4;
 
+	SpriteSheet font_sheet;
+
 	try
 	{
-		LoadBitmap("resources/fonts/cool_font_32.bmp", tempBitmap);
+		LoadBitmap("resources/fonts/periesh.bmp", tempBitmap);
 		WriteLine("Bitmap temp screen data");
 
+		
 		FillScreenDataWithBitmap(tempBitmap, font_image);
+
+		ChunkUpSprites(font_image, font_sheet, 32, 32, 16, 16);
+
+		font_sheet.sprite_width = 32;
+		font_sheet.sprite_height = 32;
+		font_sheet.sprite_count_x = 16;
+		font_sheet.sprite_count_y = 16;
+
+		
+
 		BlitScreenData(font_image, main_console.screen_data, 0, 0);
 	}
 	catch(const std::runtime_error& e)
@@ -723,6 +748,9 @@ int CALLBACK WinMain(
 
 		BlitScreenData(font_image, currentScreen, 230, 160);
 
+		BlitScreenData(font_sheet.GetSprite(0), currentScreen, 300, 10);
+		BlitScreenData(font_sheet.GetSprite(1), currentScreen, 300, 42);
+		
 		if(console_active)
 		{
 			main_console.render(currentScreen);
