@@ -609,7 +609,7 @@ int CALLBACK WinMain(
 		
 		FillScreenDataWithBitmap(tempBitmap, font_image);
 
-		ChunkUpSprites(font_image, font_sheet, 32, 32, 16, 16);
+		ChunkUpSprites(font_image, font_sheet, 32, 32, 9, 9);
 
 		font_sheet.sprite_width = 32;
 		font_sheet.sprite_height = 32;

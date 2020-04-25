@@ -14,6 +14,9 @@ class ScreenData
 {
 public:
 	static uint32_t screenDataID;
+	// investigate move semantics to allow for data copy from one struct into another
+	// especially when that pervious constructed item is just temporary, such as being in place
+	// constructed at an array.
 	ScreenData()
 	{
 		bytesPerPixel = 4;
