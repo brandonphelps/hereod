@@ -211,6 +211,11 @@ void Console::update(uint32_t keycode)
 {
 	WriteLine("Updating message with keycode: " + std::to_string(keycode));
 	current_message += static_cast<char>(keycode);
+	WriteLine("Current message: " +current_message);
+	if(keycode == VK_RETURN)
+	{
+		current_message = "";
+	}
 	// // if keycode is a normal key value A-Z0-9, add to current active string
 	// // if keycode is a enter key add string to buffer_history.
 	// if(console_display_keys.find(keycode) != console_display_keys.end())
@@ -225,6 +230,9 @@ void Console::update(uint32_t keycode)
 
 void Console::render(ScreenData& render_dest)
 {
+
+	DrawRectangle(render_window.buffer, render_window.width, render_window.height, 0, 0, render_window.width, render_window.height, 0x00, 0x00, 0x00);
+
 	// update the render window as needed.
 	int index = 0;
 	for(int i = 0; i < current_message.size(); i++)
@@ -695,7 +703,10 @@ int CALLBACK WinMain(
 							// StartMemPrint = tempBitmap.pixel_buffer;
 							StartMemPrint = currentScreen.get_buffer_at(200, 200);
 						}
-
+						if(console_active && WasDown)
+						{
+							main_console.update(VKCode);
+						}
 						if(!console_active)
 						{
 							if(VKCode == 'M' && WasDown)
@@ -735,11 +746,7 @@ int CALLBACK WinMain(
 							}
 						}
 					}
-					if(console_active)
-					{
-						main_console.update(VKCode);
-					}
-					else
+					if(!console_active)
 					{
 						UpdateKeyboardInputs(msg, newKeyboard);
 					}
