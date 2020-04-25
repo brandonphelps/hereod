@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <cstring>
 
+uint32_t ScreenData::screenDataID = 0;
+
 uint8_t* ScreenData::get_buffer_at(uint32_t x, uint32_t y)
 {
 	return buffer + (x * bytesPerPixel) + (y * bytesPerPixel * width);
@@ -91,11 +93,17 @@ void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t 
 
 
 
+
 void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x, uint32_t dest_pixel_y)
+{
+	BlitScreenData(source, dest, dest_pixel_x, dest_pixel_y, 0, 0);
+}
+
+void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x, uint32_t dest_pixel_y, uint32_t source_pixel_x, uint32_t source_pixel_y)
 {
 	
 	uint8_t* row = dest.buffer + dest_pixel_x*4 + dest_pixel_y*dest.width*4;
-	uint8_t* copy_row = source.buffer + 0*4 + 0*source.width*4;
+	uint8_t* copy_row = source.buffer + source_pixel_x*4 + source_pixel_y*source.width*4;
 
 	uint32_t MaxX = dest_pixel_x + source.width;
 	uint32_t MaxY = dest_pixel_y + source.height;

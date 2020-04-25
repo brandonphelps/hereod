@@ -29,6 +29,7 @@
 #include "game_controller.h"
 #include "console_another.h"
 #include "video.h"
+#include "sprite_sheet.h"
 
 
 #include "clanger.h"
@@ -200,29 +201,63 @@ public:
 	// does not include the currently active typing message.
 	std::vector<std::string> buffer_history;
 	std::string current_message;
-	ScreenData screen_data;
-
+	SpriteSheet font_sheet;
+	ScreenData render_window;
 	uint32_t x_position;
 	uint32_t y_position;
 };
 
 void Console::update(uint32_t keycode)
 {
-	// if keycode is a normal key value A-Z0-9, add to current active string
-	// if keycode is a enter key add string to buffer_history.
-	if(console_display_keys.find(keycode) != console_display_keys.end())
+	WriteLine("Updating message with keycode: " + std::to_string(keycode));
+	current_message += static_cast<char>(keycode);
+	WriteLine("Current message: " +current_message);
+	if(keycode == VK_RETURN)
 	{
-		current_message += static_cast<char>(keycode);
+		current_message = "";
 	}
-	else
-	{
-		// current_message
-	}
+	// // if keycode is a normal key value A-Z0-9, add to current active string
+	// // if keycode is a enter key add string to buffer_history.
+	// if(console_display_keys.find(keycode) != console_display_keys.end())
+	// {
+	// 	current_message += static_cast<char>(keycode);
+	// }
+	// else
+	// {
+	// 	// current_message
+	// }
 }
 
 void Console::render(ScreenData& render_dest)
 {
-	BlitScreenData(screen_data, render_dest, 200, 200);
+
+	DrawRectangle(render_window.buffer, render_window.width, render_window.height, 0, 0, render_window.width, render_window.height, 0x00, 0x00, 0x00);
+
+	// update the render window as needed.
+	int index = 0;
+	for(int i = 0; i < current_message.size(); i++)
+	{
+		if(current_message[i] == 'A' || current_message[i] == 'a')
+		{
+			index = 0;
+		}
+		else if(current_message[i] == 'B' || current_message[i] == 'b')
+		{
+			index = 1;
+		}
+		else if(current_message[i] == 'W' || current_message[i] == 'w')
+		{
+			index = 2;
+		}
+		else
+		{
+			continue;
+		}
+
+		BlitScreenData(font_sheet.GetSprite(index), render_window, i * font_sheet.sprite_width, 0);
+	}
+
+	BlitScreenData(render_window, render_dest, 200, 200);
 }
 
 
@@ -454,6 +489,17 @@ int CALLBACK WinMain(
 	                         hInstance,
 	                         NULL);
 
+
+	WriteLine("Info: \n\n\n");
+
+	// WriteLine("Is ScreenData CopyInsertable: " + std::to_string(
+
+
+	WriteLine("END INFO\n\n\n");
+		
+
+
+
 	// clanger_State rootState;
 	// rootState.next = NULL;
 	
@@ -505,9 +551,8 @@ int CALLBACK WinMain(
 	}
 
 	Console main_console;
-	main_console.screen_data.bytesPerPixel = 4;
-	main_console.screen_data.buffer = NULL;
-	resize_buffer(main_console.screen_data, 960 / 4, 540 / 4);
+	main_console.current_message = "AB World";
+	resize_buffer(main_console.render_window, 960 / 4, 540 / 4);
 
 	float GameUpdateHz = (MonitorRefreshHz / 2);
 	float TargetSecondsPerFrame = 1.0f / (float)GameUpdateHz;
@@ -587,13 +632,19 @@ int CALLBACK WinMain(
 	font_image.buffer = NULL;
 	font_image.bytesPerPixel = 4;
 
+	SpriteSheet font_sheet;
+
 	try
 	{
-		LoadBitmap("resources/fonts/cool_font_32.bmp", tempBitmap);
+		LoadBitmap("resources/fonts/periesh.bmp", tempBitmap);
 		WriteLine("Bitmap temp screen data");
 
+		
 		FillScreenDataWithBitmap(tempBitmap, font_image);
-		BlitScreenData(font_image, main_console.screen_data, 0, 0);
+
+		ChunkUpSprites(font_image, font_sheet, 32, 32, 9, 9);
+
+		main_console.font_sheet = font_sheet;
 	}
 	catch(const std::runtime_error& e)
 	{
@@ -652,6 +703,10 @@ int CALLBACK WinMain(
 							// StartMemPrint = tempBitmap.pixel_buffer;
 							StartMemPrint = currentScreen.get_buffer_at(200, 200);
 						}
+						if(console_active && WasDown)
+						{
+							main_console.update(VKCode);
+						}
 						if(!console_active)
 						{
 							if(VKCode == 'M' && WasDown)
@@ -691,7 +746,10 @@ int CALLBACK WinMain(
 							}
 						}
 					}
-					UpdateKeyboardInputs(msg, newKeyboard);
+					if(!console_active)
+					{
+						UpdateKeyboardInputs(msg, newKeyboard);
+					}
 				} break;
 				
 				default:
@@ -704,6 +762,7 @@ int CALLBACK WinMain(
 		}
 
 		mahInput->dtForFrame = SecondsElapsedForFrame;
+
 
 		if(RecordingStates && !PlaybackInput)
 		{
@@ -723,6 +782,9 @@ int CALLBACK WinMain(
 
 		BlitScreenData(font_image, currentScreen, 230, 160);
 
+		BlitScreenData(font_sheet.GetSprite(0), currentScreen, 300, 10);
+		BlitScreenData(font_sheet.GetSprite(1), currentScreen, 300, 42);
+		
 		if(console_active)
 		{
 			main_console.render(currentScreen);

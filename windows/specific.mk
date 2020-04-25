@@ -11,7 +11,7 @@ SPECIFIC_OBJS += bin/$(1).o
 endef
 
 # // todo remove include after moving bitmap to c file.
-bin/main.o: windows/src/main.cpp bitmap/include/herod_bitmap.h
+bin/main.o: windows/src/main.cpp bitmap/include/herod_bitmap.h include/sprite_sheet.h
 	mkdir -p $(dir $@)
 	$(CC) $(C_FLAGS) -c $< $(C_OUTPUT_SPECIFIER)$@
 SPECIFIC_OBJS += bin/main.o
