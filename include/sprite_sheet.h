@@ -4,6 +4,8 @@
 #ifndef H_SPRITE_SHEET_H
 #define H_SPRITE_SHEET_H
 
+#include <array>
+
 #include "video.h"
 
 #include "console_another.h"
@@ -17,7 +19,7 @@ public:
 	uint32_t sprite_count_x;
 	uint32_t sprite_count_y;
 
-	std::vector<ScreenData> sprites;
+	std::array<ScreenData, 100> sprites;
 
 	// todo make const.
 	ScreenData& GetSprite(int i)
@@ -42,7 +44,7 @@ void ChunkUpSprites(ScreenData& image_data,
 	p.sprite_count_x = sprite_count_x;
 	p.sprite_count_y = sprite_count_y;
 
-	p.sprites.clear();
+	// p.sprites.clear();
 
 	WriteLine("Chunking up sprite sheet");
 
@@ -55,7 +57,7 @@ void ChunkUpSprites(ScreenData& image_data,
 		resize_buffer(new_sprite, p.sprite_width, p.sprite_height);
 		BlitScreenData(image_data, new_sprite, 0, 0, row * p.sprite_width, 0);
 		WriteLine("Push sprite into vector");
-		p.sprites.push_back(new_sprite);
+		p.sprites[row] = new_sprite;
 	}
 }
 
