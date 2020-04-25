@@ -48,7 +48,6 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 {
 	destination.bytesPerPixel = 4;
 	resize_buffer(destination, source.width, source.height);
-
 	if(source.bits_per_pixel == 24 || source.bits_per_pixel == 32)
 	{
 		uint8_t bytes_per_pixel = source.bits_per_pixel / 8;
@@ -56,19 +55,17 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 
 		// bitmaps are blue, green, red for 3 bytes per pixel
 		// source pointer
-		uint8_t* pixel = destination.buffer;
-		int p_count = 0;
-
-		WriteLine("Filling out Screen data: " + std::to_string(bytes_per_pixel * source.width * source.height));
-		WriteLine("destination width height: " + std::to_string(destination.width) + ", " + std::to_string(destination.height));
-
-
-		BitMapPixelIter<ThirtyTwoColor> pixel_iter(source.pixel_buffer, source.width * source.height);
+		//(source.pixel_buffer, source.width * source.height);
+		BitMapPixelIter pixel_iter = source.begin(); 
 
 		int pixels_translated = 0;
-		int x = 0;
-		FILE* log_file = fopen("log_file.txt", "w");
-		
+		// FILE* log_file = fopen("log_file.txt", "w");
+		// // WriteLine("Checking for pixel value: " + std::to_string(x));
+		// std::stringstream oss;
+		// oss << p << std::endl;
+		// //WriteLine(oss.str());
+		// fputs(oss.str().c_str(), log_file);
+		uint8_t* pixel = destination.buffer;
 		while(! pixel_iter.end_iteration())
 		{
 			if(pixels_translated > destination.width * destination.height)
@@ -85,17 +82,7 @@ void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
 			pixel++;
 			*pixel = p.alpha;
 			pixel++;
-
-			// WriteLine("Checking for pixel value: " + std::to_string(x));
-			std::stringstream oss;
-			oss << p << std::endl;
-			//WriteLine(oss.str());
-			fputs(oss.str().c_str(), log_file);
 		}
-		x = 0;
-
-		WriteLine("Pixels translated: " + std::to_string(pixels_translated));
-
 	}
 	else
 	{
@@ -147,7 +134,6 @@ std::string toHex(uint8_t* start, size_t length)
 }
 
 const static std::set<uint32_t> console_display_keys = {'M', 'N'};
-
 
 class Console
 {
@@ -466,13 +452,6 @@ int CALLBACK WinMain(
 		MonitorRefreshHz = Win32RefreshRate;
 	}
 
-	ScreenData testingScreenData;
-	testingScreenData.bytesPerPixel = 4;
-	testingScreenData.buffer = NULL;
-	resize_buffer(testingScreenData, 50, 80);
-	DrawRectangle(testingScreenData.buffer, 50, 80, 0, 0, 20, 40, 0xFF, 0, 0);
-	DrawRectangle(testingScreenData.buffer, 50, 80, 20, 0, 40, 20, 0xFF, 0xFF, 0);
-
 	Console main_console;
 	main_console.screen_data.bytesPerPixel = 4;
 	main_console.screen_data.buffer = NULL;
@@ -558,7 +537,7 @@ int CALLBACK WinMain(
 
 	try
 	{
-		LoadBitmap("resources/fonts/Untitled.bmp", tempBitmap);
+		LoadBitmap("resources/fonts/cool_font_32.bmp", tempBitmap);
 		WriteLine("Bitmap temp screen data");
 
 		FillScreenDataWithBitmap(tempBitmap, font_image);
@@ -691,7 +670,6 @@ int CALLBACK WinMain(
 		                                mahInput);
 
 		BlitScreenData(font_image, currentScreen, 230, 160);
-		// BlitScreenData(testingScreenData, currentScreen, 10, 10);
 
 		if(console_active)
 		{

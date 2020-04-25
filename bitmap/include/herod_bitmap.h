@@ -31,59 +31,72 @@ std::ostream& operator<<(std::ostream& out, const PixelColor& p)
 	return out;
 }
 
-struct MonoColor
+enum class BitMapPixelLayout
 {
+ BGR,
+ BGRA
 };
 
-
-struct FourtyTwoColor
-{
-};
-
-struct ThirtyTwoColor
-{
-};
-
-template <typename T>
 class BitMapPixelIter
 {
 public:
 	// length is number of pixels
-	BitMapPixelIter(uint8_t* start_buffer, uint32_t length)
+	// bitmappixel iter will not consume ownership of start_buffer.
+	// should already be allocated. 
+	BitMapPixelIter(uint8_t* start_buffer, uint32_t length, BitMapPixelLayout layout)
 	{
 		_pixel_buffer = start_buffer;
 		_pixel_cursor = start_buffer;
+		_pixel_layout = layout;
 		_length = length;
 		_current_index = 0;
 		_end_reached = false;
 	}
+
+	// copy construct is able to be created by compiler.
+	// performs membor wise copy
+	// https://en.cppreference.com/w/cpp/language/copy_constructor
+	// todo write tests to confirm this. 
 	
 	// return the current pixel color and move the pointer forward. 
 	PixelColor next();
+
 	bool end_iteration() const;
 
 private:
+	PixelColor nextBGR();
+	PixelColor nextBGRA();
+
 	uint8_t* _pixel_buffer;
 	uint8_t* _pixel_cursor;
+	BitMapPixelLayout _pixel_layout;
 	uint32_t _length;
 	uint32_t _current_index;
 	bool _end_reached;
+
 };
 
-template <typename T>
-bool BitMapPixelIter<T>::end_iteration() const
+bool BitMapPixelIter::end_iteration() const
 {
 	return _end_reached;
 }
 
-template <typename T>
-PixelColor BitMapPixelIter<T>::next()
+PixelColor BitMapPixelIter::next()
 {
-	// 
+	PixelColor result;
+	switch(_pixel_layout)
+	{
+	case BitMapPixelLayout::BGR:
+		result = nextBGR();
+		break;
+	case BitMapPixelLayout::BGRA:
+		result = nextBGRA();
+		break;
+	}
+	return result;
 }
 
-template <>
-PixelColor BitMapPixelIter<FourtyTwoColor>::next()
+PixelColor BitMapPixelIter::nextBGR()
 {
 	PixelColor result;
 
@@ -111,8 +124,7 @@ PixelColor BitMapPixelIter<FourtyTwoColor>::next()
 	return result;
 }
 
-template <>
-PixelColor BitMapPixelIter<ThirtyTwoColor>::next()
+PixelColor BitMapPixelIter::nextBGRA()
 {
 	PixelColor result;
 	if(_end_reached)
@@ -140,7 +152,6 @@ PixelColor BitMapPixelIter<ThirtyTwoColor>::next()
 	return result;
 }
 
-
 class HBitmap
 {
 public:
@@ -152,8 +163,10 @@ public:
 	uint8_t info_header[40];
 
 	uint32_t info_header_size; // should be 40.
-	int32_t width; // width of bitmap in pixels
-	int32_t height;  // width of bitmap in pixels
+	uint32_t width; // width of bitmap in pixels
+	uint32_t height;  // width of bitmap in pixels
+	bool y_flipped; // indicates that the height was negative.
+	bool x_flipped; // indicates that the width was negative.
 	uint16_t planes;
 	uint16_t bits_per_pixel;
 	uint32_t compression;
@@ -162,10 +175,23 @@ public:
 	uint32_t ypixels_per_meter;
 	uint32_t colors_used;
 	uint32_t important_colors;
-
+	// consider bundling the pixel_buffer array with a color arrangment. layout
+	// this could allow for a pixel color iter where T is the requested pixel color format.
 	uint8_t* pixel_buffer;
+	BitMapPixelLayout layout;
+
+	// todo add in end method.
+	BitMapPixelIter begin();
+
 private:
 };
+
+BitMapPixelIter HBitmap::begin()
+{
+	BitMapPixelIter tmp(pixel_buffer, width * height, layout);
+	return tmp;
+}
+
 
 // todo: move these into a serialization module. 
 // appears bitmaps are little endian.
@@ -253,12 +279,16 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 		offset += 4;
 
 		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
+		// todo determine if loaded width is negative, if so then
+		// set x_flipped to true.
 		bitmap.width = from_byte_array32(buf);
 		offset += 4;
+		bitmap.x_flipped = false;
 
 		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
 		bitmap.height = from_byte_array32(buf);
 		offset += 4;
+		bitmap.y_flipped = true;
 
 		buf = reinterpret_cast<uint8_t*>(temp_buffer+offset);
 		bitmap.planes = from_byte_array16(buf);
@@ -304,6 +334,16 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 		{
 			throw std::runtime_error("Unsported bitmap bits per pixel " + std::to_string(bitmap.bits_per_pixel));
 		}
+
+		if(bitmap.bits_per_pixel == 24)
+		{
+			bitmap.layout = BitMapPixelLayout::BGR;
+		}
+		else if(bitmap.bits_per_pixel == 32)
+		{
+			bitmap.layout = BitMapPixelLayout::BGRA;
+		}
+
 		
 		uint8_t bytes_per_pixel = bitmap.bits_per_pixel / 8;
 		// pitch is the number of bytes in a row.
