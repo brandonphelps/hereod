@@ -14,6 +14,9 @@
 #include <sstream>
 
 #include <stdint.h>
+#include <set>
+
+#include "herod_bitmap.h"
 
 #include "performance.h"
 #include "keyboard_updates.h"
@@ -40,6 +43,65 @@ void temp_main();
 
 std::string ReadInput(const std::string& prompt);
 
+// used for copying bitmap data into a screen data.
+void FillScreenDataWithBitmap(HBitmap& source, ScreenData& destination)
+{
+	destination.bytesPerPixel = 4;
+	resize_buffer(destination, source.width, source.height);
+
+	if(source.bits_per_pixel == 24 || source.bits_per_pixel == 32)
+	{
+		uint8_t bytes_per_pixel = source.bits_per_pixel / 8;
+		WriteLine("Bytes per pixel: " + std::to_string(bytes_per_pixel));
+
+		// bitmaps are blue, green, red for 3 bytes per pixel
+		// source pointer
+		uint8_t* pixel = destination.buffer;
+		int p_count = 0;
+
+		WriteLine("Filling out Screen data: " + std::to_string(bytes_per_pixel * source.width * source.height));
+		WriteLine("destination width height: " + std::to_string(destination.width) + ", " + std::to_string(destination.height));
+
+
+		BitMapPixelIter<ThirtyTwoColor> pixel_iter(source.pixel_buffer, source.width * source.height);
+
+		int pixels_translated = 0;
+		int x = 0;
+		FILE* log_file = fopen("log_file.txt", "w");
+		
+		while(! pixel_iter.end_iteration())
+		{
+			if(pixels_translated > destination.width * destination.height)
+			{
+				break;
+			}
+			pixels_translated++;
+			PixelColor p = pixel_iter.next();
+			*pixel = p.blue;
+			pixel++;
+			*pixel = p.green;
+			pixel++;
+			*pixel = p.red;
+			pixel++;
+			*pixel = p.alpha;
+			pixel++;
+
+			// WriteLine("Checking for pixel value: " + std::to_string(x));
+			std::stringstream oss;
+			oss << p << std::endl;
+			//WriteLine(oss.str());
+			fputs(oss.str().c_str(), log_file);
+		}
+		x = 0;
+
+		WriteLine("Pixels translated: " + std::to_string(pixels_translated));
+
+	}
+	else
+	{
+		throw std::runtime_error("Invalid bytes per pixel count");
+	}
+}
 
 static char valueConvertTable[16] =
 	{
@@ -84,28 +146,72 @@ std::string toHex(uint8_t* start, size_t length)
 	return msg;
 }
 
+const static std::set<uint32_t> console_display_keys = {'M', 'N'};
+
+
+class Console
+{
+public:
+	// render_dest is the location of where the console should be rendered onto. 
+	void render(ScreenData& render_dest);
+
+	// note this does not allow for multiple  key pressed at the same time.
+	// update to comput a keybord or game controller input. 
+	void update(uint32_t keyCode);
+	// contains all messages that have been typed into the console,
+	// does not include the currently active typing message.
+	std::vector<std::string> buffer_history;
+	std::string current_message;
+	ScreenData screen_data;
+
+	uint32_t x_position;
+	uint32_t y_position;
+};
+
+void Console::update(uint32_t keycode)
+{
+	// if keycode is a normal key value A-Z0-9, add to current active string
+	// if keycode is a enter key add string to buffer_history.
+	if(console_display_keys.find(keycode) != console_display_keys.end())
+	{
+		current_message += static_cast<char>(keycode);
+	}
+	else
+	{
+		// current_message
+	}
+}
+
+void Console::render(ScreenData& render_dest)
+{
+	BlitScreenData(screen_data, render_dest, 200, 200);
+}
+
+
+// // base class for Widget / gui like objects that can be interactived with
+// class Widget
+// {
+// public:
+// 	virtual Update() = 0;
+// private:
+	
+// };
+
+// class VisibleWidget : public Widget
+// {
+// public:
+// 	Update()
+// 	{
+// 		std::cout << "I'm a visible widet" << std::endl;
+// 	}
+	
+// 	ScreenData* screen_data;
+// };
+
 static bool Running = true;
 HINSTANCE hInst;
 
 // todo(brandon): this could be a platform indepdenant function?
-void resize_buffer(ScreenData& screendata, uint32_t new_width, uint32_t new_height)
-{
-	if(screendata.buffer != NULL)
-	{
-		WriteOut("Clearning out previously allocated buffer\n\r");
-		delete screendata.buffer;
-		screendata.buffer = NULL;
-	}
-
-	WriteOut("Resizing buffer\n\r");
-
-	screendata.width = new_width;
-	screendata.height = new_height;
-	screendata.pitch = screendata.width * screendata.bytesPerPixel;
-
-	WriteOut("Allocating " + std::to_string(screendata.pitch) + " * " + std::to_string(screendata.height) + "\n\r");
-	screendata.buffer = new uint8_t[screendata.pitch * screendata.height];
-}
 
 struct win32_pixel_buffer
 {
@@ -186,6 +292,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 uint8_t* StartMemPrint = 0;
+uint32_t StartMemPrintWidth = 0;
+uint32_t StartMemPrintHeight = 0;
 uint64_t StartAddress = 0;
 bool DrawMemory = false;
 
@@ -212,7 +320,7 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					StartAddress = reinterpret_cast<uintptr_t>(StartMemPrint);
 					std::string Address = toHex(StartAddress);
 					TextOut(hdc, 40, 40, Address.c_str(), Address.size());
-					static uint8_t mem_print_width = 10;
+					static uint8_t mem_print_width = 50;
 					for(int i = 0; i < 13; i++)
 					{
 						uint8_t* platname = StartMemPrint + (i * mem_print_width);
@@ -322,7 +430,7 @@ int CALLBACK WinMain(
 	// auto ret = subprocess::call({"dir"});
 	// WriteLine("Ret: value: " + std::to_string(ret));
 
-	temp_main();
+	// temp_main();
 
 	if (!hWnd)
 	{
@@ -357,6 +465,19 @@ int CALLBACK WinMain(
 	{
 		MonitorRefreshHz = Win32RefreshRate;
 	}
+
+	ScreenData testingScreenData;
+	testingScreenData.bytesPerPixel = 4;
+	testingScreenData.buffer = NULL;
+	resize_buffer(testingScreenData, 50, 80);
+	DrawRectangle(testingScreenData.buffer, 50, 80, 0, 0, 20, 40, 0xFF, 0, 0);
+	DrawRectangle(testingScreenData.buffer, 50, 80, 20, 0, 40, 20, 0xFF, 0xFF, 0);
+
+	Console main_console;
+	main_console.screen_data.bytesPerPixel = 4;
+	main_console.screen_data.buffer = NULL;
+	resize_buffer(main_console.screen_data, 960 / 4, 540 / 4);
+
 	float GameUpdateHz = (MonitorRefreshHz / 2);
 	float TargetSecondsPerFrame = 1.0f / (float)GameUpdateHz;
 	ScreenData currentScreen;
@@ -381,7 +502,7 @@ int CALLBACK WinMain(
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd, nCmdShow);
-	// ShowWindow(memH, nCmdShow);
+	ShowWindow(memH, nCmdShow);
 
 	MSG msg;
 	// load custom game module 
@@ -426,6 +547,29 @@ int CALLBACK WinMain(
 	// trigger a window update
 	UpdateWindow(hWnd);
 	UpdateWindow(memH);
+
+	bool console_active = false;
+
+
+	HBitmap tempBitmap;
+	ScreenData font_image;
+	font_image.buffer = NULL;
+	font_image.bytesPerPixel = 4;
+
+	try
+	{
+		LoadBitmap("resources/fonts/Untitled.bmp", tempBitmap);
+		WriteLine("Bitmap temp screen data");
+
+		FillScreenDataWithBitmap(tempBitmap, font_image);
+		BlitScreenData(font_image, main_console.screen_data, 0, 0);
+	}
+	catch(const std::runtime_error& e)
+	{
+		std::stringstream blah;
+		blah << "@@@@Unable to load bitmap data@@: " << e.what();
+		WriteLine(blah.str());
+	}
 	
 	RECT new_rec;
 	new_rec.left = 0;
@@ -469,39 +613,50 @@ int CALLBACK WinMain(
 					bool IsDown  = ((msg.lParam & (1 << 31)) == 0);
 					if(WasDown != IsDown)
 					{
-						if(VKCode == 'M' && WasDown)
+						if(VKCode == '1' && WasDown)
 						{
-							DrawMemory = true;
+							WriteLine("Activating console");
+							console_active = !console_active;
+							// StartMemPrint = main_console.screen_data.buffer;
+							// StartMemPrint = tempBitmap.pixel_buffer;
+							StartMemPrint = currentScreen.get_buffer_at(200, 200);
 						}
-						else if(VKCode == 'N' && WasDown)
+						if(!console_active)
 						{
-							DrawMemory = false;
-						}
-						if(DrawMemory && VKCode == 'V' && WasDown)
-						{
-							StartMemPrint += 8;
-						}
-						else if(DrawMemory && VKCode == 'B' && WasDown)
-						{
-							StartMemPrint -= 8;							
-						}
-						if(VKCode == 'L' && WasDown)
-						{
-							BeginRecordingInput(&mahState);
-							RecordingStates = true;
-							WriteLine("Begin recording");
-						}
-						if(VKCode == 'P' && WasDown)
-						{
-							if(PlaybackInput)
+							if(VKCode == 'M' && WasDown)
 							{
-								PlaybackInput = false;
-								ClearPlayback(&mahState);
+								DrawMemory = true;
 							}
-							else
+							else if(VKCode == 'N' && WasDown)
 							{
-								WriteLine("Begin Replay");
-								PlaybackInput = true;
+								DrawMemory = false;
+							}
+							if(DrawMemory && VKCode == 'V' && WasDown)
+							{
+								StartMemPrint += 8;
+							}
+							else if(DrawMemory && VKCode == 'B' && WasDown)
+							{
+								StartMemPrint -= 8;							
+							}
+							if(VKCode == 'L' && WasDown)
+							{
+								BeginRecordingInput(&mahState);
+								RecordingStates = true;
+								WriteLine("Begin recording");
+							}
+							if(VKCode == 'P' && WasDown)
+							{
+								if(PlaybackInput)
+								{
+									PlaybackInput = false;
+									ClearPlayback(&mahState);
+								}
+								else
+								{
+									WriteLine("Begin Replay");
+									PlaybackInput = true;
+								}
 							}
 						}
 					}
@@ -534,6 +689,14 @@ int CALLBACK WinMain(
 		initRest = blueFuncs.GameUpdate(&currentScreen,
 		                                &mahState,
 		                                mahInput);
+
+		BlitScreenData(font_image, currentScreen, 230, 160);
+		// BlitScreenData(testingScreenData, currentScreen, 10, 10);
+
+		if(console_active)
+		{
+			main_console.render(currentScreen);
+		}
 
 
 		// timing information to ensure a steady framerate.

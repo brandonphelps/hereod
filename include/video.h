@@ -12,6 +12,8 @@ public:
 	void set_pixel_color(uint32_t x, uint32_t y,
 	                     uint32_t color_mask);
 
+	uint8_t* get_buffer_at(uint32_t x, uint32_t y);
+
 public:
   uint32_t width;
   uint32_t height;
@@ -22,6 +24,9 @@ public:
 
 void drawBuf(uint8_t*, uint32_t, uint32_t);
 void drawBuf(uint8_t*, uint32_t, uint32_t, uint32_t);
+
+// copies the buffer information from the source to the destination. 
+void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t pixel_x, uint32_t pixel_y);
 
 void DrawRectangle(uint8_t* buffer,
                    uint32_t buf_width, uint32_t buf_height,
@@ -35,5 +40,7 @@ void DrawRectangle(ScreenData* screenData,
 
 void DrawText(ScreenData* screenData, uint32_t x, uint32_t y, const std::string& data);
 	
+void resize_buffer(ScreenData& screenData, uint32_t width, uint32_t height);
+
 
 #endif

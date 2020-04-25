@@ -87,7 +87,7 @@ void DrawToon(ScreenData* screenData, PositionComponent* toon, uint32_t color_ma
 	DrawRectangle(screenData,
 	              MapXOffset + static_cast<uint32_t>(toon->x_pos*MetersToPixel),
 	              MapYOffset + static_cast<uint32_t>(toon->y_pos*MetersToPixel),
-	              30, 30, color_mask);
+	              40, 40, color_mask);
 }
 
 EntityObj* ents; // all the entities live here. 

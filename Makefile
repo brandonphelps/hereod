@@ -68,6 +68,16 @@ TARGET_OBJS += bin/lua/$(1).o
 endef
 
 
+define BitMapCommonRule
+bin/bitmap/$(1).o: bitmap/src/$(1).cpp
+	@mkdir -p bin/bitmap
+	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
+TARGET_OBJS += bin/bitmap/$(1).o
+
+endef
+INCLUDE_DIRS += -Ibitmap/include
+
+
 # $(eval $(call LuaCommonRule,lstate))
 # $(eval $(call LuaCommonRule,lapi))
 
