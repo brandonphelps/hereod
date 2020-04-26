@@ -30,7 +30,7 @@
 #include "console_another.h"
 #include "video.h"
 #include "sprite_sheet.h"
-
+#include "herod_console.h"
 
 #include "clanger.h"
 
@@ -185,137 +185,6 @@ std::string toHex(uint8_t* start, size_t length)
 	return msg;
 }
 
-const static std::set<uint32_t> console_display_keys = {'M', 'N'};
-
-class Console
-{
-public:
-	// render_dest is the location of where the console should be rendered onto. 
-	void render(ScreenData& render_dest);
-
-	void renderString(ScreenData& window, const std::string& msg, int start_x, int start_y);
-
-	// note this does not allow for multiple  key pressed at the same time.
-	// update to comput a keybord or game controller input. 
-	void update(uint32_t keyCode);
-	// contains all messages that have been typed into the console,
-	// does not include the currently active typing message.
-	std::vector<std::string> buffer_history;
-	std::string current_message;
-	SpriteSheet font_sheet;
-	ScreenData render_window;
-	uint32_t x_position;
-	uint32_t y_position;
-};
-
-void Console::update(uint32_t keycode)
-{
-	WriteLine("Updating message with keycode: " + std::to_string(keycode));
-
-
-	if(keycode == VK_RETURN)
-	{
-		buffer_history.push_back(current_message);
-		current_message = "";
-	}
-	else if(keycode == VK_BACK)
-	{
-
-		if(!current_message.empty())
-		{
-			int prev_size = current_message.size();
-			WriteLine("BACK Space");
-			current_message.pop_back();
-			int after_size = current_message.size();
-			if(prev_size != after_size)
-			{
-				WriteLine("pop back is a lie: " + std::to_string(prev_size) + ", " + std::to_string(after_size));
-			}
-		}
-	}
-	else
-	{
-		current_message += static_cast<char>(keycode);
-	}
-		
-	WriteLine("Current message: " + current_message);
-	// // if keycode is a normal key value A-Z0-9, add to current active string
-	// // if keycode is a enter key add string to buffer_history.
-	// if(console_display_keys.find(keycode) != console_display_keys.end())
-	// {
-	// 	current_message += static_cast<char>(keycode);
-	// }
-	// else
-	// {
-	// 	// current_message
-	// }
-}
-
-void Console::renderString(ScreenData& dest, const std::string& str, int start_x, int start_y)
-{
-	// update the render window as needed.
-	int index = 0;
-	for(int i = 0; i < str.size(); i++)
-	{
-		if(str[i] >= 48 && str[i] <= 57)
-		{
-			index = (str[i] - 48) + 26;
-		}
-		else if(str[i] >= 65 && str[i] <= 90)
-		{
-			index = toupper(str[i]) - 65;
-		}
-		else
-		{
-			continue;
-		}
-
-		BlitScreenData(font_sheet.GetSprite(index), dest,
-		               start_x + (i * font_sheet.sprite_width), start_y);
-	}
-}
-
-void Console::render(ScreenData& render_dest)
-{
-
-	DrawRectangle(render_window.buffer, render_window.width, render_window.height, 0, 0, render_window.width, render_window.height, 0x00, 0x00, 0x00);
-
-
-	int high_index = 2;
-	for(int i = buffer_history.size()-1; i >= 0; --i)
-	{
-		renderString(render_window, buffer_history[i],
-		             0, render_window.height - (high_index++ * font_sheet.sprite_height));
-	}
-
-	renderString(render_window, current_message,
-	             0, render_window.height - font_sheet.sprite_height);
-
-
-	BlitScreenData(render_window, render_dest, 200, 200);
-}
-
-
-// // base class for Widget / gui like objects that can be interactived with
-// class Widget
-// {
-// public:
-// 	virtual Update() = 0;
-// private:
-	
-// };
-
-// class VisibleWidget : public Widget
-// {
-// public:
-// 	Update()
-// 	{
-// 		std::cout << "I'm a visible widet" << std::endl;
-// 	}
-	
-// 	ScreenData* screen_data;
-// };
-
 static bool Running = true;
 HINSTANCE hInst;
 
@@ -327,7 +196,7 @@ struct win32_pixel_buffer
 	BITMAPINFO map_info;
 };
 
-win32_pixel_buffer CurrentBuffer;
+
 
 void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, uint32_t new_height)
 {
@@ -355,6 +224,8 @@ WindowDimension GetWindowDimension(HWND Window)
 	result.height = ClientRect.bottom - ClientRect.top;
 	return result;
 }
+
+win32_pixel_buffer CurrentBuffer;
 
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -404,6 +275,7 @@ uint32_t StartMemPrintWidth = 0;
 uint32_t StartMemPrintHeight = 0;
 uint64_t StartAddress = 0;
 bool DrawMemory = false;
+
 
 LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {

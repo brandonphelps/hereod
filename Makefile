@@ -58,7 +58,7 @@ $(eval $(call CommonSrcRule,game_memory))
 $(eval $(call CommonSrcRule,game_state))
 $(eval $(call CommonSrcRule,game_recording))
 $(eval $(call CommonSrcRule,grid_helpers))
-
+$(eval $(call CommonSrcRule,sprite_sheet))
 
 define LuaCommonRule
 bin/lua/$(1).o: lua/src/$(1).cpp
@@ -77,6 +77,16 @@ TARGET_OBJS += bin/bitmap/$(1).o
 endef
 INCLUDE_DIRS += -Ibitmap/include
 
+INCLUDE_DIRS += -Iconsole/include
+
+define ModuleCommonRule
+bin/$(2)/$(1).o: $(2)/src/$(1).cpp
+	@mkdir -p bin/$(2)
+	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
+TARGET_OBJS += bin/$(2)/$(1).o
+endef
+
+$(eval $(call ModuleCommonRule,herod_console,console))
 
 # $(eval $(call LuaCommonRule,lstate))
 # $(eval $(call LuaCommonRule,lapi))
