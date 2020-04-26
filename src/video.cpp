@@ -9,6 +9,68 @@
 
 uint32_t ScreenData::screenDataID = 0;
 
+ScreenData::ScreenData()
+{
+	bytesPerPixel = 4;
+	buffer = new uint8_t[10];
+	my_id = screenDataID++;
+	pitch = 0;
+	width = 0;
+	height = 0;
+#ifdef _WIN32
+	WriteLine("Screen data Constructor: " + std::to_string(my_id));
+#endif
+}
+
+ScreenData::ScreenData(const ScreenData& other)
+{
+	bytesPerPixel = other.bytesPerPixel;
+	buffer = new uint8_t[other.pitch * other.height];
+	pitch = other.pitch;
+	width = other.width;
+	height = other.height;
+	std::memcpy(buffer, other.buffer, other.pitch * other.height);
+
+	my_id = screenDataID++;
+}
+
+ScreenData::~ScreenData()
+{
+	if(buffer != NULL)
+	{
+		delete[] buffer;
+		buffer = NULL;
+	}
+
+#ifdef _WIN32
+	WriteLine("Screen data destructor: " + std::to_string(my_id));
+#endif
+}
+
+ScreenData& ScreenData::operator=(ScreenData& other)
+{
+	if(&other == this)
+	{
+		return *this;
+	}
+	if(buffer != NULL)
+	{
+		delete[] buffer;
+		buffer = NULL;
+	}
+	bytesPerPixel = other.bytesPerPixel;
+	buffer = new uint8_t[other.pitch * other.height];
+	pitch = other.pitch;
+	width = other.width;
+	height = other.height;
+	std::memcpy(buffer, other.buffer, other.pitch * other.height);
+
+	my_id = screenDataID++;
+	return *this;
+}
+
+
+
 uint8_t* ScreenData::get_buffer_at(uint32_t x, uint32_t y)
 {
 	return buffer + (x * bytesPerPixel) + (y * bytesPerPixel * width);

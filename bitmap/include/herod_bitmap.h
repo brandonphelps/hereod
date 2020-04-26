@@ -48,7 +48,6 @@ private:
 	uint32_t _length;
 	uint32_t _current_index;
 	bool _end_reached;
-
 };
 
 class HBitmap
