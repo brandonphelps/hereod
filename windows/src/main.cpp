@@ -30,10 +30,9 @@
 #include "console_another.h"
 #include "video.h"
 #include "sprite_sheet.h"
-
+#include "herod_console.h"
 
 #include "clanger.h"
-#include "subprocess.hpp"
 
 void my_clanger_printer(const std::string& msg)
 {
@@ -186,101 +185,6 @@ std::string toHex(uint8_t* start, size_t length)
 	return msg;
 }
 
-const static std::set<uint32_t> console_display_keys = {'M', 'N'};
-
-class Console
-{
-public:
-	// render_dest is the location of where the console should be rendered onto. 
-	void render(ScreenData& render_dest);
-
-	// note this does not allow for multiple  key pressed at the same time.
-	// update to comput a keybord or game controller input. 
-	void update(uint32_t keyCode);
-	// contains all messages that have been typed into the console,
-	// does not include the currently active typing message.
-	std::vector<std::string> buffer_history;
-	std::string current_message;
-	SpriteSheet font_sheet;
-	ScreenData render_window;
-	uint32_t x_position;
-	uint32_t y_position;
-};
-
-void Console::update(uint32_t keycode)
-{
-	WriteLine("Updating message with keycode: " + std::to_string(keycode));
-	current_message += static_cast<char>(keycode);
-	WriteLine("Current message: " +current_message);
-	if(keycode == VK_RETURN)
-	{
-		current_message = "";
-	}
-	// // if keycode is a normal key value A-Z0-9, add to current active string
-	// // if keycode is a enter key add string to buffer_history.
-	// if(console_display_keys.find(keycode) != console_display_keys.end())
-	// {
-	// 	current_message += static_cast<char>(keycode);
-	// }
-	// else
-	// {
-	// 	// current_message
-	// }
-}
-
-void Console::render(ScreenData& render_dest)
-{
-
-	DrawRectangle(render_window.buffer, render_window.width, render_window.height, 0, 0, render_window.width, render_window.height, 0x00, 0x00, 0x00);
-
-	// update the render window as needed.
-	int index = 0;
-	for(int i = 0; i < current_message.size(); i++)
-	{
-		if(current_message[i] == 'A' || current_message[i] == 'a')
-		{
-			index = 0;
-		}
-		else if(current_message[i] == 'B' || current_message[i] == 'b')
-		{
-			index = 1;
-		}
-		else if(current_message[i] == 'W' || current_message[i] == 'w')
-		{
-			index = 2;
-		}
-		else
-		{
-			continue;
-		}
-
-		BlitScreenData(font_sheet.GetSprite(index), render_window, i * font_sheet.sprite_width, 0);
-	}
-
-	BlitScreenData(render_window, render_dest, 200, 200);
-}
-
-
-// // base class for Widget / gui like objects that can be interactived with
-// class Widget
-// {
-// public:
-// 	virtual Update() = 0;
-// private:
-	
-// };
-
-// class VisibleWidget : public Widget
-// {
-// public:
-// 	Update()
-// 	{
-// 		std::cout << "I'm a visible widet" << std::endl;
-// 	}
-	
-// 	ScreenData* screen_data;
-// };
-
 static bool Running = true;
 HINSTANCE hInst;
 
@@ -292,7 +196,7 @@ struct win32_pixel_buffer
 	BITMAPINFO map_info;
 };
 
-win32_pixel_buffer CurrentBuffer;
+
 
 void ResizeGraphicsBuffer(win32_pixel_buffer& pixel_buff, uint32_t new_width, uint32_t new_height)
 {
@@ -320,6 +224,8 @@ WindowDimension GetWindowDimension(HWND Window)
 	result.height = ClientRect.bottom - ClientRect.top;
 	return result;
 }
+
+win32_pixel_buffer CurrentBuffer;
 
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -370,6 +276,7 @@ uint32_t StartMemPrintHeight = 0;
 uint64_t StartAddress = 0;
 bool DrawMemory = false;
 
+
 LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	LRESULT Result = 0;
@@ -392,13 +299,13 @@ LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 					StartAddress = reinterpret_cast<uintptr_t>(StartMemPrint);
 					std::string Address = toHex(StartAddress);
-					TextOut(hdc, 40, 40, Address.c_str(), Address.size());
+					TextOutA(hdc, 40, 40, Address.c_str(), Address.size());
 					static uint8_t mem_print_width = 50;
 					for(int i = 0; i < 13; i++)
 					{
 						uint8_t* platname = StartMemPrint + (i * mem_print_width);
 						std::string valueStr = toHex(platname, mem_print_width);
-						TextOut(hdc, 40, 65 + (15 * i), valueStr.c_str(), valueStr.size());
+						TextOutA(hdc, 40, 65 + (15 * i), valueStr.c_str(), valueStr.size());
 					}
 				
 					SelectObject(hdc, hOldFont);

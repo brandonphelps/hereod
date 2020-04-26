@@ -83,6 +83,8 @@ BOOL InitializeDebugConsole()
   // freopen("CONIN$", "r" , stdin);
 
 
+  
+
   SetConsoleTitle("Debug Console");
 
 
