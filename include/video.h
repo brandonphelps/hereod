@@ -9,6 +9,7 @@
 #include "console_another.h"
 #endif
 
+#include "pixel_color.h"
 
 class ScreenData
 {

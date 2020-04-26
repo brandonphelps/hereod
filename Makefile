@@ -62,8 +62,7 @@ $(eval $(call CommonSrcRule,game_state))
 $(eval $(call CommonSrcRule,game_recording))
 $(eval $(call CommonSrcRule,grid_helpers))
 $(eval $(call CommonSrcRule,sprite_sheet))
-
-
+$(eval $(call CommonSrcRule,pixel_color))
 
 define ModuleCommonRule
 bin/$(2)/$(1).o: $(2)/src/$(1).cpp
@@ -71,6 +70,7 @@ bin/$(2)/$(1).o: $(2)/src/$(1).cpp
 	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
 TARGET_OBJS += bin/$(2)/$(1).o
 endef
+
 
 $(eval $(call ModuleCommonRule,herod_bitmap,bitmap))
 $(eval $(call ModuleCommonRule,herod_console,console))
