@@ -21,6 +21,9 @@ endif
 
 
 INCLUDE_DIRS += -Iinclude -Ilua/include -Iclanger/include
+INCLUDE_DIRS += -Ibitmap/include
+INCLUDE_DIRS += -Iconsole/include
+
 
 LIB_DIRS = -L/usr/local/lib
 
@@ -60,24 +63,7 @@ $(eval $(call CommonSrcRule,game_recording))
 $(eval $(call CommonSrcRule,grid_helpers))
 $(eval $(call CommonSrcRule,sprite_sheet))
 
-define LuaCommonRule
-bin/lua/$(1).o: lua/src/$(1).cpp
-	@mkdir -p bin/lua
-	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
-TARGET_OBJS += bin/lua/$(1).o
-endef
 
-
-define BitMapCommonRule
-bin/bitmap/$(1).o: bitmap/src/$(1).cpp
-	@mkdir -p bin/bitmap
-	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
-TARGET_OBJS += bin/bitmap/$(1).o
-
-endef
-INCLUDE_DIRS += -Ibitmap/include
-
-INCLUDE_DIRS += -Iconsole/include
 
 define ModuleCommonRule
 bin/$(2)/$(1).o: $(2)/src/$(1).cpp
@@ -86,27 +72,10 @@ bin/$(2)/$(1).o: $(2)/src/$(1).cpp
 TARGET_OBJS += bin/$(2)/$(1).o
 endef
 
+$(eval $(call ModuleCommonRule,herod_bitmap,bitmap))
 $(eval $(call ModuleCommonRule,herod_console,console))
-
-# $(eval $(call LuaCommonRule,lstate))
-# $(eval $(call LuaCommonRule,lapi))
-
-
-define ClangerCommonRule
-bin/clanger/$(1).o: clanger/src/$(1).cpp
-	@mkdir -p bin/clanger
-	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
-TARGET_OBJS += bin/clanger/$(1).o
-endef
-
-
-# $(eval $(call LuaCommonRule,lstate))
-# $(eval $(call LuaCommonRule,lapi))
-
-$(eval $(call ClangerCommonRule,clanger))
-$(eval $(call ClangerCommonRule,windows_exec))
-
-
+$(eval $(call ModuleCommonRule,clanger,clanger))
+$(eval $(call ModuleCommonRule,windows_exec,clanger))
 
 clean:
 	rm -rf bin $(TARGETS)
