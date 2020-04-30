@@ -1,4 +1,3 @@
-
 #ifndef VIDEO_H
 #define VIDEO_H
 
@@ -49,7 +48,8 @@ void drawBuf(uint8_t*, uint32_t, uint32_t, uint32_t);
 // copies the buffer information from the source to the destination. 
 void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x, uint32_t dest_pixel_y);
 
-void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x, uint32_t dest_pixel_y, uint32_t source_pixel_x, uint32_t source_pixel_y);
+void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x, uint32_t dest_pixel_y,
+                    uint32_t source_pixel_x, uint32_t source_pixel_y);
 
 void DrawRectangle(uint8_t* buffer,
                    uint32_t buf_width, uint32_t buf_height,

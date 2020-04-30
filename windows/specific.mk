@@ -24,9 +24,11 @@ bin/tower_d.dll: bin/tower_main.o bin/console_another.o bin/video.o
 bin/blue_d.dll: bin/blue_main.o bin/blue_entity.o bin/console_another.o bin/video.o bin/game_memory.o bin/grid_helpers.o
 	$(LD) -DLL -EXPORT:GameInit -EXPORT:GameUpdate -EXPORT:GameShutdown /OUT:$@ $^
 
-cool.exe: $(SPECIFIC_OBJS) $(TARGET_OBJS) bin/tower_d.dll bin/blue_d.dll
+cool.exe: $(SPECIFIC_OBJS) $(TARGET_OBJS) bin/tower_d.dll bin/blue_d.dll bin/lua.lib
 	$(LD) /OUT:$@ $(LIBS) $(filter %.o,$^) 
 
+bin/lua.lib: $(LUA_TARGET_OBJS)
+	$(AR) $^ /OUT:$@
 
 windows_child.exe: clanger/src/windows_child.cpp
 	$(CC) clanger/src/windows_child.cpp

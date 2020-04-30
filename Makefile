@@ -77,6 +77,21 @@ $(eval $(call ModuleCommonRule,herod_console,console))
 $(eval $(call ModuleCommonRule,clanger,clanger))
 $(eval $(call ModuleCommonRule,windows_exec,clanger))
 
+LUA_TARGET_OBJS = 
+
+define LuaModuleRule
+bin/lua/$(1).o: lua/src/$(1).c
+	@mkdir -p bin/lua
+	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
+LUA_TARGET_OBJS += bin/lua/$(1).o
+endef
+
+
+LUA_SRCS = lapi lauxlib lbaselib lbitlib lcode lcorolib lctype ldblib ldebug ldo ldump lfunc lgc linit liolib llex lmathlib lmem loadlib lobject lopcodes lparser lstate lstring lstrlib ltable ltablib ltm lundump lutf8lib lvm lzio 
+
+$(foreach lsrc,$(LUA_SRCS),$(eval $(call LuaModuleRule,$(lsrc))))
+
+
 clean:
 	rm -rf bin $(TARGETS)
 
