@@ -2,7 +2,6 @@
 #ifndef HEROD_CONSOLE_H
 #define HEROD_CONSOLE_H
 
-
 #include "video.h"
 #include "sprite_sheet.h"
 
@@ -10,13 +9,18 @@
 #include <string>
 #include <vector>
 
+#include <functional>
+
 class Console
 {
 public:
+	void add_enter_callback(std::function<void(const std::string&)> hook);
+	
 	// render_dest is the location of where the console should be rendered onto. 
 	void render(ScreenData& render_dest);
 
 	void renderString(ScreenData& window, const std::string& msg, int start_x, int start_y);
+	void add_message(const std::string& msg);
 
 	// note this does not allow for multiple  key pressed at the same time.
 	// update to comput a keybord or game controller input. 
@@ -29,6 +33,11 @@ public:
 	ScreenData render_window;
 	uint32_t x_position;
 	uint32_t y_position;
+
+
+private:
+	// is called if an enter update is called. 
+	std::function<void(const std::string&)> enter_hook;
 };
 
 

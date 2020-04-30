@@ -6,13 +6,26 @@
 #include "console_another.h"
 #include <string>
 
+void Console::add_enter_callback(std::function<void(const std::string&)> hook)
+{
+	enter_hook = hook;
+}
+
+void Console::add_message(const std::string& msg)
+{
+	buffer_history.push_back(msg);
+}
+
 void Console::update(uint32_t keycode)
 {
 	WriteLine("Updating message with keycode: " + std::to_string(keycode));
 
-
 	if(keycode == VK_RETURN)
 	{
+		if(enter_hook)
+		{
+			enter_hook(current_message);
+		}
 		buffer_history.push_back(current_message);
 		current_message = "";
 	}
@@ -33,7 +46,14 @@ void Console::update(uint32_t keycode)
 	}
 	else
 	{
-		current_message += static_cast<char>(keycode);
+		if(keycode == VK_OEM_PLUS)
+		{
+			current_message += '+';
+		}
+		else
+		{
+			current_message += static_cast<char>(keycode);
+		}
 	}
 		
 	WriteLine("Current message: " + current_message);

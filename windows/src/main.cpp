@@ -3,6 +3,7 @@
 #include <timeapi.h>
 #include <conio.h>
 
+#include <functional>
 #include <stdlib.h>
 #include <vector>
 #include <iostream>
@@ -39,6 +40,29 @@
 void my_clanger_printer(const std::string& msg)
 {
 	WriteLine(msg);
+}
+
+void lua_eval(lua_State* L, Console& cons, const std::string& in_messg)
+{
+	int error = luaL_dostring(L, in_messg.c_str());
+	if(error)
+	{
+		cons.add_message("Failed to handle lua string eval");
+		cons.add_message(std::string(lua_tostring(L, -1)));
+	}
+	else
+	{
+		const char* result = lua_tostring(L, -1);
+		if(result)
+		{
+			WriteLine("result: " + std::string(result));
+		}
+		else
+		{
+			cons.add_message(std::string(result));
+		}
+		lua_pop(L, 1); // i think this is needed.
+	}
 }
 
 void temp_main();
@@ -436,7 +460,7 @@ int CALLBACK WinMain(
 			{
 				WriteLine("Failed to get result");
 			}
-			// lua_pop(L, 1);
+			lua_pop(L, 1);
 		}
 	}
 	// error = lua_pcall(L, 0, 0, 0);
@@ -445,7 +469,7 @@ int CALLBACK WinMain(
 	// 	WriteLine("Found an error when calling lua");
 	// }
 	
-	lua_close(L);
+	// lua_close(L);
 	
 	// clanger_State rootState;
 	// rootState.next = NULL;
@@ -498,7 +522,13 @@ int CALLBACK WinMain(
 	}
 
 	Console main_console;
-	main_console.current_message = "AB World";
+
+	using namespace std::placeholders;
+	
+	std::function<void(const std::string& msg)> l_eval = std::bind(lua_eval, L, main_console, _1);
+
+	main_console.add_enter_callback(l_eval);
+	main_console.current_message = "";
 	resize_buffer(main_console.render_window, 960 / 4, 540 / 4);
 
 	float GameUpdateHz = (MonitorRefreshHz / 2);
