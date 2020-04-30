@@ -15,7 +15,6 @@ void ChunkUpSprites(ScreenData& image_data,
 	p.sprite_count_y = sprite_count_y;
 
 	// p.sprites.clear();
-
 	//	WriteLine("Chunking up sprite sheet");
 
 	int sprite_count = 0;
