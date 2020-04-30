@@ -34,6 +34,8 @@
 
 #include "clanger.h"
 
+#include "lua.hpp"
+
 void my_clanger_printer(const std::string& msg)
 {
 	WriteLine(msg);
@@ -405,8 +407,23 @@ int CALLBACK WinMain(
 	WriteLine("END INFO\n\n\n");
 		
 
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
 
-
+	std::string lua_eval_line = "2+2";
+	int error = luaL_loadbuffer(L, lua_eval_line.c_str(), lua_eval_line.size(), "line");
+	if(error)
+	{
+		WriteLine("Found an error when loading lua");
+	}
+	error = lua_pcall(L, 0, 0, 0);
+	if(error)
+	{
+		WriteLine("Found an error when calling lua");
+	}
+	
+	lua_close(L);
+	
 	// clanger_State rootState;
 	// rootState.next = NULL;
 	

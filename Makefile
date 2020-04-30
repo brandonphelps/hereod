@@ -23,7 +23,7 @@ endif
 INCLUDE_DIRS += -Iinclude -Ilua/include -Iclanger/include
 INCLUDE_DIRS += -Ibitmap/include
 INCLUDE_DIRS += -Iconsole/include
-
+INCLUDE_DIRS += -Ilua/include
 
 LIB_DIRS = -L/usr/local/lib
 
@@ -87,9 +87,18 @@ LUA_TARGET_OBJS += bin/lua/$(1).o
 endef
 
 
-LUA_SRCS = lapi lauxlib lbaselib lbitlib lcode lcorolib lctype ldblib ldebug ldo ldump lfunc lgc linit liolib llex lmathlib lmem loadlib lobject lopcodes lparser lstate lstring lstrlib ltable ltablib ltm lundump lutf8lib lvm lzio 
+LUA_SRCS = lapi lauxlib lbaselib lbitlib lcode lcorolib lctype ldblib ldebug ldo ldump lfunc lgc linit liolib llex lmathlib lmem loslib loadlib lobject lopcodes lparser lstate lstring lstrlib ltable ltablib ltm lundump lutf8lib lvm lzio 
+
+
+bin/lua/lua.o: lua/src/lua.c
+	@mkdir -p bin/lua
+	@$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
+
 
 $(foreach lsrc,$(LUA_SRCS),$(eval $(call LuaModuleRule,$(lsrc))))
+
+
+
 
 
 clean:
@@ -113,3 +122,6 @@ include mac_osx/specific.mk
 endif
 
 endif
+
+
+

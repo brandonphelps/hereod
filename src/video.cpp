@@ -17,9 +17,6 @@ ScreenData::ScreenData()
 	pitch = 0;
 	width = 0;
 	height = 0;
-#ifdef _WIN32
-	WriteLine("Screen data Constructor: " + std::to_string(my_id));
-#endif
 }
 
 ScreenData::ScreenData(const ScreenData& other)
@@ -41,10 +38,6 @@ ScreenData::~ScreenData()
 		delete[] buffer;
 		buffer = NULL;
 	}
-
-#ifdef _WIN32
-	WriteLine("Screen data destructor: " + std::to_string(my_id));
-#endif
 }
 
 ScreenData& ScreenData::operator=(ScreenData& other)
@@ -96,13 +89,6 @@ void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height)
 void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t pitch)
 {
 	static int printme = 1;
-	#ifdef _WIN32
-	if(printme)
-	{
-		WriteOut("Draw buff: " + std::to_string(buf_width) +", " + std::to_string(buf_height) + "\n\r");
-	}
-	
-	#endif
 
 	uint8_t* row = (uint8_t*)buffer;
 	for(int y = 0; y < buf_height; ++y)
@@ -272,27 +258,13 @@ void resize_buffer(ScreenData& screendata,
 {
 	if(screendata.buffer != NULL)
 	{
-#if _WIN32
-		WriteOut("Clearning out previously allocated buffer\n\r");
-#endif
-
 		delete screendata.buffer;
 		screendata.buffer = NULL;
 	}
 
-#if _WIN32
-	WriteOut("Resizing buffer\n\r");
-#endif
-
 	screendata.width = new_width;
 	screendata.height = new_height;
 	screendata.pitch = screendata.width * screendata.bytesPerPixel;
-
-#if _WIN32
-	WriteOut("Allocating (" + std::to_string(screendata.width) + "*" +
-	         std::to_string(screendata.bytesPerPixel) + ")"  + std::to_string(screendata.pitch) + " * " +
-	         std::to_string(screendata.height) +" == " + std::to_string(screendata.pitch * screendata.height) + "\n\r");
-#endif
 	screendata.buffer = new uint8_t[screendata.pitch * screendata.height];
 	std::memset(screendata.buffer, 0, screendata.pitch * screendata.height);
 }
