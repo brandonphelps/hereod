@@ -3,25 +3,16 @@
 #define H_CUST_BITMAP_H
 
 #include <iostream>
-#include <iomanip>
+
 // #include <fstream> // can't pass a c string into std::ifstream constructor
 // must be using wrong compiler flags or something.
 #include <cstdio>
 
+#include "pixel_color.h"
+
 #ifdef _WIN32
 #include "console_another.h"
 #endif
-
-class PixelColor
-{
-public:
-	uint8_t blue;
-	uint8_t green;
-	uint8_t red;
-	uint8_t alpha;
-};
-
-std::ostream& operator<<(std::ostream& out, const PixelColor& p);
 
 enum class BitMapPixelLayout
 {
@@ -57,7 +48,6 @@ private:
 	uint32_t _length;
 	uint32_t _current_index;
 	bool _end_reached;
-
 };
 
 class HBitmap

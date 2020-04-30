@@ -23,7 +23,7 @@ endif
 INCLUDE_DIRS += -Iinclude -Ilua/include -Iclanger/include
 INCLUDE_DIRS += -Ibitmap/include
 INCLUDE_DIRS += -Iconsole/include
-
+INCLUDE_DIRS += -Ilua/include
 
 LIB_DIRS = -L/usr/local/lib
 
@@ -62,8 +62,7 @@ $(eval $(call CommonSrcRule,game_state))
 $(eval $(call CommonSrcRule,game_recording))
 $(eval $(call CommonSrcRule,grid_helpers))
 $(eval $(call CommonSrcRule,sprite_sheet))
-
-
+$(eval $(call CommonSrcRule,pixel_color))
 
 define ModuleCommonRule
 bin/$(2)/$(1).o: $(2)/src/$(1).cpp
@@ -72,10 +71,35 @@ bin/$(2)/$(1).o: $(2)/src/$(1).cpp
 TARGET_OBJS += bin/$(2)/$(1).o
 endef
 
+
 $(eval $(call ModuleCommonRule,herod_bitmap,bitmap))
 $(eval $(call ModuleCommonRule,herod_console,console))
 $(eval $(call ModuleCommonRule,clanger,clanger))
 $(eval $(call ModuleCommonRule,windows_exec,clanger))
+
+LUA_TARGET_OBJS = 
+
+define LuaModuleRule
+bin/lua/$(1).o: lua/src/$(1).c
+	@mkdir -p bin/lua
+	@$$(CC) $$(C_FLAGS) $$(C_BIN_SPECIFIER) $$< $$(C_OUTPUT_SPECIFIER)$$@
+LUA_TARGET_OBJS += bin/lua/$(1).o
+endef
+
+
+LUA_SRCS = lapi lauxlib lbaselib lbitlib lcode lcorolib lctype ldblib ldebug ldo ldump lfunc lgc linit liolib llex lmathlib lmem loslib loadlib lobject lopcodes lparser lstate lstring lstrlib ltable ltablib ltm lundump lutf8lib lvm lzio 
+
+
+bin/lua/lua.o: lua/src/lua.c
+	@mkdir -p bin/lua
+	@$(CC) $(C_FLAGS) $(C_BIN_SPECIFIER) $< $(C_OUTPUT_SPECIFIER)$@
+
+
+$(foreach lsrc,$(LUA_SRCS),$(eval $(call LuaModuleRule,$(lsrc))))
+
+
+
+
 
 clean:
 	rm -rf bin $(TARGETS)
@@ -98,3 +122,6 @@ include mac_osx/specific.mk
 endif
 
 endif
+
+
+

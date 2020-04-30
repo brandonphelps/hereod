@@ -15,8 +15,7 @@ void ChunkUpSprites(ScreenData& image_data,
 	p.sprite_count_y = sprite_count_y;
 
 	// p.sprites.clear();
-
-	WriteLine("Chunking up sprite sheet");
+	//	WriteLine("Chunking up sprite sheet");
 
 	int sprite_count = 0;
 	for(int row = 0;
@@ -24,12 +23,12 @@ void ChunkUpSprites(ScreenData& image_data,
 	{
 		for(int col = 0; col < p.sprite_count_x; col++)
 		{
-			WriteLine("Reading from sprite at: 0, " + std::to_string(row * p.sprite_height));
+			// WriteLine("Reading from sprite at: 0, " + std::to_string(row * p.sprite_height));
 			ScreenData new_sprite;
 			resize_buffer(new_sprite, p.sprite_width, p.sprite_height);
 			BlitScreenData(image_data, new_sprite, 0, 0,
 			               col * p.sprite_width, row * p.sprite_height);
-			WriteLine("Push sprite into vector");
+			// WriteLine("Push sprite into vector");
 			p.sprites[sprite_count] = new_sprite;
 			sprite_count++;
 		}

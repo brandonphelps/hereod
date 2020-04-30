@@ -34,6 +34,8 @@
 
 #include "clanger.h"
 
+#include "lua.hpp"
+
 void my_clanger_printer(const std::string& msg)
 {
 	WriteLine(msg);
@@ -398,15 +400,53 @@ int CALLBACK WinMain(
 
 
 	WriteLine("Info: \n\n\n");
-
 	// WriteLine("Is ScreenData CopyInsertable: " + std::to_string(
-
-
 	WriteLine("END INFO\n\n\n");
-		
 
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
 
-
+	std::string lua_eval_line = "function add(a,b) return a+b end";
+	//int error = luaL_loadstring(L, lua_eval_line.c_str());
+	int error = luaL_dostring(L, lua_eval_line.c_str());
+	if(error)
+	{
+		WriteLine(std::string(lua_tostring(L, -1)));
+		lua_pop(L, 1);
+		WriteLine("Found an error when loading lua");
+	}
+	else
+	{
+		WriteLine("running add function");
+		error = luaL_dostring(L, "return add(2,2)");
+		if(error)
+		{
+			WriteLine(std::string(lua_tostring(L, -1)));
+			lua_pop(L, 1);
+			WriteLine("Found an error when do string on add lua");
+		}
+		else
+		{
+			const char* result = lua_tostring(L, -1);
+			if(result)
+			{
+				WriteLine("RESULT: " + std::string(result));
+			}
+			else
+			{
+				WriteLine("Failed to get result");
+			}
+			// lua_pop(L, 1);
+		}
+	}
+	// error = lua_pcall(L, 0, 0, 0);
+	// if(error)
+	// {
+	// 	WriteLine("Found an error when calling lua");
+	// }
+	
+	lua_close(L);
+	
 	// clanger_State rootState;
 	// rootState.next = NULL;
 	

@@ -19,7 +19,6 @@ uint16_t from_byte_array16(uint8_t* pointer)
 }
 
 
-
 // reads file and loads files contents into bitmap
 // new resources are allocated, in pixel_buffer, ensure they are cleaned up.
 void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
@@ -194,20 +193,6 @@ void LoadBitmap(const std::string& filepath, HBitmap& bitmap)
 }
 
 
-
-
-std::ostream& operator<<(std::ostream& out, const PixelColor& p)
-{
-	out << "Pixel: " << std::hex << std::setfill('0');
-	out << std::setw(2) << static_cast<int>(p.blue);
-	out << std::setw(2) << static_cast<int>(p.green);
-	out << std::setw(2) << static_cast<int>(p.red);
-	out << std::setw(2) << static_cast<int>(p.alpha);
-	return out;
-}
-
-
-
 BitMapPixelIter::BitMapPixelIter(uint8_t* start_buffer, uint32_t length, BitMapPixelLayout layout)
 {
 	_pixel_buffer = start_buffer;
@@ -217,7 +202,6 @@ BitMapPixelIter::BitMapPixelIter(uint8_t* start_buffer, uint32_t length, BitMapP
 	_current_index = 0;
 	_end_reached = false;
 }
-
 
 bool BitMapPixelIter::end_iteration() const
 {
