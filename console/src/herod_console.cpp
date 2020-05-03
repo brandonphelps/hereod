@@ -91,6 +91,7 @@ void Console::render(ScreenData& render_dest)
 	// 0, would be below the console since we draw coords from sprite upper left.
 	// 1, is used for the actual typing. 
 	int high_index = 2;
+	// std::list<std::string>::iter it = buffer
 	for(int i = buffer_history.size()-1; i >= 0; --i)
 	{
 		renderString(render_window, buffer_history[i],

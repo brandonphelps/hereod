@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <list>
 
 #include <functional>
 
@@ -25,7 +26,7 @@ public:
 	// note this does not allow for multiple  key pressed at the same time.
 	// update to comput a keybord or game controller input. 
 	void update(uint32_t keyCode);
-	// contains all messages that have been typed into the console,
+ 	// contains all messages that have been typed into the console,
 	// does not include the currently active typing message.
 	std::vector<std::string> buffer_history;
 	std::string current_message;

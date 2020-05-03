@@ -4,7 +4,7 @@
 #define MY_CUSTOM_KEYBOARD_H
 
 #include <stdint.h>
-
+	
 class GameButtonState
 {
 public:
@@ -13,11 +13,19 @@ public:
 };
 
 
+class KeyboardInputController
+{
+public:
+	GameButtonState keys[200];
+};
+
+
 class GameInputController
 {
 public:
 	bool isConnected;
 	bool isAnalog;
+	//KeyboardInputController keyboardController;
 	GameButtonState MoveUp;
 	GameButtonState MoveDown;
 	GameButtonState MoveLeft;

@@ -615,10 +615,8 @@ int CALLBACK WinMain(
 	{
 		LoadBitmap("resources/fonts/periesh.bmp", tempBitmap);
 		WriteLine("Bitmap temp screen data");
-
 		
 		FillScreenDataWithBitmap(tempBitmap, font_image);
-
 		ChunkUpSprites(font_image, font_sheet, 32, 32, 9, 9);
 
 		main_console.font_sheet = font_sheet;
@@ -766,7 +764,6 @@ int CALLBACK WinMain(
 		{
 			main_console.render(currentScreen);
 		}
-
 
 		// timing information to ensure a steady framerate.
 		LARGE_INTEGER WorkCounter = Win32GetWallClock();
