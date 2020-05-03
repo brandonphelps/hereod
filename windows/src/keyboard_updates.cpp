@@ -18,7 +18,7 @@ void UpdateKeyboardInputs(const MSG& msg, GameInputController* newKeyboard)
 	// seems like this triggers on ups and downs
 	if(WasDown != IsDown)
 	{
-		// uint32_t keyboard_index = char_to_index_functor(VKCode);
+		uint32_t keyboard_index = char_to_index_functor(VKCode);
 		//ProcessKeyMessage(&(newKeyboard->keyboardController.keys[keyboard_index]), IsDown);
 		if(VKCode == 'A')
 		{

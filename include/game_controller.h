@@ -25,7 +25,7 @@ class GameInputController
 public:
 	bool isConnected;
 	bool isAnalog;
-	//KeyboardInputController keyboardController;
+	KeyboardInputController keyboardController;
 	GameButtonState MoveUp;
 	GameButtonState MoveDown;
 	GameButtonState MoveLeft;
