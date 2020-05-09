@@ -82,11 +82,7 @@ BOOL InitializeDebugConsole()
   // freopen("CONOUT$", "w" ,stderr);
   // freopen("CONIN$", "r" , stdin);
 
-
-  
-
   SetConsoleTitle("Debug Console");
-
 
   if(ConsoleStdout == NULL)
   {
@@ -100,7 +96,6 @@ BOOL InitializeDebugConsole()
   }
 
   SetConsoleTextAttribute(ConsoleStdout, FOREGROUND_GREEN | FOREGROUND_BLUE);
-
 
   if(ConsoleStderr = NULL)
   {

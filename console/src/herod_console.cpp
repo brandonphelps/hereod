@@ -4,6 +4,7 @@
 // remove platform depedant code
 #include <windows.h>
 #include "console_another.h"
+#include "game_controller.h"
 #include <string>
 
 void Console::add_enter_callback(std::function<void(const std::string&)> hook)
@@ -16,12 +17,33 @@ void Console::add_message(const std::string& msg)
 	buffer_history.push_back(msg);
 }
 
-void Console::update(uint32_t keycode)
+// this function must only be called with a key transition occurs, rather than
+// on every update loop. 
+void Console::update(const GameInput* input)
 {
-	WriteLine("Updating message with keycode: " + std::to_string(keycode));
+	const KeyboardInputController* keyboard = &(input->keyboard.keyboardController);
 
-	if(keycode == VK_RETURN)
+	// this is for when shift is not pressed due to the lower alpha be higher value then upper
+	int ascii_start = 96;
+
+	// a - z 
+	for(int i = 1; i < 27; i++)
 	{
+		if(keyboard->shift.EndedDown)
+		{
+			ascii_start = 64;
+		}
+		if(keyboard->keys[i].EndedDown)
+		{
+			char value = static_cast<char>(ascii_start + i);
+			WriteLine("Updating messages with keyboard is down: " + std::to_string(value) + "\n\r");
+			current_message += value;
+		}
+	}
+	
+	if(keyboard->enter.EndedDown)
+	{
+		WriteLine("Enter was pressed down");
 		if(enter_hook)
 		{
 			enter_hook(current_message);
@@ -29,34 +51,46 @@ void Console::update(uint32_t keycode)
 		buffer_history.push_back(current_message);
 		current_message = "";
 	}
-	else if(keycode == VK_BACK)
-	{
 
-		if(!current_message.empty())
-		{
-			int prev_size = current_message.size();
-			WriteLine("BACK Space");
-			current_message.pop_back();
-			int after_size = current_message.size();
-			if(prev_size != after_size)
-			{
-				WriteLine("pop back is a lie: " + std::to_string(prev_size) + ", " + std::to_string(after_size));
-			}
-		}
-	}
-	else
-	{
-		if(keycode == VK_OEM_PLUS)
-		{
-			current_message += '+';
-		}
-		else
-		{
-			current_message += static_cast<char>(keycode);
-		}
-	}
+	// 
+
+	// if(keycode == VK_RETURN)
+	// {
+	// 	if(enter_hook)
+	// 	{
+	// 		enter_hook(current_message);
+	// 	}
+	// 	buffer_history.push_back(current_message);
+	// 	current_message = "";
+	// }
+	// else if(keycode == VK_BACK)
+	// {
+
+	// 	if(!current_message.empty())
+	// 	{
+	// 		int prev_size = current_message.size();
+	// 		WriteLine("BACK Space");
+	// 		current_message.pop_back();
+	// 		int after_size = current_message.size();
+	// 		if(prev_size != after_size)
+	// 		{
+	// 			WriteLine("pop back is a lie: " + std::to_string(prev_size) + ", " + std::to_string(after_size));
+	// 		}
+	// 	}
+	// }
+	// else
+	// {
+	// 	if(keycode == VK_OEM_PLUS)
+	// 	{
+	// 		current_message += '+';
+	// 	}
+	// 	else
+	// 	{
+	// 		current_message += static_cast<char>(keycode);
+	// 	}
+	// }
 		
-	WriteLine("Current message: " + current_message);
+	// WriteLine("Current message: " + current_message);
 }
 
 void Console::renderString(ScreenData& dest, const std::string& str, int start_x, int start_y)
@@ -65,13 +99,20 @@ void Console::renderString(ScreenData& dest, const std::string& str, int start_x
 	int index = 0;
 	for(int i = 0; i < str.size(); i++)
 	{
+		// 0 - 9
 		if(str[i] >= 48 && str[i] <= 57)
 		{
 			index = (str[i] - 48) + 26;
 		}
+		// A-Z
 		else if(str[i] >= 65 && str[i] <= 90)
 		{
-			index = toupper(str[i]) - 65;
+			index = str[i] - 65;
+		}
+		// a-z
+		else if(str[i] >= 97 && str[i] <= 122)
+		{
+			index = (str[i] - 97) + 10 + 26;
 		}
 		else
 		{

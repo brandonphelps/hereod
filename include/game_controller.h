@@ -3,6 +3,10 @@
 #ifndef MY_CUSTOM_KEYBOARD_H
 #define MY_CUSTOM_KEYBOARD_H
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <stdint.h>
 	
 class GameButtonState
@@ -12,11 +16,19 @@ public:
 	bool EndedDown;
 };
 
-
 class KeyboardInputController
 {
 public:
-	GameButtonState keys[200];
+	GameButtonState keys[1000];
+	GameButtonState shift; 
+	GameButtonState enter;
+	GameButtonState escape;
+
+#ifdef _WIN32
+	void UpdateButtonState(const uint32_t keycode, bool IsDown);
+#endif
+private:
+	
 };
 
 

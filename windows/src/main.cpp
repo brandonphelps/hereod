@@ -555,7 +555,7 @@ int CALLBACK WinMain(
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
 	ShowWindow(hWnd, nCmdShow);
-	ShowWindow(memH, nCmdShow);
+	// ShowWindow(memH, nCmdShow);
 
 	MSG msg;
 	// load custom game module 
@@ -678,10 +678,6 @@ int CALLBACK WinMain(
 							// StartMemPrint = tempBitmap.pixel_buffer;
 							StartMemPrint = currentScreen.get_buffer_at(200, 200);
 						}
-						if(console_active && WasDown)
-						{
-							main_console.update(VKCode);
-						}
 						if(!console_active)
 						{
 							if(VKCode == 'M' && WasDown)
@@ -721,10 +717,18 @@ int CALLBACK WinMain(
 							}
 						}
 					}
-					if(!console_active)
+					// if(!console_active)
+					// {
+					UpdateKeyboardInputs(msg, newKeyboard);
+					if(WasDown != IsDown)
 					{
-						UpdateKeyboardInputs(msg, newKeyboard);
+						if(console_active)
+						{
+							main_console.update(mahInput);
+						}
 					}
+
+					// }
 				} break;
 				
 				default:
@@ -737,6 +741,7 @@ int CALLBACK WinMain(
 		}
 
 		mahInput->dtForFrame = SecondsElapsedForFrame;
+
 
 
 		if(RecordingStates && !PlaybackInput)
