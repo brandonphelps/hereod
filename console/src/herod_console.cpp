@@ -22,6 +22,7 @@ void Console::add_message(const std::string& msg)
 void Console::update(const KeyboardInputController* keyboard, uint32_t keycode)
 {
 	// this is for when shift is not pressed due to the lower alpha be higher value then upper
+	WriteLine("Obtained key code value: " + std::to_string(keycode));
 	if(keycode >= 'A' && keycode <= 'Z')
 	{
 		char value = static_cast<char>(keycode);
@@ -32,14 +33,72 @@ void Console::update(const KeyboardInputController* keyboard, uint32_t keycode)
 		WriteLine("Updating messages with keyboard is down: " + std::to_string(value) + "\n\r");
 		current_message += value;
 	}
+	else if(keycode >= '0' && keycode <= '9')
+	{
+		WriteLine("Found a number character");
+		char value;
+		if(keyboard->shift.EndedDown)
+		{
+			WriteLine("@@@@@@@@@@@@@@@@@@@@ SHIFT Adding in: " + value);
+			if(keycode == '0')
+			{
+				value = ')';
+			}
+			else if(keycode == '9')
+			{
+				value = '(';
+			}
+			else if(keycode == '8')
+			{
+				value = '*';
+			}
+			else if(keycode == '7')
+			{
+				value = '&';
+			}
+			else if(keycode == '6')
+			{
+				value = '^';
+			}
+			else if(keycode == '5')
+			{
+				value = '%';
+			}
+			else if(keycode == '4')
+			{
+				value = '$';
+			}
+			else if(keycode == '3')
+			{
+				value = '#';
+			}
+			else if(keycode == '2')
+			{
+				value = '@';
+			}
+			else if(keycode == '1')
+			{
+				value = '!';
+			}
+		}
+		else
+		{
+			value = static_cast<char>(keycode);
+		}
+		current_message += value;
+		WriteLine("@@@@@@@@@@@@@@@@@@@@ Adding in: " + std::to_string(value));
+	}
 	else
 	{
 		if(keycode == ' ')
 		{
 			current_message += ' ';
 		}
+		if(keycode == VK_BACK && !current_message.empty())
+		{
+			current_message.pop_back();
+		}
 	}
-	
 	if(keyboard->enter.EndedDown)
 	{
 		WriteLine("Enter was pressed down");
@@ -51,32 +110,6 @@ void Console::update(const KeyboardInputController* keyboard, uint32_t keycode)
 		current_message = "";
 	}
 
-	// 
-
-	// if(keycode == VK_RETURN)
-	// {
-	// 	if(enter_hook)
-	// 	{
-	// 		enter_hook(current_message);
-	// 	}
-	// 	buffer_history.push_back(current_message);
-	// 	current_message = "";
-	// }
-	// else if(keycode == VK_BACK)
-	// {
-
-	// 	if(!current_message.empty())
-	// 	{
-	// 		int prev_size = current_message.size();
-	// 		WriteLine("BACK Space");
-	// 		current_message.pop_back();
-	// 		int after_size = current_message.size();
-	// 		if(prev_size != after_size)
-	// 		{
-	// 			WriteLine("pop back is a lie: " + std::to_string(prev_size) + ", " + std::to_string(after_size));
-	// 		}
-	// 	}
-	// }
 	// else
 	// {
 	// 	if(keycode == VK_OEM_PLUS)
@@ -96,22 +129,39 @@ void Console::renderString(ScreenData& dest, const std::string& str, int start_x
 {
 	// update the render window as needed.
 	int index = 0;
+	static int odd_ball_offset = 26 + 10 + 26;
 	for(int i = 0; i < str.size(); i++)
 	{
 		// 0 - 9
-		if(str[i] >= 48 && str[i] <= 57)
+		if(str[i] >= '0' && str[i] <= '9')
 		{
 			index = (str[i] - 48) + 26;
 		}
 		// A-Z
-		else if(str[i] >= 65 && str[i] <= 90)
+		else if(str[i] >= 'A' && str[i] <= 'Z')
 		{
-			index = str[i] - 65;
+			index = str[i] - 'A';
 		}
 		// a-z
-		else if(str[i] >= 97 && str[i] <= 122)
+		else if(str[i] >= 'a' && str[i] <= 'z')
 		{
 			index = (str[i] - 97) + 10 + 26;
+		}
+		else if(str[i] == '@')
+		{
+			index = odd_ball_offset + 1;
+		}
+		else if(str[i] >= '!' && str[i] <= '&')
+		{
+			index = odd_ball_offset + (str[i] - '!');
+		}
+		else if(str[i] == '(')
+		{
+			index = odd_ball_offset + 9;
+		}
+		else if(str[i] == ')')
+		{
+			index = odd_ball_offset + 10;
 		}
 		else
 		{

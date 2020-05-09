@@ -3,23 +3,8 @@
 #include "game_controller.h"
 #include "console_another.h"
 
-uint32_t char_to_index_functor(uint32_t input_character)
-{
-	WriteLine("Char to index func " + std::to_string(input_character));
-	uint32_t result = 0;
-	// 1 - (90 - 65) = 25 - 1 = 24
-	if(input_character >= 65 && input_character <= 90)
-	{
-		result = input_character - 64;
-	}
-	WriteLine("Result of index to char: " + std::to_string(result));
-	return result;
-}
-
 void KeyboardInputController::UpdateButtonState(const uint32_t VKCode , bool IsDown)
 {
-	uint32_t keyboard_index = char_to_index_functor(VKCode);
-	ProcessKeyMessage(&(keys[keyboard_index]), IsDown); 
 	if(VKCode == VK_SHIFT)
 	{
 		ProcessKeyMessage(&(shift), IsDown);
