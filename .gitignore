@@ -1,7 +1,5 @@
 
 
-.vs/*
 *~
-cool
-cool.exe
-bin/*
+*.exe
+*.obj

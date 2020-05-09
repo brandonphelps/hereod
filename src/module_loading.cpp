@@ -24,7 +24,7 @@ void LocalPrinter(const std::string& msg)
 void LoadModule(ModuleFunctions& module_funcs, const std::string& lib_path)
 {
 #ifdef _WIN32	
-	module_funcs.lib_handle = LoadLibrary(lib_path.c_str());
+	module_funcs.lib_handle = LoadLibraryA(lib_path.c_str());
 #else
 	module_funcs.lib_handle = dlopen(lib_path.c_str(), RTLD_LOCAL);
 #endif

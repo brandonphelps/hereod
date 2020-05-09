@@ -1,19 +1,81 @@
-#include <stdint.h>
-
-#include "video.h"
-
 #ifdef _WIN32
 #include "console_another.h"
 #endif
 
+#include "video.h"
+
+#include <stdint.h>
+#include <cstring>
+
+uint32_t ScreenData::screenDataID = 0;
+
+ScreenData::ScreenData()
+{
+	bytesPerPixel = 4;
+	buffer = new uint8_t[10];
+	my_id = screenDataID++;
+	pitch = 0;
+	width = 0;
+	height = 0;
+}
+
+ScreenData::ScreenData(const ScreenData& other)
+{
+	bytesPerPixel = other.bytesPerPixel;
+	buffer = new uint8_t[other.pitch * other.height];
+	pitch = other.pitch;
+	width = other.width;
+	height = other.height;
+	std::memcpy(buffer, other.buffer, other.pitch * other.height);
+
+	my_id = screenDataID++;
+}
+
+ScreenData::~ScreenData()
+{
+	if(buffer != NULL)
+	{
+		delete[] buffer;
+		buffer = NULL;
+	}
+}
+
+ScreenData& ScreenData::operator=(ScreenData& other)
+{
+	if(&other == this)
+	{
+		return *this;
+	}
+	if(buffer != NULL)
+	{
+		delete[] buffer;
+		buffer = NULL;
+	}
+	bytesPerPixel = other.bytesPerPixel;
+	buffer = new uint8_t[other.pitch * other.height];
+	pitch = other.pitch;
+	width = other.width;
+	height = other.height;
+	std::memcpy(buffer, other.buffer, other.pitch * other.height);
+
+	my_id = screenDataID++;
+	return *this;
+}
+
+
+
+uint8_t* ScreenData::get_buffer_at(uint32_t x, uint32_t y)
+{
+	return buffer + (x * bytesPerPixel) + (y * bytesPerPixel * width);
+}
+
 void ScreenData::set_pixel_color(uint32_t x, uint32_t y, uint32_t color_mask)
 {
-	if(x > width || y > height)
+	if(x >= width || y >= height)
 	{
 		return;
 	}
 
-	uint32_t offset = 0;
 	uint32_t* pixel = (uint32_t*)(buffer + x * bytesPerPixel + y * bytesPerPixel * width);
 	*pixel = color_mask;
 }
@@ -27,13 +89,6 @@ void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height)
 void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t pitch)
 {
 	static int printme = 1;
-	#ifdef _WIN32
-	if(printme)
-	{
-		WriteOut("Draw buff: " + std::to_string(buf_width) +", " + std::to_string(buf_height) + "\n\r");
-	}
-	
-	#endif
 
 	uint8_t* row = (uint8_t*)buffer;
 	for(int y = 0; y < buf_height; ++y)
@@ -83,6 +138,49 @@ void drawBuf(uint8_t* buffer, uint32_t buf_width, uint32_t buf_height, uint32_t 
 	}
 	printme = 0;
 }
+
+
+
+
+void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x, uint32_t dest_pixel_y)
+{
+	BlitScreenData(source, dest, dest_pixel_x, dest_pixel_y, 0, 0);
+}
+
+void BlitScreenData(ScreenData& source, ScreenData& dest, uint32_t dest_pixel_x, uint32_t dest_pixel_y, uint32_t source_pixel_x, uint32_t source_pixel_y)
+{
+	
+	uint8_t* row = dest.buffer + dest_pixel_x*4 + dest_pixel_y*dest.width*4;
+	uint8_t* copy_row = source.buffer + source_pixel_x*4 + source_pixel_y*source.width*4;
+
+	uint32_t MaxX = dest_pixel_x + source.width;
+	uint32_t MaxY = dest_pixel_y + source.height;
+
+	if(MaxX > dest.width)
+	{
+		MaxX = dest.width;
+	}
+
+	if(MaxY > dest.height)
+	{
+		MaxY = dest.height;
+	}
+
+	for(int y = dest_pixel_y; y < MaxY; ++y)
+	{
+		uint32_t* pixel = (uint32_t*)row;
+		uint32_t* copy_pixel = (uint32_t*)copy_row;
+		for(int x = dest_pixel_x; x < MaxX; ++x)
+		{
+			*pixel = *copy_pixel;
+			++pixel;
+			++copy_pixel;
+		}
+		row += dest.width * 4;
+		copy_row += source.width * 4;
+	}
+}
+
 
 void DrawRectangle(ScreenData* data,
                    uint32_t s_x, uint32_t s_y,
@@ -143,4 +241,30 @@ void DrawRectangle(uint8_t* buffer,
 		}
 		row += buf_width * 4;
 	}
+}
+
+
+
+void DrawText(ScreenData* screenData, uint32_t x, uint32_t y, const std::string& data)
+{
+	
+}
+
+
+
+void resize_buffer(ScreenData& screendata,
+                   uint32_t new_width,
+                   uint32_t new_height)
+{
+	if(screendata.buffer != NULL)
+	{
+		delete screendata.buffer;
+		screendata.buffer = NULL;
+	}
+
+	screendata.width = new_width;
+	screendata.height = new_height;
+	screendata.pitch = screendata.width * screendata.bytesPerPixel;
+	screendata.buffer = new uint8_t[screendata.pitch * screendata.height];
+	std::memset(screendata.buffer, 0, screendata.pitch * screendata.height);
 }

@@ -3,17 +3,30 @@
 #include <stdint.h>
 #include "game_controller.h"
 
+void InitGameButtonState(GameButtonState& b)
+{
+	b.EndedDown = false;
+	b.HalfTransitionCount = 0;
+}
+
+void InitKeyboardController(KeyboardInputController& keyboard)
+{
+	for(int i = 0; i < 40; i++)
+	{
+		InitGameButtonState(keyboard.keys[i]);
+	}
+	InitGameButtonState(keyboard.shift);
+	InitGameButtonState(keyboard.enter);
+	InitGameButtonState(keyboard.escape);
+}
+
 void GameInputControllerInit(GameInputController* controller)
 {
-	controller->MoveUp.EndedDown = false;
-	controller->MoveDown.EndedDown = false;
-	controller->MoveLeft.EndedDown = false;
-	controller->MoveRight.EndedDown = false;
-
-	controller->MoveUp.HalfTransitionCount = false;
-	controller->MoveDown.HalfTransitionCount = false;
-	controller->MoveLeft.HalfTransitionCount = false;
-	controller->MoveRight.HalfTransitionCount = false;
+	InitGameButtonState(controller->MoveUp);
+	InitGameButtonState(controller->MoveDown);
+	InitGameButtonState(controller->MoveLeft);
+	InitGameButtonState(controller->MoveRight);
+	InitKeyboardController(controller->keyboardController);
 }
 
 void ProcessKeyMessage(GameButtonState* buttonState, bool IsDown)
