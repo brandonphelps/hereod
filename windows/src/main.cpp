@@ -529,6 +529,7 @@ int CALLBACK WinMain(
 
 	main_console.add_enter_callback(l_eval);
 	main_console.current_message = "";
+	//	InitKeyboardController(main_console.local_keyboard);
 	resize_buffer(main_console.render_window, 960 / 4, 540 / 4);
 
 	float GameUpdateHz = (MonitorRefreshHz / 2);
@@ -722,12 +723,11 @@ int CALLBACK WinMain(
 					UpdateKeyboardInputs(msg, newKeyboard);
 					if(WasDown != IsDown)
 					{
-						if(console_active)
+						if(console_active && IsDown)
 						{
-							main_console.update(mahInput);
+							main_console.update(&(newKeyboard->keyboardController), VKCode);
 						}
 					}
-
 					// }
 				} break;
 				

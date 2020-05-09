@@ -44,6 +44,7 @@ public:
 	GameButtonState MoveRight;
 };
 
+void InitKeyboardController(KeyboardInputController& keyboard);
 void GameInputControllerInit(GameInputController* controller);
 void ProcessKeyMessage(GameButtonState* buttonState, bool IsDown);
 

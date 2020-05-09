@@ -25,9 +25,9 @@ public:
 	void renderString(ScreenData& window, const std::string& msg, int start_x, int start_y);
 	void add_message(const std::string& msg);
 
-	// note this does not allow for multiple  key pressed at the same time.
-	// update to comput a keybord or game controller input. 
-	void update(const GameInput* input);
+	// keycode should correspond to the pressed key to add to the console input.
+	// should not consist of modifier keys like shift, etc keyboard will contain those. 
+	void update(const KeyboardInputController* keyboard, uint32_t keycode);
  	// contains all messages that have been typed into the console,
 	// does not include the currently active typing message.
 	std::vector<std::string> buffer_history;
@@ -36,6 +36,7 @@ public:
 	ScreenData render_window;
 	uint32_t x_position;
 	uint32_t y_position;
+
 
 
 private:

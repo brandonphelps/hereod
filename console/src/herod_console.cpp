@@ -19,26 +19,18 @@ void Console::add_message(const std::string& msg)
 
 // this function must only be called with a key transition occurs, rather than
 // on every update loop. 
-void Console::update(const GameInput* input)
+void Console::update(const KeyboardInputController* keyboard, uint32_t keycode)
 {
-	const KeyboardInputController* keyboard = &(input->keyboard.keyboardController);
-
 	// this is for when shift is not pressed due to the lower alpha be higher value then upper
-	int ascii_start = 96;
-
-	// a - z 
-	for(int i = 1; i < 27; i++)
+	if(keycode >= 'A' && keycode <= 'Z')
 	{
-		if(keyboard->shift.EndedDown)
+		char value = static_cast<char>(keycode);
+		if(!keyboard->shift.EndedDown)
 		{
-			ascii_start = 64;
+			value = static_cast<char>(keycode + 97 - 65);
 		}
-		if(keyboard->keys[i].EndedDown)
-		{
-			char value = static_cast<char>(ascii_start + i);
-			WriteLine("Updating messages with keyboard is down: " + std::to_string(value) + "\n\r");
-			current_message += value;
-		}
+		WriteLine("Updating messages with keyboard is down: " + std::to_string(value) + "\n\r");
+		current_message += value;
 	}
 	
 	if(keyboard->enter.EndedDown)
