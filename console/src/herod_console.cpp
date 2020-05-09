@@ -35,11 +35,9 @@ void Console::update(const KeyboardInputController* keyboard, uint32_t keycode)
 	}
 	else if(keycode >= '0' && keycode <= '9')
 	{
-		WriteLine("Found a number character");
 		char value;
 		if(keyboard->shift.EndedDown)
 		{
-			WriteLine("@@@@@@@@@@@@@@@@@@@@ SHIFT Adding in: " + value);
 			if(keycode == '0')
 			{
 				value = ')';
@@ -94,6 +92,62 @@ void Console::update(const KeyboardInputController* keyboard, uint32_t keycode)
 		{
 			current_message += ' ';
 		}
+		else if(keycode == VK_OEM_PLUS)
+		{
+			if(keyboard->shift.EndedDown)
+			{
+				current_message += '+';
+			}
+			else
+			{
+				current_message += '=';
+			}
+		}
+		else if(keycode == VK_OEM_MINUS)
+		{
+			if(keyboard->shift.EndedDown)
+			{
+				current_message += '_';
+			}
+			else
+			{
+				current_message += '-';
+			}
+		}
+		else if(keycode == VK_OEM_2)
+		{
+			if(keyboard->shift.EndedDown)
+			{
+				current_message += '?';
+			}
+			else
+			{
+				current_message += '/';
+			}
+		}
+		else if(keycode == VK_OEM_4)
+		{
+			if(keyboard->shift.EndedDown)
+			{
+				current_message += '{';
+			}
+			else
+			{
+				current_message += '[';
+			}
+		}
+		else if(keycode == VK_OEM_6)
+		{
+			if(keyboard->shift.EndedDown)
+			{
+				current_message += '}';
+			}
+			else
+			{
+				current_message += ']';
+			}
+		}
+
 		if(keycode == VK_BACK && !current_message.empty())
 		{
 			current_message.pop_back();
@@ -151,17 +205,65 @@ void Console::renderString(ScreenData& dest, const std::string& str, int start_x
 		{
 			index = odd_ball_offset + 1;
 		}
-		else if(str[i] >= '!' && str[i] <= '&')
+		else if(str[i] >= '!' && str[i] <= '%')
 		{
 			index = odd_ball_offset + (str[i] - '!');
 		}
+		else if(str[i] == '^')
+		{
+			index = odd_ball_offset + 5;
+		}
+		else if(str[i] == '&')
+		{
+			index = odd_ball_offset + 6;
+		}
+		else if(str[i] == '*')
+		{
+			index = odd_ball_offset + 7;
+		}
 		else if(str[i] == '(')
 		{
-			index = odd_ball_offset + 9;
+			index = odd_ball_offset + 8;
 		}
 		else if(str[i] == ')')
 		{
+			index = odd_ball_offset + 9;
+		}
+		else if(str[i] == '{')
+		{
 			index = odd_ball_offset + 10;
+		}
+		else if(str[i] == '}')
+		{
+			index = odd_ball_offset + 11;
+		}
+		else if(str[i] == '[')
+		{
+			index = odd_ball_offset + 12;
+		}
+		else if(str[i] == ']')
+		{
+			index = odd_ball_offset + 13;
+		}
+		else if(str[i] == '+')
+		{
+			index = odd_ball_offset + 14;
+		}
+		else if(str[i] == '-')
+		{
+			index = odd_ball_offset + 15;
+		}
+		else if(str[i] == '/')
+		{
+			index = odd_ball_offset + 16;
+		}
+		else if(str[i] == '=')
+		{
+			index = odd_ball_offset + 17;
+		}
+		else if(str[i] == '_')
+		{
+			index = odd_ball_offset + 18;
 		}
 		else
 		{
