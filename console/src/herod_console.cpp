@@ -32,6 +32,13 @@ void Console::update(const KeyboardInputController* keyboard, uint32_t keycode)
 		WriteLine("Updating messages with keyboard is down: " + std::to_string(value) + "\n\r");
 		current_message += value;
 	}
+	else
+	{
+		if(keycode == ' ')
+		{
+			current_message += ' ';
+		}
+	}
 	
 	if(keyboard->enter.EndedDown)
 	{

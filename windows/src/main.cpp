@@ -614,11 +614,11 @@ int CALLBACK WinMain(
 
 	try
 	{
-		LoadBitmap("resources/fonts/periesh.bmp", tempBitmap);
+		LoadBitmap("resources/fonts/Hoerlj.bmp", tempBitmap);
 		WriteLine("Bitmap temp screen data");
 		
 		FillScreenDataWithBitmap(tempBitmap, font_image);
-		ChunkUpSprites(font_image, font_sheet, 32, 32, 9, 9);
+		ChunkUpSprites(font_image, font_sheet, 20, 32, 9, 9);
 
 		main_console.font_sheet = font_sheet;
 	}
@@ -718,8 +718,6 @@ int CALLBACK WinMain(
 							}
 						}
 					}
-					// if(!console_active)
-					// {
 					UpdateKeyboardInputs(msg, newKeyboard);
 					if(WasDown != IsDown)
 					{
@@ -728,12 +726,10 @@ int CALLBACK WinMain(
 							main_console.update(&(newKeyboard->keyboardController), VKCode);
 						}
 					}
-					// }
 				} break;
 				
 				default:
 				{
-					
 					TranslateMessage(&msg);
 					DispatchMessageA(&msg);
 				} break;
