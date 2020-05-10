@@ -1,6 +1,8 @@
 
 #include "herod_console.h"
 
+#include <sstream>
+
 // remove platform depedant code
 #include <windows.h>
 #include "console_another.h"
@@ -12,9 +14,17 @@ void Console::add_enter_callback(std::function<void(const std::string&)> hook)
 	enter_hook = hook;
 }
 
+std::string toHex(uint8_t* start, size_t length);
+
+
 void Console::add_message(const std::string& msg)
 {
+	std::stringstream oss;
+	oss << "\t Calling: " << this << std::endl;
+	WriteLine("\t Calling : " + oss.str());
+	WriteLine("Console adding message: " + msg);
 	buffer_history.push_back(msg);
+	WriteLine("New buffer length: " + std::to_string(buffer_history.size()));
 }
 
 // this function must only be called with a key transition occurs, rather than
@@ -156,11 +166,12 @@ void Console::update(const KeyboardInputController* keyboard, uint32_t keycode)
 	if(keyboard->enter.EndedDown)
 	{
 		WriteLine("Enter was pressed down");
+		// buffer_history.push_back(current_message);
+		add_message(current_message);
 		if(enter_hook)
 		{
 			enter_hook(current_message);
 		}
-		buffer_history.push_back(current_message);
 		current_message = "";
 	}
 

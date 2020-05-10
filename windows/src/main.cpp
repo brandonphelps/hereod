@@ -42,27 +42,164 @@ void my_clanger_printer(const std::string& msg)
 	WriteLine(msg);
 }
 
-void lua_eval(lua_State* L, Console& cons, const std::string& in_messg)
+int msghandler(lua_State* L)
 {
-	int error = luaL_dostring(L, in_messg.c_str());
-	if(error)
+	const char* msg = lua_tostring(L, 1);
+	if(msg == NULL)
 	{
-		cons.add_message("Failed to handle lua string eval");
-		cons.add_message(std::string(lua_tostring(L, -1)));
-	}
-	else
-	{
-		const char* result = lua_tostring(L, -1);
-		if(result)
+		if(luaL_callmeta(L, 1, "__tostring") &&
+		   lua_type(L, -1) == LUA_TSTRING)
 		{
-			WriteLine("result: " + std::string(result));
+			return 1;
 		}
 		else
 		{
-			cons.add_message(std::string(result));
+			msg = lua_pushfstring(L, "(error object is a %s value)",
+			                      luaL_typename(L, 1));
 		}
-		lua_pop(L, 1); // i think this is needed.
+		// luaL_traceback(L, L, msg, 1);
 	}
+	return 1;
+}
+
+int docall(lua_State* L, int narg, int nres)
+{
+	WriteLine("Do line ");
+	int status;
+	int base = lua_gettop(L) - narg;
+	lua_pushcfunction(L, msghandler);
+	lua_insert(L, base);
+	status = lua_pcall(L, narg, nres, base);
+	lua_remove(L, base);
+	return status;
+}
+int addreturn(lua_State* L)
+{
+	const char* line = lua_tostring(L, -1); // reads original line.
+	WriteLine("addreturn: " + std::string(line));
+	const char* retline = lua_pushfstring(L, "return %s;", line);
+	WriteLine("\tRet line: " + std::string(retline));
+	int status = luaL_loadbuffer(L, retline, strlen(retline), "=stdin");
+	if(status == LUA_OK)
+	{
+		WriteLine("Status: oksay");
+		lua_remove(L, -2);
+		if(line[0] != '\0')
+		{
+			// lua_saveline(L, line);
+		}
+	}
+	else
+	{
+		lua_pop(L, 2);
+	}
+	return status;
+}
+
+int pushline(lua_State* L, int firstline, const std::string& in_message)
+{
+	char buffer[3000];
+	std::memcpy(buffer, in_message.c_str(), in_message.size() + 1);
+	char *b = buffer;
+
+	WriteLine("Lua push line with: " + in_message);
+	WriteLine("\t with: " + std::string(b));
+	size_t l = in_message.size();
+	if(l > 0 && b[l-1] == '\n')
+	{
+	   b[--l] = '\0';
+	}
+	if(firstline && b[0] == '=')
+	{
+		WriteLine("Adding return thing");
+		lua_pushfstring(L, "return %s", b+1);
+	}
+	else
+	{
+		WriteLine("Pushing string: " + std::string(b));
+		lua_pushlstring(L, b, l);
+	}
+	return 1;
+}
+
+
+int loadline(lua_State* L, const std::string& in_message)
+{
+	int status;
+	lua_settop(L, 0);
+	if(!pushline(L, 1, in_message))
+	{
+		WriteLine("Failed to push line");
+		return -1;
+	}
+
+	if((status = addreturn(L)) != LUA_OK)
+	{
+		//status = multiline(L);
+		WriteLine("Failed to add return");
+	}
+	lua_remove(L, 1);
+	if(lua_gettop(L) != 1)
+	{
+		WriteLine("LUA STATIS IS BORKED!!!!!!!!!!!!!!!!!!!!!!!!");
+	}
+	return status;
+}
+
+void lua_eval(lua_State* L, Console& cons, const std::string& in_message)
+{
+	int status;
+	WriteLine("lua eval on: " + in_message);
+	status = loadline(L, in_message);
+
+	if(status != -1)
+	{
+		status = docall(L, 0, LUA_MULTRET);
+		if(status == LUA_OK)
+		{
+			WriteLine("Blah success");
+			int n = lua_gettop(L);
+			if(n > 0) // checks to see if any results are available.
+			{
+				const char* msg = lua_tostring(L, -1);
+				WriteLine("Result: " + std::string(msg));
+				// luaL_checkstack(L, LUA_MINSTACK, "too many results to print");
+				// lua_getglobal(L, "print");
+				//lua_insert(L, 1);
+				cons.add_message("Result: " + std::string(msg));
+				lua_pop(L, 1);
+			}
+		}
+		else
+		{
+			WriteLine("Blah failure");
+		}
+	}
+	
+	// WriteLine("Lua evalue: " + in_messg);
+	// if(in_messg.empty())
+	// {
+	// 	return;
+	// }
+	// int error = luaL_dostring(L, in_messg.c_str());
+	// if(error)
+	// {
+	// 	cons.add_message("Failed to handle lua string eval");
+	// 	cons.add_message(std::string(lua_tostring(L, -1)));
+	// }
+	// else
+	// {
+	// 	const char* result = lua_tostring(L, -1);
+	// 	if(result)
+	// 	{
+	// 		WriteLine("result: " + std::string(result));
+	// 	}
+	// 	else
+	// 	{
+	// 		cons.add_message(std::string(result));
+	// 	}
+	// 	lua_pop(L, 1); // i think this is needed.
+	// }
 }
 
 void temp_main();
@@ -525,7 +662,8 @@ int CALLBACK WinMain(
 
 	using namespace std::placeholders;
 	
-	std::function<void(const std::string& msg)> l_eval = std::bind(lua_eval, L, main_console, _1);
+	std::function<void(const std::string& msg)> l_eval = std::bind(lua_eval,
+	                                                               L, std::ref(main_console), _1);
 
 	main_console.add_enter_callback(l_eval);
 	main_console.current_message = "";

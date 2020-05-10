@@ -28,8 +28,6 @@ void UpdateKeyboardInputs(const MSG& msg, GameInputController* newKeyboard)
 	// the keyboards triggers multiple "down" key events .
 	if(WasDown != IsDown)
 	{
-		WriteLine("Raw VKCode: " + std::to_string(VKCode));
-		WriteLine("Transition: " + std::to_string(msg.wParam) + " IsDown: " + std::to_string(IsDown));
 		newKeyboard->keyboardController.UpdateButtonState(VKCode, IsDown);
 		
 		// if(VKCode == 'A')
